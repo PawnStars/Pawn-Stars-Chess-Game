@@ -6,8 +6,11 @@ import edu.up.cs301.game.GamePlayer;
 /**
  * An interface that implements a chess player.
  * 
+ * @author Allison Liedtke
  * @author Anthony Donaldson
- * @version 24 March 2015
+ * @author Derek Schumacher
+ * @author Scott Rowland
+ * @version March 2015
  */
 public interface ChessPlayer extends GamePlayer
 {

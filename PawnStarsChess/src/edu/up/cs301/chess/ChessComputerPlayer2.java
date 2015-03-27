@@ -16,8 +16,11 @@ import android.widget.TextView;
 * there is no human player on the device, this player will display a GUI
 * that displays the board as the game is being played.
 * 
-* @author 
-* @version
+* @author Anthony Donaldson
+* @author Derek Schumacher
+* @author Scott Rowland
+* @author Allison Liedtke
+* @version March 2015
 */
 public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 	

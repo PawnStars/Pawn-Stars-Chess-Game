@@ -9,13 +9,13 @@ import edu.up.cs301.game.infoMsg.GameState;
 /**
  * This contains the state for a Chess board. The state consists of an array
  * of the pieces on the board, the points each player has, whose turn it is,
- * if player 1 is in check, and player 1's color
- * .
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
- * @version March 19, 2015
+ * if player 1 is in check, and player 1's color.
+ * 
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
+ * @author Allison Liedtke
+ * @version March 2015
  *
  */
 public class ChessGameState extends GameState {

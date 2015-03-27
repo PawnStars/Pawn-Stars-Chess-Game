@@ -9,10 +9,13 @@ import edu.up.cs301.game.config.GameConfig;
 import edu.up.cs301.game.config.GamePlayerType;
 
 /**
- * this is the primary activity for Chess
+ * This is the primary activity for Chess.
  * 
- * @author 
- * @version
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
+ * @version March 2015
  */
 public class ChessMainActivity extends GameMainActivity {
 	

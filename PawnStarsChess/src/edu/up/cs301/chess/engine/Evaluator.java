@@ -7,10 +7,10 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  * This evaluates a ChessGameState and calculates its score
  * to be used internally and/or externally
  * .
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
  * @version March 2015
  *
  */

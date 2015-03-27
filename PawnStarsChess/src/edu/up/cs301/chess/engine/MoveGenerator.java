@@ -6,10 +6,10 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
 /**
  * This generates a list of moves that the AI will use to make a move.
  * .
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
  * @version March 2015
  *
  */

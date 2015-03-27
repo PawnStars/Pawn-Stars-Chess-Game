@@ -11,10 +11,10 @@ import edu.up.cs301.game.actionMsg.GameAction;
  * A basic action that indicates when a player is ready to resign.
  * It will return a losing message.
  * 
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
  * @version March 2015
  *
  */

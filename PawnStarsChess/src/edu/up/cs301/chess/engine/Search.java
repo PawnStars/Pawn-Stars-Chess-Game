@@ -5,10 +5,11 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
 
 /**
  * This looks for a move based on the intelligence of the AI.
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
+ * 
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
  * @version March 2015
  *
  */

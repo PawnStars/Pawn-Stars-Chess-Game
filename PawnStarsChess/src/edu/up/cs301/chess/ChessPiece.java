@@ -8,10 +8,10 @@ import edu.up.cs301.chess.ChessPiece;
  * color, what type of piece it is, if it is on the board,
  * and it it has moved before.
  * .
- * @authors Allison Liedtke
- * 		    Anthony Donaldson
- * 		    Derek Schumacher
- * 			Scott Rowland
+ * @author Allison Liedtke
+ * @author Anthony Donaldson
+ * @author Derek Schumacher
+ * @author Scott Rowland
  * @version March 2015
  *
  */
