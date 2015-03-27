@@ -1,0 +1,8 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="AppTheme" parent="android:Theme.Light" />
+
+    <style name="importantButton">
+ 		<item name="android:background">@drawable/raised_button_background</item>
+	</style>
+</resources>

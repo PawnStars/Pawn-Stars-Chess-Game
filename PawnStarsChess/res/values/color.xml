@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000</color>
+    <color name="green">#0F0</color>
+    <color name="red">#ff0000</color>
+    <color name="button_color">#FFAAAAAA</color>
+    <drawable name="raised_button_background">#FFFFFFFF</drawable>
+    <drawable name="colorButtonSpecial">#FFFF0000</drawable>
+    <color name="background_color">#FFFFFFFF</color>
+    
+</resources>

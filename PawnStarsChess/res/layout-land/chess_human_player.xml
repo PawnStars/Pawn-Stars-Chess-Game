@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/top_gui_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/background_color"
+        android:orientation="vertical"
+        android:weightSum="11.5" >
+
+        <TextView
+            android:id="@+id/scoreTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/score"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/player1TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/player1"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/player1ScoreTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/randomNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/player2TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/player2"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/player2ScoreTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/randomNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="173dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="@string/undo"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/drawButton"
+            android:layout_width="172dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="@string/draw" />
+
+        <Button
+            android:id="@+id/flipBoardButton"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="@string/flipBoardBut"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/resignButton"
+            android:layout_width="172dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="@string/resign" />
+
+    </LinearLayout>
+
+    <edu.up.cs301.chess.ChessBoard
+        android:id="@+id/gameBoardSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="0dp"
+        android:layout_toRightOf="@+id/LinearLayout2"
+        android:background="@color/background_color"
+        android:paddingBottom="0dp"
+        android:paddingLeft="200dp"
+        android:paddingTop="25dp" />
+
+</RelativeLayout>
