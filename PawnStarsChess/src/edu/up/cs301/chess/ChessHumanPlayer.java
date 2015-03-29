@@ -1,11 +1,15 @@
 package edu.up.cs301.chess;
 
+import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
@@ -21,7 +25,7 @@ import android.view.View.OnClickListener;
  * @author Allison Liedtke
  * @version March 2015
  */
-public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, OnClickListener {
+public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, OnClickListener, OnTouchListener {
 
 	/* instance variables */
 	
@@ -50,6 +54,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	//TODO: implement isWhite
 	private boolean isWhite;
 	
+	private boolean down;
+	
+	private ChessPiece lastPieceSelected;
+	
+	private boolean[][] validLocs;
+	
+	
 	/**
 	 * constructor
 	 * 
@@ -59,6 +70,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	public ChessHumanPlayer(String name) {
 		super(name);
 		boardRotation = 0;
+		validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	}
 
 	/**
@@ -162,6 +174,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// Find the board
 		board = (ChessBoard)activity.findViewById(R.id.gameBoardSurfaceView);
 		
+		board.setOnClickListener(this);
+		
+		down = false;
+		
 		// if we have a game state, "simulate" that we have just received
 		// the state from the game so that the GUI values are updated
 		if (state != null) {
@@ -175,6 +191,80 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	public boolean isWhite()
 	{
 		return isWhite;
+	}
+
+	public boolean onTouch(View v, MotionEvent event) {
+		// TODO Auto-generated method stub
+		
+		//get the tile the event corresponds to
+		float[] tileSize = board.getTileSize();
+		int tileX = (int) (event.getX()/tileSize[0]);
+		int tileY = (int) (event.getY()/tileSize[1]);
+		
+		// Make sure it is within bounds
+		if(tileX < 0 || tileX > ChessGameState.BOARD_HEIGHT*tileSize[0])
+		{
+			return false;
+		}
+		if(tileY < 0 || tileX > ChessGameState.BOARD_WIDTH*tileSize[0])
+		{
+			return false;
+		}
+		
+		int[] selectedLoc = {tileX,tileY};
+		ChessPiece pieceSelected = state.getPieceMap()[tileX][tileY];
+		
+		if(event.getAction() == MotionEvent.ACTION_DOWN && down == false)
+		{
+			//selected a tile with a piece on it of the same color
+			if(pieceSelected != null && pieceSelected.isWhite() == isWhite())
+			{
+				down = true;
+				
+				//pass selected tile to ChessBoard
+				board.setSelectedLoc(selectedLoc);
+				
+				//get valid locations for that piece
+				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected);
+				
+				//add the valid moves into a bitboard
+				for(int i=0;i<validMoves.length;i++)
+				{
+					int[] newPos = validMoves[i].getNewPos();
+					validLocs[newPos[0]][newPos[1]] = true;
+				}
+				board.setSelectedTiles(validLocs);
+			}
+			//didn't select a tile with a piece on it or it is of a different color
+			else if(lastPieceSelected == null || lastPieceSelected.isWhite() != isWhite())
+			{
+				//is a valid location to move the piece to
+				if(validLocs[tileX][tileY] == true)
+				{
+					ChessPiece takenPiece = state.getPieceMap()[tileX][tileY];
+					ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
+					state.applyMove(act);
+				}
+				else//invalid location
+				{
+					down = false;
+					
+					//clear selected tiles
+					board.setSelectedLoc(null);
+					
+					// Clear valid locations
+					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+					board.setSelectedTiles(null);
+				}
+			}
+		}
+		else if(event.getAction() == MotionEvent.ACTION_UP)
+		{
+			down = false;
+			v.performClick();
+		}
+		lastPieceSelected = pieceSelected;
+		return true;
 	}
 
 }// class CounterHumanPlayer

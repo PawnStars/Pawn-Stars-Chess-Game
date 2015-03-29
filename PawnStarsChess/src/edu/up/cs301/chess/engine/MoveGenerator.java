@@ -1,6 +1,7 @@
 package edu.up.cs301.chess.engine;
 
 import edu.up.cs301.chess.ChessGameState;
+import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 
 /**
@@ -15,39 +16,69 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  */
 public class MoveGenerator {
 	
-	public final ChessMoveAction[] getPossibleMoves(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state, boolean whichPlayer)
 	{
 		return null;
 	}
 	
-	public final ChessMoveAction[] getEvasions(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getEvasions(ChessGameState state, boolean whichPlayer)
 	{
 		return null;
 	}
 	
-	public final ChessMoveAction[] getCapturesAndChecks(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getCapturesAndChecks(ChessGameState state, boolean whichPlayer)
 	{
 		return null;
 	}
 	
-	public final ChessMoveAction[] getCaptures(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getCaptures(ChessGameState state, boolean whichPlayer)
 	{
 		return null;
 	}
 	
-	public final boolean isInCheck(ChessGameState state, boolean whichPlayer)
+	public static final boolean isInCheck(ChessGameState state, boolean whichPlayer)
 	{
 		return false;
 	}
 	
-	public final boolean givesCheck(ChessGameState state, boolean whichPlayer, ChessMoveAction move)
+	public static final boolean givesCheck(ChessGameState state, boolean whichPlayer, ChessMoveAction move)
 	{
 		return false;
 	}
 	
-	public final boolean canTakeKing(ChessGameState state, boolean whichPlayer)
+	public static final boolean canTakeKing(ChessGameState state, boolean whichPlayer)
 	{
 		return false;
+	}
+	
+	public static final ChessMoveAction[] getPieceMoves(ChessGameState state, ChessPiece piece)
+	{
+		int type = piece.getType();
+		if(type == ChessPiece.PAWN)
+		{
+			
+		}
+		else if(type == ChessPiece.ROOK)
+		{
+			
+		}
+		else if(type == ChessPiece.QUEEN)
+		{
+			
+		}
+		else if(type == ChessPiece.KNIGHT)
+		{
+			
+		}
+		else if(type == ChessPiece.KING)
+		{
+			
+		}
+		else if(type == ChessPiece.BISHOP)
+		{
+			
+		}
+		return null;
 	}
 	
 	/**
