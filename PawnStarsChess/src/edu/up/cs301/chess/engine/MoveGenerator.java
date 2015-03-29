@@ -136,21 +136,10 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {i,loc[1]};
 				
-				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-				
-				//space is occupied
-				if(taken != null)
+				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				if(done == true)
 				{
-					if(taken.isWhite() != player.isWhite())
-					{
-						//add a move if it can take a piece
-						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-					}
-					i = 100;
-				}
-				else //unoccupied
-				{
-					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					break;
 				}
 			}
 			
@@ -159,21 +148,10 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {i,loc[1]};
 				
-				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-				
-				//space is occupied
-				if(taken != null)
+				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				if(done == true)
 				{
-					if(taken.isWhite() != player.isWhite())
-					{
-						//add a move if it can take a piece
-						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-					}
-					i = 100;
-				}
-				else //unoccupied
-				{
-					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					break;
 				}
 			}
 			
@@ -182,21 +160,10 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {loc[0],i};
 				
-				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-				
-				//space is occupied
-				if(taken != null)
+				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				if(done == true)
 				{
-					if(taken.isWhite() != player.isWhite())
-					{
-						//add a move if it can take a piece
-						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-					}
-					i = 100;
-				}
-				else //unoccupied
-				{
-					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					break;
 				}
 			}
 			
@@ -205,21 +172,10 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {loc[0],i};
 				
-				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-				
-				//space is occupied
-				if(taken != null)
+				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				if(done == true)
 				{
-					if(taken.isWhite() != player.isWhite())
-					{
-						//add a move only if the tile is empty or 
-						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-					}
-					i = 100;
-				}
-				else //unoccupied
-				{
-					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					break;
 				}
 			}
 		}
@@ -274,6 +230,38 @@ public class MoveGenerator {
 	}
 	
 	/**
+	 * 
+	 * @param state
+	 * @param piece
+	 * @param moveList
+	 * @param newLoc
+	 * @param player
+	 * @return
+	 */
+	private static boolean addRookMove(ChessGameState state, ChessPiece piece,
+			ArrayList<ChessMoveAction> moveList, int[] newLoc,
+			ChessPlayer player)
+	{
+		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+		
+		//space is occupied
+		if(taken != null)
+		{
+			if(taken.isWhite() != player.isWhite())
+			{
+				//add a move if it can take a piece
+				moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+			}
+			return true;
+		}
+		else //unoccupied
+		{
+			moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+		}
+		return false;
+	}
+
+	/**
 	 * You must defend yourself from check threats, so this function removes
 	 * all moves that do not protect the king.
 	 * 
@@ -281,7 +269,7 @@ public class MoveGenerator {
 	 * @param moves
 	 * @return a list of legal moves
 	 */
-	public final ChessMoveAction[] removeIllegalMoves(ChessGameState state, ChessMoveAction[] moves)
+	public static final ChessMoveAction[] removeIllegalMoves(ChessGameState state, ChessMoveAction[] moves)
 	{
 		return moves;
 	}
