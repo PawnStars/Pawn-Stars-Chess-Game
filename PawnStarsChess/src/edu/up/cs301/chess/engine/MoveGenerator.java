@@ -1,8 +1,6 @@
 package edu.up.cs301.chess.engine;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
@@ -23,11 +21,26 @@ public class MoveGenerator {
 	
 	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state, ChessPlayer player)
 	{
-		//Set<ChessMoveAction> moveList = new HashSet<ChessMoveAction>();
+		ArrayList<ChessMoveAction[]> moveList2d = new ArrayList<ChessMoveAction[]>();
 		//player 1
 		if(state.isPlayer1IsWhite() == true && player.isWhite() == true)
 		{
-			if(state.isWhoseTurn())
+			if(state.isWhoseTurn())//true if player 1's turn
+			{
+				ChessPiece[] pieces = state.getPlayer1Pieces();
+				for(int i=0;i<ChessGameState.NUM_PIECES;i++)
+				{
+					if(pieces[i].isAlive())
+					{
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player);
+						moveList2d.add(newActions);
+					}
+				}
+			}
+		}
+		else //player 2
+		{
+			if(!state.isWhoseTurn())
 			{
 				ChessPiece[] pieces = state.getPlayer1Pieces();
 				for(int i=0;i<ChessGameState.NUM_PIECES;i++)
@@ -35,21 +48,30 @@ public class MoveGenerator {
 					if(pieces[i].isAlive())
 					{
 						//TODO add the arrays together
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player);
+						moveList2d.add(newActions);
 					}
-					
 				}
-				return null;
 			}
 		}
-		else //player 2
+		//Calculate the length of the new array
+		int length = 0;
+		for(ChessMoveAction[] actions: moveList2d)
 		{
-			if(!state.isWhoseTurn())
+			length+= actions.length;
+		}
+		
+		//Add every move into the array
+		ChessMoveAction[] moveList = new ChessMoveAction[length];
+		int i=0;
+		for(ChessMoveAction[] actions: moveList2d)
+		{
+			for(ChessMoveAction action:actions)
 			{
-				
-				return null;
+				moveList[i++] = action;
 			}
 		}
-		return null;
+		return moveList;
 	}
 	
 	public static final ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
