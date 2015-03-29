@@ -5,9 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.view.MotionEvent;
 import android.view.SurfaceView;
-import android.view.View;
 import android.util.AttributeSet;
 
 /**
@@ -299,8 +297,13 @@ public class ChessBoard extends SurfaceView
 		invalidate();
 	}
 	
+	/**
+	 * Returns an array of size 2 containing the size of each tile on the board
+	 * @return
+	 */
 	public float[] getTileSize()
 	{
 		return tileSize;
 	}
+	
 }

@@ -213,7 +213,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		int[] selectedLoc = {tileX,tileY};
 		ChessPiece pieceSelected = state.getPieceMap()[tileX][tileY];
-		
 		if(event.getAction() == MotionEvent.ACTION_DOWN && down == false)
 		{
 			//selected a tile with a piece on it of the same color
@@ -225,7 +224,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				board.setSelectedLoc(selectedLoc);
 				
 				//get valid locations for that piece
-				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected);
+				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this);
 				
 				//add the valid moves into a bitboard
 				for(int i=0;i<validMoves.length;i++)

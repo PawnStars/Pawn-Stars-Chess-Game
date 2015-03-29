@@ -1,7 +1,10 @@
 package edu.up.cs301.chess.engine;
 
+import java.util.ArrayList;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
+import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 
 /**
@@ -16,65 +19,254 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  */
 public class MoveGenerator {
 	
-	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final ChessMoveAction[] getEvasions(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final ChessMoveAction[] getCapturesAndChecks(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getCapturesAndChecks(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final ChessMoveAction[] getCaptures(ChessGameState state, boolean whichPlayer)
+	public static final ChessMoveAction[] getCaptures(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final boolean isInCheck(ChessGameState state, boolean whichPlayer)
+	public static final boolean isInCheck(ChessGameState state, ChessPlayer player)
 	{
 		return false;
 	}
 	
-	public static final boolean givesCheck(ChessGameState state, boolean whichPlayer, ChessMoveAction move)
+	public static final boolean givesCheck(ChessGameState state, ChessPlayer player, ChessMoveAction move)
 	{
 		return false;
 	}
 	
-	public static final boolean canTakeKing(ChessGameState state, boolean whichPlayer)
+	public static final boolean canTakeKing(ChessGameState state, ChessPlayer player)
 	{
 		return false;
 	}
 	
-	public static final ChessMoveAction[] getPieceMoves(ChessGameState state, ChessPiece piece)
+	public static final ChessMoveAction[] getPieceMoves(ChessGameState state, ChessPiece piece, ChessPlayer player)
 	{
+		
 		int type = piece.getType();
+		
+		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
+		
+		int[] loc = piece.getLocation();
+		
 		if(type == ChessPiece.PAWN)
 		{
+			//add the horizontal moves
+			int numVertMoves;
+			if(piece.getHasMoved() == false)
+			{
+				numVertMoves = 2;
+			}
+			else
+			{
+				numVertMoves = 1;
+			}
+			for(int i=1;i<=numVertMoves;i++)
+			{
+				
+				int[] newLoc = loc;
+				
+				if(piece.isWhite())
+				{
+					newLoc[0] += i;
+				}
+				else
+				{
+					newLoc[0] -= i;
+				}
+				// Don't need to check for out of bounds because of promotion
+				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+				
+				//can't take a piece like this
+				if(taken == null)
+				{
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				}
+			}
+			int[][] attackLoc;
+			if(piece.isWhite())
+			{
+				attackLoc = new int[][]{
+						{loc[0]-1,loc[1]+1},
+						{loc[0]+1,loc[1]+1}
+				};
+			}
+			else
+			{
+				attackLoc = new int[][]{
+						{loc[0]-1,loc[1]-1},
+						{loc[0]+1,loc[1]-1}
+				};
+			}
 			
+			//add the left and right capture moves
+			for(int i=0;i<2;i++)
+			{
+				if(!ChessGameState.outOfBounds(attackLoc[i]))
+				{
+					//TODO not sure if this part is right
+					ChessPiece taken = state.getPieceMap()[attackLoc[i][0]][attackLoc[i][1]];
+					
+					//it can take a piece of a different color
+					if(taken != null && taken.isWhite() != player.isWhite())
+					{
+						moveList.add(new ChessMoveAction(player, piece, attackLoc[i], taken));
+					}
+				}
+			}
 		}
-		else if(type == ChessPiece.ROOK)
+		else if(type == ChessPiece.ROOK || type == ChessPiece.QUEEN)
 		{
+			//horizontal to the right
+			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
+			{
+				int[] newLoc = {i,loc[1]};
+				
+				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+				
+				//space is occupied
+				if(taken != null)
+				{
+					if(taken.isWhite() != player.isWhite())
+					{
+						//add a move if it can take a piece
+						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					}
+					i = 100;
+				}
+				else //unoccupied
+				{
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				}
+			}
 			
-		}
-		else if(type == ChessPiece.QUEEN)
-		{
+			//horizontal to the left
+			for(int i=loc[0]-1;i>=0;i--)
+			{
+				int[] newLoc = {i,loc[1]};
+				
+				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+				
+				//space is occupied
+				if(taken != null)
+				{
+					if(taken.isWhite() != player.isWhite())
+					{
+						//add a move if it can take a piece
+						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					}
+					i = 100;
+				}
+				else //unoccupied
+				{
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				}
+			}
 			
+			//vertical going up
+			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
+			{
+				int[] newLoc = {loc[0],i};
+				
+				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+				
+				//space is occupied
+				if(taken != null)
+				{
+					if(taken.isWhite() != player.isWhite())
+					{
+						//add a move if it can take a piece
+						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					}
+					i = 100;
+				}
+				else //unoccupied
+				{
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				}
+			}
+			
+			//vertical going down
+			for(int i=loc[0]-1;i>=0;i--)
+			{
+				int[] newLoc = {loc[0],i};
+				
+				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+				
+				//space is occupied
+				if(taken != null)
+				{
+					if(taken.isWhite() != player.isWhite())
+					{
+						//add a move only if the tile is empty or 
+						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					}
+					i = 100;
+				}
+				else //unoccupied
+				{
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				}
+			}
 		}
 		else if(type == ChessPiece.KNIGHT)
 		{
+			int[][] newLoc = {
+					{loc[0]+1,loc[1]+2},//top-mid right
+					{loc[0]+2,loc[1]+1},//top right
+					
+					{loc[0]+1,loc[1]-2},//bottom-mid right
+					{loc[0]+2,loc[1]-1},//bottom right
+					
+					{loc[0]-1,loc[1]+2},//top-mid left
+					{loc[0]-2,loc[1]+1},//top left
+					
+					{loc[0]-1,loc[1]-2},//bottom-mid left
+					{loc[0]-2,loc[1]-1}//bottom left
+			};
 			
+			//iterate through each possible knight move
+			for(int i=0;i<newLoc.length;i++)
+			{
+				if(!ChessGameState.outOfBounds(newLoc[i]))
+				{
+					ChessPiece taken = state.getPieceMap()[newLoc[i][0]][newLoc[i][1]];
+					
+					//space is occupied
+					if(taken != null)
+					{
+						if(taken.isWhite() != player.isWhite())
+						{
+							//add a move only if the tile is empty or 
+							moveList.add(new ChessMoveAction(player, piece, newLoc[i], taken));
+						}
+					}
+					else //unoccupied
+					{
+						moveList.add(new ChessMoveAction(player, piece, newLoc[i], taken));
+					}
+				}
+			}
 		}
 		else if(type == ChessPiece.KING)
 		{
 			
 		}
-		else if(type == ChessPiece.BISHOP)
+		else if(type == ChessPiece.BISHOP || type == ChessPiece.QUEEN)
 		{
 			
 		}

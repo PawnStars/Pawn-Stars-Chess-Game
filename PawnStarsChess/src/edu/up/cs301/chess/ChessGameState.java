@@ -456,6 +456,31 @@ public class ChessGameState extends GameState {
 	public boolean applyMove(ChessMoveAction move)
 	{
 		return false;
-		
+	}
+	
+	/**
+	 * Checks if an array contains points that are within the board;
+	 * @param loc
+	 * @return true if the points are in bounds, false if not
+	 */
+	public static boolean outOfBounds(int[] loc)
+	{
+		if(loc == null)
+		{
+			return false;
+		}
+		if(loc.length != 2)
+		{
+			return false;
+		}
+		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT)
+		{
+			return false;
+		}
+		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH)
+		{
+			return false;
+		}
+		return true;
 	}
 }
