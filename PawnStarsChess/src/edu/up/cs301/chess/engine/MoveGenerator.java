@@ -1,6 +1,8 @@
 package edu.up.cs301.chess.engine;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
@@ -21,6 +23,32 @@ public class MoveGenerator {
 	
 	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state, ChessPlayer player)
 	{
+		//Set<ChessMoveAction> moveList = new HashSet<ChessMoveAction>();
+		//player 1
+		if(state.isPlayer1IsWhite() == true && player.isWhite() == true)
+		{
+			if(state.isWhoseTurn())
+			{
+				ChessPiece[] pieces = state.getPlayer1Pieces();
+				for(int i=0;i<ChessGameState.NUM_PIECES;i++)
+				{
+					if(pieces[i].isAlive())
+					{
+						//TODO add the arrays together
+					}
+					
+				}
+				return null;
+			}
+		}
+		else //player 2
+		{
+			if(!state.isWhoseTurn())
+			{
+				
+				return null;
+			}
+		}
 		return null;
 	}
 	
@@ -136,7 +164,7 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {i,loc[1]};
 				
-				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				boolean done = addMove(state,piece,moveList,newLoc,player);
 				if(done == true)
 				{
 					break;
@@ -148,7 +176,7 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {i,loc[1]};
 				
-				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				boolean done = addMove(state,piece,moveList,newLoc,player);
 				if(done == true)
 				{
 					break;
@@ -160,7 +188,7 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {loc[0],i};
 				
-				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				boolean done = addMove(state,piece,moveList,newLoc,player);
 				if(done == true)
 				{
 					break;
@@ -172,7 +200,7 @@ public class MoveGenerator {
 			{
 				int[] newLoc = {loc[0],i};
 				
-				boolean done = addRookMove(state,piece,moveList,newLoc,player);
+				boolean done = addMove(state,piece,moveList,newLoc,player);
 				if(done == true)
 				{
 					break;
@@ -218,15 +246,66 @@ public class MoveGenerator {
 				}
 			}
 		}
-		else if(type == ChessPiece.KING)
-		{
-			
-		}
 		else if(type == ChessPiece.BISHOP || type == ChessPiece.QUEEN)
 		{
+			int[] newLoc = new int[2];
 			
+			//top right
+			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]++)
+			{
+				boolean done = addMove(state,piece,moveList,newLoc,player);
+				if(done == true)
+				{
+					break;
+				}
+			}
+			
+			//top left
+			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]++)
+			{
+				boolean done = addMove(state,piece,moveList,newLoc,player);
+				if(done == true)
+				{
+					break;
+				}
+			}
+			
+			//bottom right
+			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]--)
+			{
+				boolean done = addMove(state,piece,moveList,newLoc,player);
+				if(done == true)
+				{
+					break;
+				}
+			}
+			
+			//bottom left
+			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]--)
+			{
+				boolean done = addMove(state,piece,moveList,newLoc,player);
+				if(done == true)
+				{
+					break;
+				}
+			}
 		}
-		return null;
+		else if(type == ChessPiece.KING)
+		{
+			//iterate through the locations surrounding the king
+			for(int i=loc[0]-1;i<=loc[0]+1;i++)
+			{
+				for(int j=loc[1]-1;j<=loc[1]+1;j++)
+				{
+					if(i != loc[0] && j != loc[1])
+					{
+						addMove(state,piece,moveList,new int[]{i,j},player);
+					}
+				}
+			}
+		}
+		
+		return removeIllegalMoves(state, moveList.toArray(new ChessMoveAction[moveList.size()]));
 	}
 	
 	/**
@@ -238,10 +317,9 @@ public class MoveGenerator {
 	 * @param player
 	 * @return
 	 */
-	private static boolean addRookMove(ChessGameState state, ChessPiece piece,
-			ArrayList<ChessMoveAction> moveList, int[] newLoc,
-			ChessPlayer player)
-	{
+	private static boolean addMove(ChessGameState state,
+			ChessPiece piece, ArrayList<ChessMoveAction> moveList,
+			int[] newLoc, ChessPlayer player) {
 		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 		
 		//space is occupied
