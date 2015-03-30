@@ -128,7 +128,7 @@ public class Evaluator {
 	/**
 	 * Evaluates a game state and assigns each player a score
 	 */
-	public static final void evalulate(ChessGameState state)
+	public static final int evalulate(ChessGameState state)
 	{
 		int score = 0;
 		
@@ -143,7 +143,9 @@ public class Evaluator {
         score = endGameEval(state, score);
         //TODO implement score setting correctly
         state.setPlayer1Points(score);
-        state.setPlayer2Points(score);
+        state.setPlayer2Points(-score);
+        
+        return score;
 	}
 
 	/**

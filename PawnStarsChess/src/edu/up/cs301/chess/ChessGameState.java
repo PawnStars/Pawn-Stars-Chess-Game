@@ -1,6 +1,7 @@
 package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.game.infoMsg.GameState;
@@ -85,37 +86,53 @@ public class ChessGameState extends GameState {
 		
 		// Give each player a pawn of the appropriate color:
 		for (int i = 0; i < BOARD_WIDTH; ++i) {
-			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite);
-			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite);
+			int[] loc1 = {BOARD_HEIGHT-2,i};
+			int[] loc2 = {1,i};
+			
+			//swap locations
+			if(!player1IsWhite)
+			{
+				int[] temp = loc1;
+				loc1 = loc2;
+				loc2 = temp;
+			}
+			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite,loc1);
+			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite,loc2);
 		}
 
-		// Give each payer the remaining pieces of the appropriate color:
+		// Give each player the remaining pieces of the appropriate color:
 		int[] pieces = { ChessPiece.ROOK, ChessPiece.KNIGHT, ChessPiece.BISHOP,
 				ChessPiece.KING, ChessPiece.QUEEN, ChessPiece.BISHOP,
 				ChessPiece.KNIGHT, ChessPiece.ROOK };
 		for (int i = BOARD_WIDTH; i < NUM_PIECES; ++i) {
+			int[] loc1 = {BOARD_HEIGHT-1,i};
+			int[] loc2 = {0,i};
+			
+			//swap locations
+			if(!player1IsWhite)
+			{
+				int[] temp = loc1;
+				loc1 = loc2;
+				loc2 = temp;
+			}
 			player1Pieces[i] = new ChessPiece(pieces[i - BOARD_WIDTH],
-					player1IsWhite);
+					player1IsWhite,loc1);
 			player2Pieces[i] = new ChessPiece(pieces[i - BOARD_WIDTH],
-					!player1IsWhite);
+					!player1IsWhite,loc2);
 		}
 		
 		//Put player 2's pieces on the board (in the piecemap):
-		int index = player2Pieces.length - 1;
-		for (int row = 0; row < 2; ++row) {
-			for (int col = 0; col < BOARD_WIDTH; ++col) {
-				pieceMap[row][col] = player2Pieces[index];
-				index--;
-			}
+		for(ChessPiece p: player2Pieces)
+		{
+			int[] loc = p.getLocation();
+			pieceMap[loc[0]][loc[1]] = p;
 		}
 		
 		//Put player 1's pieces on the board (in the piecemap):
-		index = player1Pieces.length - 1;
-		for (int row = BOARD_HEIGHT-1; row > BOARD_HEIGHT-3 ; --row) {
-			for (int col = 0; col < BOARD_WIDTH; ++col) {
-				pieceMap[row][col] = player1Pieces[index];
-				index--;
-			}
+		for(ChessPiece p: player1Pieces)
+		{
+			int[] loc = p.getLocation();
+			pieceMap[loc[0]][loc[1]] = p;
 		}
 		
 		//Sets all elements in canCastle to true
@@ -495,6 +512,54 @@ public class ChessGameState extends GameState {
 		return false;
 	}
 	
+	/**
+	 * Convert the game state into a readable chess board
+	 */
+	@Override
+	public String toString()
+	{
+		String rtnVal = "";
+		
+		String turn = "";
+		if(player1IsWhite == whoseTurn)//white's turn
+		{
+			turn = "White";
+		}
+		if(player1IsWhite != whoseTurn)//black's turn
+		{
+			turn = "Black";
+		}
+		
+		String validStr = "";
+		if(valid)
+		{
+			validStr = "Valid";
+		}
+		if(!valid)
+		{
+			validStr = "Invalid";
+		}
+		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
+		
+		rtnVal += "Moves: ";
+		for(ChessMoveAction move:moveList)
+		{
+			rtnVal+=move.toString()+", ";
+		}
+		
+		rtnVal +="State\n";
+		for(int i=0;i<BOARD_HEIGHT;i++)
+		{
+			for(int j=0;j<BOARD_WIDTH;j++)
+			{
+				rtnVal+="["+pieceMap[i][j].toString()+"]";
+			}
+			rtnVal+="\n";
+		}
+		
+		return rtnVal;
+	}
+
 	/**
 	 * Checks if an array contains points that are within the board;
 	 * @param loc

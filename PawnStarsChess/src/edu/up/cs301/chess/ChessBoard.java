@@ -32,10 +32,10 @@ public class ChessBoard extends SurfaceView
 	
 	// The unicode characters for chess pieces
 	// outline of the characters
-	private static String whitePieceStrs[] = {"\u2654","\u2655","\u2656","\u2657","\u2658","\u2659"};
+	public static final String whitePieceStrs[] = {"\u2654","\u2655","\u2656","\u2657","\u2658","\u2659"};
 	
 	// filled in characters
-	private static String blackPieceStrs[] = {"\u265A","\u265B","\u265C","\u265D","\u265E","\u265F"};
+	public static final String blackPieceStrs[] = {"\u265A","\u265B","\u265C","\u265D","\u265E","\u265F"};
 	
 	// an 8x8 array of the pieces on the board
 	private ChessPiece pieceMap[][];

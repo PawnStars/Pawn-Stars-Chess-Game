@@ -21,12 +21,19 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  */
 public class MoveGenerator {
 	
+	/**
+	 * Returns an array containing the moves a player can make
+	 * 
+	 * @param state the current ChessGameState
+	 * @param player the current player
+	 * @return an array of moves
+	 */
 	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state,
-			ChessPlayer currPlayer)
+			ChessPlayer player)
 	{
 		ArrayList<ChessMoveAction[]> moveList2d = new ArrayList<ChessMoveAction[]>();
 		//player 1
-		if(state.isPlayer1IsWhite() == true && currPlayer.isWhite() == true)
+		if(state.isPlayer1IsWhite() == true && player.isWhite() == true)
 		{
 			if(state.isWhoseTurn())//true if player 1's turn
 			{
@@ -37,7 +44,7 @@ public class MoveGenerator {
 					{
 						//get all possible moves the player can make
 						//including ones that do not protect the king
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], currPlayer, currPlayer.isWhite(), false);
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
 						moveList2d.add(newActions);
 					}
 				}
@@ -53,7 +60,7 @@ public class MoveGenerator {
 					if(pieces[i].isAlive())
 					{
 						//TODO add the arrays together
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], currPlayer, currPlayer.isWhite(), false);
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
 						moveList2d.add(newActions);
 					}
 				}
@@ -78,7 +85,7 @@ public class MoveGenerator {
 		}
 		
 		//remove the moves that would get the king captured
-		return removeIllegalMoves(state, moveList, currPlayer);
+		return removeIllegalMoves(state, moveList, player);
 	}
 	
 	public static final ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
@@ -147,7 +154,7 @@ public class MoveGenerator {
 	 * @param currPlayer
 	 * @param color
 	 * @param legal
-	 * @return
+	 * @return an array of moves
 	 */
 	public static final ChessMoveAction[] getPieceMoves(ChessGameState state,
 			ChessPiece piece, ChessPlayer currPlayer, boolean color, boolean legal)

@@ -1,5 +1,8 @@
 package edu.up.cs301.chess;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 
@@ -44,7 +47,7 @@ public class ChessPiece {
 	 * @param type: Constant used to indicate which piece
 	 * @param isWhite: true if the piece is white
 	 */
-	public ChessPiece (int type, boolean isWhite) {
+	public ChessPiece (int type, boolean isWhite, int[] location) {
 		//Make sure type is valid:
 		if (type < 6 && type >= 0) {
 			this.type = type;
@@ -53,6 +56,14 @@ public class ChessPiece {
 		this.hasMoved = false;
 		this.isWhite = isWhite;
 		this.isAlive = true;
+		this.location = location;
+	}
+	public ChessPiece(ChessPiece piece)
+	{
+		this.hasMoved = piece.getHasMoved();
+		this.isWhite = piece.isWhite();
+		this.isAlive = piece.isAlive();
+		this.location = piece.getLocation();
 	}
 	
 	/**
@@ -132,16 +143,6 @@ public class ChessPiece {
 	}
 	
 	/**
-	 * Makes a deep copy of this ChessPiece
-	 * @return a copy of this ChessPiece
-	 */
-	public ChessPiece copy()
-	{
-		ChessPiece newPiece = new ChessPiece(type,isWhite);
-		return newPiece;
-	}
-	
-	/**
 	 * Does a deep copy of a 2d array of ChessPieces
 	 * 
 	 * @param an 8x8 array
@@ -160,7 +161,7 @@ public class ChessPiece {
 			{
 				if(map[i][j] != null)
 				{
-					newMap[i][j] = map[i][j].copy();
+					newMap[i][j] = new ChessPiece(map[i][j]);
 				}
 			}
 		}
@@ -184,7 +185,7 @@ public class ChessPiece {
 		{
 			if(list[k] != null)
 			{
-				newList[k] = list[k].copy();
+				newList[k] = new ChessPiece(list[k]);
 			}
 		}
 		
@@ -362,4 +363,41 @@ public class ChessPiece {
 		
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		String typeStr = "";
+		if(type == PAWN)
+		{
+			typeStr = "p";
+		}
+		else if(type == QUEEN)
+		{
+			typeStr = "q";
+		}
+		else if(type == KING)
+		{
+			typeStr = "k";
+		}
+		else if(type == ROOK)
+		{
+			typeStr = "r";
+		}
+		else if(type == BISHOP)
+		{
+			typeStr = "b";
+		}
+		else if(type == KNIGHT)
+		{
+			typeStr = "k";
+		}
+		if(!isWhite)
+		{
+			typeStr = typeStr.toUpperCase(Locale.US);
+		}
+		return "["+typeStr+"]";
+	}
+	
+	
 }

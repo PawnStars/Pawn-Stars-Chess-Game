@@ -41,8 +41,10 @@ public class Search {
 	 * @param state the current ChessGameState
 	 * @return a ChessMoveAction favorable to 
 	 */
-	private static final ChessMoveAction[] alphaBeta(int depth, ChessGameState state)
+	private static final ChessMoveAction[] negaScout(int depth, ChessGameState state)
 	{
+		//TODo finish
+		float score = negaScoutHelper(depth,state,Float.POSITIVE_INFINITY,Float.NEGATIVE_INFINITY,state.isWhoseTurn());
 		return null;
 	}
 	
@@ -54,9 +56,50 @@ public class Search {
 	 * @param beta the min score assured for player 2 for a given move
 	 * @return
 	 */
-	private static final ChessMoveAction[] alphaBetaHelper(int depth, ChessGameState state, float alpha, float beta, boolean maxPlayer)
+	private static final float negaScoutHelper(int depth, ChessGameState state, float alpha, float beta, boolean maxPlayer)
 	{
-		return null;
+		if(state.isGameOver() || depth == 0)
+		{
+			if(maxPlayer == true)
+			{
+				return Evaluator.evalulate(state);
+			}
+			else
+			{
+				return -(Evaluator.evalulate(state));
+			}
+		}
+		//will make invalid ChessMoveActions
+		ChessMoveAction[] possibleMoves = MoveGenerator.getPossibleMoves(state, null);
+		
+		boolean first = true;
+		float score = 0;
+		for(ChessMoveAction move: possibleMoves)
+		{
+			if(first)
+			{
+				ChessGameState newState = new ChessGameState(state);
+				state.applyMove(move);
+				score -=negaScoutHelper(depth-1, newState, -beta, -alpha, !maxPlayer);
+				first = false;
+			}
+			else
+			{
+				ChessGameState newState = new ChessGameState(state);
+				state.applyMove(move);
+				score -=negaScoutHelper(depth-1, newState, -alpha-1, -alpha, !maxPlayer);
+				if(alpha < score && score < beta)
+				{
+					score -=negaScoutHelper(depth-1, newState, -beta, -score, !maxPlayer);
+				}
+			}
+			alpha = Math.max(alpha, score);
+			if(alpha >= beta)
+			{
+				break;
+			}
+		}
+		return alpha;
 	}
 	
 	/**

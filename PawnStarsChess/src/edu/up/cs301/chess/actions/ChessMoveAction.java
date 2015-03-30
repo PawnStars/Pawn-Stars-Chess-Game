@@ -1,5 +1,8 @@
 package edu.up.cs301.chess.actions;
 
+import java.util.Arrays;
+
+import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.game.GamePlayer;
@@ -123,6 +126,32 @@ public class ChessMoveAction extends GameAction {
 	{
 		return valid;
 	}
+
+	/**
+	 * Convert the move into standard chess notation for debugging.
+	 */
+	@Override
+	public String toString()
+	{
+		String rtnVal = "";
+		rtnVal += whichPiece.toString();
+		int[] loc = whichPiece.getLocation();
+		
+		//convert to chess notation
+		//TODO doesn't work for special moves
+		rtnVal += (char)(97+loc[1]);
+		rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
+		rtnVal += " ";
+		
+		
+		rtnVal += (char)(97+newPos[1]);
+		rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
+		rtnVal += " ";
+		
+		return rtnVal;
+	}
+	
+	
 	
 	
 	
