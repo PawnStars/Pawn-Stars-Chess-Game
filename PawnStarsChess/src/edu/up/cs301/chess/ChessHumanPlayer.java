@@ -224,7 +224,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				board.setSelectedLoc(selectedLoc);
 				
 				//get valid locations for that piece
-				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this);
+				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this, true);
 				
 				//add the valid moves into a bitboard
 				for(int i=0;i<validMoves.length;i++)
