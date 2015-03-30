@@ -32,7 +32,9 @@ public class MoveGenerator {
 				{
 					if(pieces[i].isAlive())
 					{
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player);
+						//get all possible moves the player can make
+						//including ones that do not protect the king
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player,false);
 						moveList2d.add(newActions);
 					}
 				}
@@ -48,7 +50,7 @@ public class MoveGenerator {
 					if(pieces[i].isAlive())
 					{
 						//TODO add the arrays together
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player);
+						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player,false);
 						moveList2d.add(newActions);
 					}
 				}
@@ -71,7 +73,9 @@ public class MoveGenerator {
 				moveList[i++] = action;
 			}
 		}
-		return moveList;
+		
+		//remove the moves that would get the king captured
+		return removeIllegalMoves(state, moveList);
 	}
 	
 	public static final ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
@@ -104,7 +108,7 @@ public class MoveGenerator {
 		return false;
 	}
 	
-	public static final ChessMoveAction[] getPieceMoves(ChessGameState state, ChessPiece piece, ChessPlayer player)
+	public static final ChessMoveAction[] getPieceMoves(ChessGameState state, ChessPiece piece, ChessPlayer player, boolean legal)
 	{
 		
 		int type = piece.getType();
@@ -326,8 +330,17 @@ public class MoveGenerator {
 				}
 			}
 		}
+		ChessMoveAction[] rtnVal = moveList.toArray(new ChessMoveAction[moveList.size()]);
 		
-		return removeIllegalMoves(state, moveList.toArray(new ChessMoveAction[moveList.size()]));
+		if(legal)
+		{
+			return removeIllegalMoves(state, rtnVal);
+		}
+		else
+		{
+			return rtnVal;
+		}
+		
 	}
 	
 	/**
