@@ -1,5 +1,8 @@
 package edu.up.cs301.chess.engine;
 
+import java.util.Collection;
+import java.util.TreeMap;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.chess.actions.ChessMoveAction;
@@ -16,10 +19,12 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  */
 public class Search {
 	//the depth of the recursive search
-	private int maxDepth = 3;
+	private static int maxDepth = 3;
 	
 	//The maximum amount of time to take for a search.
-	private long maxTime;
+	private static long maxTime;
+	
+	private static final int MAX_INTELLIGENCE = 10;
 	/**
 	 * Chooses a move based on intelligence.
 	 * 
@@ -28,6 +33,17 @@ public class Search {
 	 */
 	public static final ChessMoveAction findMove(ChessPlayer player,ChessGameState state,int intelligence)
 	{
+		int depth = (intelligence/MAX_INTELLIGENCE);
+		if(depth > maxDepth)
+		{
+			depth = maxDepth;
+		}
+		if(depth < 0)
+		{
+			depth = 0;
+		}
+		ChessMoveAction[] sortedMoves = negaScout(depth,state);
+		
 		return null;
 	}
 	
@@ -43,13 +59,26 @@ public class Search {
 	 */
 	private static final ChessMoveAction[] negaScout(int depth, ChessGameState state)
 	{
-		//TODo finish
-		float score = negaScoutHelper(depth,state,Float.POSITIVE_INFINITY,Float.NEGATIVE_INFINITY,state.isWhoseTurn());
-		return null;
+		//TODO finish
+		//could use a different data structure
+		TreeMap<Float,ChessMoveAction> moveDictionary = new TreeMap<Float,ChessMoveAction>();
+		ChessMoveAction[] possibleMoves = MoveGenerator.getPossibleMoves(state, null);
+		for(ChessMoveAction move: possibleMoves)
+		{
+			float score = negaScoutHelper(depth,state,
+					Float.POSITIVE_INFINITY,Float.NEGATIVE_INFINITY,
+					state.isWhoseTurn());
+			moveDictionary.put(Float.valueOf(score), move);
+		}
+		//idk if this works
+		Collection<ChessMoveAction> values = moveDictionary.values();
+		ChessMoveAction[] sortedList = values.toArray(new ChessMoveAction[values.size()]);
+		
+		return sortedList;
 	}
 	
 	/**
-	 * Helps the main alphaBeta() method
+	 * Helps the main negaScout() method
 	 * @param depth the remaining depth of the search tree
 	 * @param state the current ChessGameState
 	 * @param alpha the max score assured for player 1 for a given move
