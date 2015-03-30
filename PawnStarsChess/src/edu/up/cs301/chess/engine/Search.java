@@ -1,6 +1,7 @@
 package edu.up.cs301.chess.engine;
 
 import edu.up.cs301.chess.ChessGameState;
+import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 
 /**
@@ -25,7 +26,7 @@ public class Search {
 	 * @param intelligence
 	 * @return
 	 */
-	public ChessMoveAction findMove(int intelligence)
+	public static final ChessMoveAction findMove(ChessPlayer player,ChessGameState state,int intelligence)
 	{
 		return null;
 	}
@@ -40,7 +41,7 @@ public class Search {
 	 * @param state the current ChessGameState
 	 * @return a ChessMoveAction favorable to 
 	 */
-	private ChessMoveAction[] alphaBeta(int depth, ChessGameState state)
+	private static final ChessMoveAction[] alphaBeta(int depth, ChessGameState state)
 	{
 		return null;
 	}
@@ -53,7 +54,7 @@ public class Search {
 	 * @param beta the min score assured for player 2 for a given move
 	 * @return
 	 */
-	private ChessMoveAction[] alphaBetaHelper(int depth, ChessGameState state, float alpha, float beta, boolean maxPlayer)
+	private static final ChessMoveAction[] alphaBetaHelper(int depth, ChessGameState state, float alpha, float beta, boolean maxPlayer)
 	{
 		return null;
 	}
@@ -64,7 +65,7 @@ public class Search {
 	 * @param state
 	 * @return
 	 */
-	private ChessMoveAction iterativeDeepening(ChessGameState state)
+	private static final ChessMoveAction iterativeDeepening(ChessGameState state)
 	{
 		return null;
 	}

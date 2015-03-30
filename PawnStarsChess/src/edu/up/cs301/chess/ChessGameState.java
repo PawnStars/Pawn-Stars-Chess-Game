@@ -1,7 +1,6 @@
 package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
 
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.game.infoMsg.GameState;
@@ -62,6 +61,8 @@ public class ChessGameState extends GameState {
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
 	
+	private boolean valid;
+	
 
 	/**
 	 * constructor, initializing the ChessGameState to its initial state
@@ -79,6 +80,7 @@ public class ChessGameState extends GameState {
 		isGameOver = false;
 		player1Points = 0;
 		player2Points = 0;
+		valid = true;
 		moveList = new ArrayDeque<ChessMoveAction>();
 		
 		// Give each player a pawn of the appropriate color:
@@ -455,13 +457,21 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean applyMove(ChessMoveAction move)
 	{
-		if(move.isValid())
+		whoseTurn = !whoseTurn;
+		if(!move.isValid() && valid == true)
+		{
+			valid = false;
+		}
+		if(move.getTakenPiece() != null)
 		{
 			for(ChessPiece p:player1Pieces)
 			{
 				if(p.equals(move.getTakenPiece()))
 				{
+					//kill it and remove from board
 					p.kill();
+					int[] loc = p.getLocation();
+					pieceMap[loc[0]][loc[1]] = null;
 				}
 			}
 			for(ChessPiece p:player2Pieces)
@@ -469,9 +479,18 @@ public class ChessGameState extends GameState {
 				if(p.equals(move.getTakenPiece()))
 				{
 					p.kill();
+					int[] loc = p.getLocation();
+					pieceMap[loc[0]][loc[1]] = null;
 				}
 			}
-			//TODO apply move
+		}
+		if(move.getWhichPiece() != null)
+		{
+			//Move the piece
+			int[] newLoc = move.getNewPos();
+			move.getWhichPiece().move(newLoc);
+			pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
+			return true;
 		}
 		return false;
 	}

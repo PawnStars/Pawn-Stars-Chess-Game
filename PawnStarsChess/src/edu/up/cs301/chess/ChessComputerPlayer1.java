@@ -2,6 +2,8 @@ package edu.up.cs301.chess;
 
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.engine.MoveGenerator;
+import edu.up.cs301.chess.engine.Search;
 import edu.up.cs301.game.GameComputerPlayer;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.Tickable;
@@ -60,6 +62,18 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public void makeMove()
 	{
+		if(smart == 0)
+		{
+			//Random move
+			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(gameState, this);
+			int randomIndex = (int) (Math.random()*(possibleActions.length));
+			gameState.applyMove(possibleActions[randomIndex]);
+		}
+		else if(smart > 0)
+		{
+			ChessMoveAction bestMove = Search.findMove(this, gameState, smart);
+			gameState.applyMove(bestMove);
+		}
 		//TODO implement AI
 	}
 
