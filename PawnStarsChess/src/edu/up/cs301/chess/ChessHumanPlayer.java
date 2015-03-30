@@ -42,9 +42,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	//The board that draws each piece
 	private ChessBoard board;
 	
-	// The rotation of the board in degrees
-	private int boardRotation;
-	
 	// the most recent game state, as given to us by the CounterLocalGame
 	private ChessGameState state;
 	
@@ -69,7 +66,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public ChessHumanPlayer(String name) {
 		super(name);
-		boardRotation = 0;
 		validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	}
 
@@ -224,7 +220,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				board.setSelectedLoc(selectedLoc);
 				
 				//get valid locations for that piece
-				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this, true);
+				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this,isWhite(), true);
 				
 				//add the valid moves into a bitboard
 				for(int i=0;i<validMoves.length;i++)

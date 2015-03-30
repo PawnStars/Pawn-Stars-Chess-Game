@@ -455,6 +455,24 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean applyMove(ChessMoveAction move)
 	{
+		if(move.isValid())
+		{
+			for(ChessPiece p:player1Pieces)
+			{
+				if(p.equals(move.getTakenPiece()))
+				{
+					p.kill();
+				}
+			}
+			for(ChessPiece p:player2Pieces)
+			{
+				if(p.equals(move.getTakenPiece()))
+				{
+					p.kill();
+				}
+			}
+			//TODO apply move
+		}
 		return false;
 	}
 	

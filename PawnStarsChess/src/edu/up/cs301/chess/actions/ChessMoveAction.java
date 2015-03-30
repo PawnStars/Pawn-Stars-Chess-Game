@@ -31,6 +31,8 @@ public class ChessMoveAction extends GameAction {
 	
 	private boolean whichColor;
 	
+	private boolean valid = false;
+	
 	/**
 	 * Constructor for the ChessMoveAction class.
 	 * 
@@ -44,15 +46,20 @@ public class ChessMoveAction extends GameAction {
 		
 		if(player instanceof ChessPlayer)
 		{
+			if(takenPiece == null)
+			{
+				valid = true;
+			}
 			whichColor = ((ChessPlayer)player).isWhite();
 			if(whichColor != takenPiece.isWhite())
 			{
-				this.whichPiece = whichPiece;
-				this.newPos = newPos;
-				this.takenPiece = takenPiece;
-				//TODO handle invalid move
+				valid = true;
 			}
 		}
+		
+		this.whichPiece = whichPiece;
+		this.newPos = newPos;
+		this.takenPiece = takenPiece;
 	}
 
 	/**
@@ -78,6 +85,15 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public int[] getNewPos() {
 		return newPos;
+	}
+	
+	/**
+	 * Returns true if the move is a move that can be applied
+	 * @return true if valid
+	 */
+	public boolean isValid()
+	{
+		return valid;
 	}
 	
 }//class CounterMoveAction
