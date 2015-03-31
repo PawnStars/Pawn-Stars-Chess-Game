@@ -27,21 +27,30 @@ public class ChessGameState extends GameState {
 	// to satisfy Serializable interface
 	private static final long serialVersionUID = 7737493762369851826L;
 
-	// Represents the board. Each piece is represented by its own character.
-	// A null character means no piece is there. Player 1 is given the "bottom"
-	// of the array.
+	/*
+	 * Represents the board. Each piece is represented by its own character.
+	 * A null character means no piece is there. Player 1 is given the
+	 * "bottom" of the array.
+	 */
 	private ChessPiece[][] pieceMap;
 
 	// Arrays to keep track of which pieces are alive/dead:
 	private ChessPiece[] player1Pieces;
 	private ChessPiece[] player2Pieces;
 
-	// Keep track of current score as pieces are taken:
+	// Keep track of current score as the game progresses:
 	private int player1Points;
 	private int player2Points;
 
-	// Keep track of whose turn it is.
-	// True means it is player 1's turn, false means it is player 2's turn.
+	// Keep track of total worth of each piece as the game progresses:
+	private int player1Material;
+	private int player2Material;
+
+	/*
+	 * Keep track of whose turn it is.
+	 * True means it is player 1's turn, 
+	 * false means it is player 2's turn.
+	 */
 	private boolean whoseTurn;
 
 	// Keep track if a king is in check
@@ -54,15 +63,25 @@ public class ChessGameState extends GameState {
 	// Keep track of which players can castle left or castle right
 	private boolean[][] canCastle;
 
-	// Keep track of which player is white:
-	// True if player 1 is white,
-	// False if player 2 is white
+	/*
+	 * Keep track of which player is white:
+	 * True if player 1 is white,
+	 * False if player 2 is white
+	 */
 	private boolean player1IsWhite; 
 	
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
 	
+	// Keep track of whether or not this state represents a valid state of the board
 	private boolean valid;
+	
+	/*
+	 * The number of moves since the last capture.
+	 * Can be used to indicate a stalemate.
+	 */
+	private int lastCapture;
+	//TODO implement statemate
 	
 
 	/**
@@ -584,5 +603,21 @@ public class ChessGameState extends GameState {
 			return false;
 		}
 		return true;
+	}
+	
+	public int getPlayer1Material() {
+		return player1Material;
+	}
+
+	public void setPlayer1Material(int player1Material) {
+		this.player1Material = player1Material;
+	}
+
+	public int getPlayer2Material() {
+		return player2Material;
+	}
+
+	public void setPlayer2Material(int player2Material) {
+		this.player2Material = player2Material;
 	}
 }

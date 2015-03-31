@@ -28,6 +28,8 @@ public class ChessPiece {
 	public static final int QUEEN = 4;
 	public static final int KING = 5;
 	
+	public static final int NUM_TYPES = 6;
+	
 	//Keeps track of what color piece is and if they have moved
 	private boolean isWhite;
 	private boolean hasMoved;
