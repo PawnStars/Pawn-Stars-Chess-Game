@@ -1,6 +1,8 @@
  package edu.up.cs301.game.test;
 
 import edu.up.cs301.chess.*;
+import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.engine.Search;
 import junit.framework.Assert;
 import android.test.AndroidTestCase;
 
@@ -60,7 +62,12 @@ public class MoveTest extends AndroidTestCase {
 	 * @throws Throwable
 	 */
 	public void testAI() throws Throwable {
-	
+		ChessGameState newState = new ChessGameState(true);
+		ChessPlayer player = new ChessComputerPlayer1("Bob", Search.MAX_INTELLIGENCE);
+		ChessMoveAction bestMove = Search.findMove(player, newState, Search.MAX_INTELLIGENCE);
+		System.out.println(bestMove.toString());
+		newState.applyMove(bestMove);
+		
 	}
 	
 	
