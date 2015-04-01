@@ -131,7 +131,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		}
 		ChessGameState newState = (ChessGameState)info;
 		
-		if(newState.equals(state))
+		if(newState == null || newState.equals(state))
 		{
 			return;
 		}
@@ -214,7 +214,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				selectedLoc[1] = tileX;
 				
 				// Make sure it is within bounds
-				if(!ChessGameState.outOfBounds(selectedLoc))
+				if(ChessGameState.outOfBounds(selectedLoc))
 				{
 					return false;
 				}
@@ -225,7 +225,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				
 				down = false;
 				
-				ChessPiece pieceSelected = state.getPieceMap()[tileX][tileY];
+				ChessPiece pieceSelected = state.getPieceMap()[tileY][tileX];
 				
 				//selected a tile with a piece on it of the same color
 				if(pieceSelected != null && pieceSelected.isWhite() == isWhite())
@@ -242,7 +242,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						for(int i=0;i<validMoves.length;i++)
 						{
 							int[] newPos = validMoves[i].getNewPos();
-							validLocs[newPos[0]][newPos[1]] = true;
+							validLocs[newPos[0]][newPos[1]] = true;//TODO check if this is right
 						}
 						board.setSelectedTiles(validLocs);
 					}

@@ -140,11 +140,15 @@ public class MoveGenerator {
 		for(ChessPiece p: moveablePieces)
 		{
 			ChessMoveAction[] moves = getPieceMoves(state,p,player,moveColor,false);
-			for(ChessMoveAction move: moves)
+			if(moves != null)
 			{
-				if(move.getTakenPiece().getType() == ChessPiece.KING)
+				for(ChessMoveAction move: moves)
 				{
-					return true;
+					if(move != null && move.getTakenPiece() != null &&
+							move.getTakenPiece().getType() == ChessPiece.KING)
+					{
+						return true;
+					}
 				}
 			}
 		}
@@ -318,6 +322,7 @@ public class MoveGenerator {
 			{
 				if(!ChessGameState.outOfBounds(newLoc[i]))
 				{
+					System.out.println("["+newLoc[i][0]+"]"+"["+newLoc[i][1]+"]");
 					ChessPiece taken = state.getPieceMap()[newLoc[i][0]][newLoc[i][1]];
 					
 					//space is occupied
@@ -419,7 +424,20 @@ public class MoveGenerator {
 	 */
 	private static boolean addMove(ChessGameState state,
 			ChessPiece piece, ArrayList<ChessMoveAction> moveList,
-			int[] newLoc, ChessPlayer player, boolean color) {
+			int[] newLoc, ChessPlayer player, boolean color)
+	{
+		if(newLoc == null || newLoc.length != 2 )
+		{
+			return false;
+		}
+		if(ChessGameState.outOfBounds(newLoc))
+		{
+			return false;
+		}
+		if(state == null || state.getPieceMap() == null)
+		{
+			return false;
+		}
 		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 		
 		//space is occupied

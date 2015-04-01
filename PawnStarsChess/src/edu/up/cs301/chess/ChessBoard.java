@@ -146,7 +146,7 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				//canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally
@@ -215,7 +215,7 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				//canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally

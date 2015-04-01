@@ -55,10 +55,13 @@ public class ChessMoveAction extends GameAction {
 			{
 				valid = true;
 			}
-			whichColor = ((ChessPlayer)player).isWhite();
-			if(whichColor != takenPiece.isWhite())
+			else
 			{
-				valid = true;
+				whichColor = ((ChessPlayer)player).isWhite();
+				if(whichColor != takenPiece.isWhite())
+				{
+					valid = true;
+				}
 			}
 		}
 		
@@ -81,10 +84,13 @@ public class ChessMoveAction extends GameAction {
 			{
 				valid = true;
 			}
-			whichColor = ((ChessPlayer)player).isWhite();
-			if(whichColor != action.getTakenPiece().isWhite())
+			else
 			{
-				valid = true;
+				whichColor = ((ChessPlayer)player).isWhite();
+				if(whichColor != action.getTakenPiece().isWhite())
+				{
+					valid = true;
+				}
 			}
 		}
 		

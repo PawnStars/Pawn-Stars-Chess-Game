@@ -193,16 +193,22 @@ public class ChessGameState extends GameState {
 		for(ChessPiece piece:player1Pieces)
 		{
 			int[] loc = piece.getLocation();
-			pieceMap[loc[0]][loc[1]] = piece;
+			if(!outOfBounds(loc))
+			{
+				pieceMap[loc[0]][loc[1]] = piece;
+			}
 		}
 		
 		for(ChessPiece piece:player2Pieces)
 		{
 			int[] loc = piece.getLocation();
-			pieceMap[loc[0]][loc[1]] = piece;
+			if(!outOfBounds(loc))
+			{
+				pieceMap[loc[0]][loc[1]] = piece;
+			}
 		}
 		
-		moveList = orig.getMoveList().clone();
+		moveList = orig.getMoveList().clone();//TODO clone the elements
 		
 		//Primitive values do not need to be copied
 		player1Points = orig.getPlayer1Points();
@@ -405,21 +411,21 @@ public class ChessGameState extends GameState {
 	{
 		if(loc == null)
 		{
-			return false;
+			return true;
 		}
 		if(loc.length != 2)
 		{
-			return false;
+			return true;
 		}
-		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT-1)
+		if(loc[0] < 0 || loc[0] >= ChessGameState.BOARD_HEIGHT)
 		{
-			return false;
+			return true;
 		}
-		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH-1)
+		if(loc[1] < 0 || loc[1] >= ChessGameState.BOARD_WIDTH)
 		{
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	/*
