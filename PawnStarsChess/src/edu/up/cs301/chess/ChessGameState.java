@@ -102,7 +102,7 @@ public class ChessGameState extends GameState {
 	 * Can be used to indicate a stalemate.
 	 */
 	private int lastCapture;
-	//TODO implement statemate
+	//TODO implement stalemate
 	
 
 	/**
@@ -159,6 +159,8 @@ public class ChessGameState extends GameState {
 				ChessPiece.KNIGHT,
 				ChessPiece.ROOK
 		};
+		
+		//Puts non-pawn pieces into the piecemap
 		for (int i = 0; i < BOARD_WIDTH; i++) {
 			int[] loc1 = {BOARD_HEIGHT-1,i};
 			int[] loc2 = {0,i};
@@ -326,15 +328,19 @@ public class ChessGameState extends GameState {
 		{
 			return false;
 		}
+		//See if user has requested a draw (tie)
 		if(act instanceof DrawAction)
 		{
 			//TODO implement
 			return true;
 		}
+		
+		//See if user has changed a piece
 		if(act instanceof ChessMoveAction)
 		{
 			ChessMoveAction move = (ChessMoveAction)act;
-			//statemate
+			
+			//Check for stalemate:
 			if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
 			{
 				isGameOver = true;
@@ -343,19 +349,27 @@ public class ChessGameState extends GameState {
 				return false;
 			}
 			
+			//Update player turn:
 			whoseTurn = !whoseTurn;
+			
+			//Used for AI???
 			if(!move.isValid() && valid == true)
 			{
 				valid = false;
 			}
-			if(move.getTakenPiece() != null)
+			
+			//See if a piece has been taken
+			ChessPiece takenPiece = move.getTakenPiece();
+			if(takenPiece != null)
 			{
 				lastCapture = 0;
+				
+				//Search for the taken piece from players' array:
 				for(ChessPiece p:player1Pieces)
 				{
-					if(p.equals(move.getTakenPiece()))
+					if(p.equals(takenPiece))
 					{
-						//kill it and remove from board
+						//kill piece and remove from board
 						p.kill();
 						int[] loc = p.getLocation();
 						pieceMap[loc[0]][loc[1]] = null;
@@ -363,8 +377,9 @@ public class ChessGameState extends GameState {
 				}
 				for(ChessPiece p:player2Pieces)
 				{
-					if(p.equals(move.getTakenPiece()))
+					if(p.equals(takenPiece))
 					{
+						//kill piece and remove from board
 						p.kill();
 						int[] loc = p.getLocation();
 						pieceMap[loc[0]][loc[1]] = null;

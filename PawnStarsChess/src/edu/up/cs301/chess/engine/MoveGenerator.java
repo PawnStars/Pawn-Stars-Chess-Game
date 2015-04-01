@@ -417,7 +417,7 @@ public class MoveGenerator {
 	 * and the color of the player
 	 * @param state
 	 * @param piece
-	 * @param moveList
+	 * @param moveList list of moves that have been made since the start of the game
 	 * @param newLoc
 	 * @param player
 	 * @return true if successful
