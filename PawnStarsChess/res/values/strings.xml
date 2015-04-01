@@ -29,4 +29,8 @@
     <string name="player2">Player 2</string>
     <string name="score">Score</string>
     <string name="randomNumber">42</string>
+    <string name="dialog_color_question">Do you want to start as white or black?</string>
+    <string name="dialog_white_label">White</string>
+    <string name="dialog_black_label">Black</string>
+    <string name="dialog_title">Pick a color</string>
 </resources>

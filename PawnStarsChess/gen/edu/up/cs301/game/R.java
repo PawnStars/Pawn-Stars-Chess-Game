@@ -88,9 +88,13 @@ public final class R {
         public static final int add_player=0x7f060009;
         public static final int app_name=0x7f060000;
         public static final int begin_game=0x7f060005;
+        public static final int dialog_black_label=0x7f06001f;
+        public static final int dialog_color_question=0x7f06001d;
         public static final int dialog_continue_label=0x7f06000f;
         public static final int dialog_quit_label=0x7f060010;
         public static final int dialog_quit_question=0x7f060011;
+        public static final int dialog_title=0x7f060020;
+        public static final int dialog_white_label=0x7f06001e;
         public static final int draw=0x7f060017;
         public static final int flipBoardBut=0x7f060016;
         public static final int guest=0x7f06000c;

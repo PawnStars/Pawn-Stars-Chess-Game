@@ -15,4 +15,10 @@ import edu.up.cs301.game.GamePlayer;
 public interface ChessPlayer extends GamePlayer
 {
 	public boolean isWhite();
+	
+	public boolean isPlayer1();
+	
+	public int getPlayerID();
+	
+	public void setWhite(boolean color);
 }

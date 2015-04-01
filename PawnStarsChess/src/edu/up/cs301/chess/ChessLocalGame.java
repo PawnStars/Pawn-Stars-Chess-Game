@@ -35,7 +35,14 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	@Override
 	public boolean canMove(int playerIdx) {
 		//TODO: implement turns
-		return true;
+		if(gameState.isWhoseTurn() && playerIdx == 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**

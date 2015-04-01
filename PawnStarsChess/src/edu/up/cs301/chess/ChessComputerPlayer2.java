@@ -111,6 +111,9 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		// Find the board
 		board = (ChessBoard) activityForGui.findViewById(R.id.gameBoardSurfaceView);
 		
+		//50/50 chance to be white or black
+		setWhite(Math.random() > 0.5);
+		
 		// if the state is non=null, update the display
 		if (gameState != null) {
 			updateDisplay();

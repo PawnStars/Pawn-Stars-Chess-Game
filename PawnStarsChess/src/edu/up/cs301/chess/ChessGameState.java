@@ -24,11 +24,13 @@ public class ChessGameState extends GameState {
 	public static final int NUM_PIECES = 16; // Total number of pieces per side
 	public static final int BOARD_WIDTH = 8; // Number of spaces wide
 	public static final int BOARD_HEIGHT = 8; // Number of spaces tall
-
+	
+	public static final int MAX_PLAYERS = 2;
 	private static final int MAX_MOVES_SINCE_CAPTURE = 50;
 	
 	// to satisfy Serializable interface
 	private static final long serialVersionUID = 7737493762369851826L;
+	
 	
 	/*
 	 * Represents the board. Each piece is represented by its own character.
@@ -79,6 +81,15 @@ public class ChessGameState extends GameState {
 	 * False if player 2 is white
 	 */
 	private boolean player1IsWhite; 
+	
+	/*
+	 * The index of the two players.
+	 * Player 1 is at element 0 and player 2 is at element 1.
+	 */
+	private int[] playerIdx = new int[2];
+	
+	//the index to start on when players give their index to the state
+	private int numConnected = 0;
 	
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
@@ -777,5 +788,48 @@ public class ChessGameState extends GameState {
 
 	public void setPlayer2Won(boolean player2Won) {
 		this.player2Won = player2Won;
+	}
+	/**
+	 * @return the player1Idx
+	 */
+	public int getPlayer1Idx() {
+		return playerIdx[1];
+	}
+
+	/**
+	 * @param player1Idx the player1Idx to set
+	 */
+	public boolean setPlayerInfo(ChessPlayer player)
+	{
+		boolean playerIsWhite = player.isWhite();
+		int playerId = player.getPlayerID();
+		
+		//the first to connect gets to choose color
+		if(numConnected == 0)
+		{
+			player1IsWhite = player.isWhite();
+			//player.setWhite(true);
+		}
+		if(numConnected == 1)
+		{
+			//player.setWhite(!player1IsWhite);
+		}
+		if(playerIdx[0] == playerId || playerIdx[1] == playerId)
+		{
+			return true;
+		}
+		if(numConnected < 0 || numConnected >= MAX_PLAYERS)
+		{
+			return false;
+		}
+		this.playerIdx[numConnected++] = playerId;
+		return true;
+	}
+
+	/**
+	 * @return the player2Idx
+	 */
+	public int getPlayer2Idx() {
+		return playerIdx[1];
 	}
 }

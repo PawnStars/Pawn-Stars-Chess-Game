@@ -9,6 +9,7 @@ import edu.up.cs301.game.R;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.MessageBox;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -61,6 +62,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	
 	private boolean[][] validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	
+	private boolean isPlayer1;
+	
+	protected boolean sentPlayerID;
 	
 	/**
 	 * constructor
@@ -146,6 +150,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		{
 			return;
 		}
+		if(!sentPlayerID)
+			sentPlayerID = newState.setPlayerInfo(this);
 		// update our state; then update the display
 		this.state = newState;
 		updateDisplay();
@@ -187,12 +193,47 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		board.setOnTouchListener(this);
 		
-		//down = false;
+		//Ask which color the player wants to be.
+		String colorQuestion =
+				activity.getResources().getString(R.string.dialog_color_question);
+		String whiteLabel =
+				activity.getResources().getString(R.string.dialog_white_label);
+		String blackLabel =
+				activity.getResources().getString(R.string.dialog_black_label);
+		String pickColorTitle =
+				activity.getResources().getString(R.string.dialog_title);
+		
+		android.content.DialogInterface.OnClickListener posListener =
+				new android.content.DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int which) {
+				setWhite(true);
+			}
+		};
+		android.content.DialogInterface.OnClickListener negListener =
+				new android.content.DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int which) {
+				setWhite(false);
+			}
+		};
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setMessage(colorQuestion);
+		builder.setTitle(pickColorTitle);
+		builder.setPositiveButton(whiteLabel, posListener);
+		builder.setNegativeButton(blackLabel, negListener);
+		AlertDialog alert = builder.create();
+		alert.show();
 		
 		// if we have a game state, "simulate" that we have just received
 		// the state from the game so that the GUI values are updated
-		if (state != null) {
+		if (state != null)
+		{
+			state.setPlayer1IsWhite(isPlayer1 == isWhite);
+			sentPlayerID = state.setPlayerInfo(this);
 			receiveInfo(state);
+			
 		}
 	}
 	/**
@@ -295,6 +336,24 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		}
 		return true;
 	}
+
+	public boolean isPlayer1() {
+		return isPlayer1;
+	}
+
+	public void setWhite(boolean isWhite) {
+		this.isWhite = isWhite;
+	}
+
+	public void setPlayer1(boolean isPlayer1) {
+		this.isPlayer1 = isPlayer1;
+	}
+
+	public int getPlayerID() {
+		return playerNum;
+	}
+	
+	
 
 }// class CounterHumanPlayer
 

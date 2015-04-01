@@ -68,10 +68,10 @@ public class ChessMainActivity extends GameMainActivity {
 				return new ChessComputerPlayer1(name,1);
 			}});
 
-		// Create a game configuration class for Counter:
+		// Create a game configuration class for Chess:
 		// - player types as given above
 		// - from 1 to 2 players
-		// - name of game is "Counter Game"
+		// - name of game is "Chess"
 		// - port number as defined above
 		GameConfig defaultConfig = new GameConfig(playerTypes, 2, 2, "Chess",
 				PORT_NUMBER);
@@ -81,6 +81,7 @@ public class ChessMainActivity extends GameMainActivity {
 		defaultConfig.addPlayer("Computer", 1); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 2); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 3); // player 2: a computer player
+		defaultConfig.addPlayer("Computer", 4); // player 2: a computer player
 		
 		// Set the default remote-player setup:
 		// - player name: "Remote Player"

@@ -20,9 +20,13 @@ import edu.up.cs301.game.util.Tickable;
  */
 public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPlayer, Tickable {
 	
-    private int smart;
+    protected int smart;
     protected ChessGameState gameState;
-    private boolean isWhite = false;//ask for this somehow
+    protected boolean isWhite;
+    
+    protected boolean isPlayer1;
+    
+    protected boolean sentPlayerID;
 	/**
      * Constructor for objects of class CounterComputerPlayer1
      * 
@@ -34,6 +38,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         super(name);
         smart = intelligence;
         
+        //pick white or black randomly
+        isWhite = Math.random() > 0.5;
     }
     
     /**
@@ -57,6 +63,10 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			if(newState == null || newState.equals(gameState))
 			{
 				return;
+			}
+			if(!sentPlayerID)
+			{
+				sentPlayerID = newState.setPlayerInfo(this);
 			}
 			
 			gameState = newState;
@@ -103,7 +113,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	}
 
 	/**
-	 * Returns the color of this player as a boolean
+	 * Returns the color of this player as a boolean.
+	 * 
 	 * @return true if this color is white,
 	 * 		   false if not.
 	 */
@@ -111,8 +122,38 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		return isWhite;
 	}
 	
+	/**
+	 * Sets the color as white if the parameter is true.
+	 * 
+	 * @param boolean true if white, false if black
+	 */
 	public void setWhite(boolean color)
 	{
 		isWhite = color;
 	}
+
+	/**
+	 * Returns true if this player is player 1 in the game state.
+	 * 
+	 * @return boolean true if this player is player 1
+	 */
+	public boolean isPlayer1() {
+		return isPlayer1;
+	}
+
+	/**
+	 * Sets the player as player 1 in the game state if
+	 * the parameter is true.
+	 * 
+	 * @param boolean true if this is player 1
+	 */
+	public void setPlayer1(boolean isPlayer1) {
+		this.isPlayer1 = isPlayer1;
+	}
+
+	public int getPlayerID() {
+		return playerNum;
+	}
+	
+	
 }
