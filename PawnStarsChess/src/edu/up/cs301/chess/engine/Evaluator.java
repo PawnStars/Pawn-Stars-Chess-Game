@@ -307,7 +307,7 @@ public class Evaluator {
 	}
 
 	/**
-	 * Add the reach of the bishops into the calculation
+	 * Add special consideration for bishops
 	 * @param state
 	 * @param score
 	 * @return score

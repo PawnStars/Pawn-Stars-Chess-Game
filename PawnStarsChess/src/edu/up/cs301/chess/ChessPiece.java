@@ -379,23 +379,23 @@ public class ChessPiece {
 		{
 			typeStr = "p";
 		}
-		else if(type == QUEEN)
+		if(type == QUEEN)
 		{
 			typeStr = "q";
 		}
-		else if(type == KING)
+		if(type == KING)
 		{
 			typeStr = "k";
 		}
-		else if(type == ROOK)
+		if(type == ROOK)
 		{
 			typeStr = "r";
 		}
-		else if(type == BISHOP)
+		if(type == BISHOP)
 		{
 			typeStr = "b";
 		}
-		else if(type == KNIGHT)
+		if(type == KNIGHT)
 		{
 			typeStr = "k";
 		}

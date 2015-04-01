@@ -131,9 +131,16 @@ public class ChessGameState extends GameState {
 		}
 
 		// Give each player the remaining pieces of the appropriate color:
-		int[] pieces = { ChessPiece.ROOK, ChessPiece.KNIGHT, ChessPiece.BISHOP,
-				ChessPiece.KING, ChessPiece.QUEEN, ChessPiece.BISHOP,
-				ChessPiece.KNIGHT, ChessPiece.ROOK };
+		int[] pieces = new int[]{
+				ChessPiece.ROOK,
+				ChessPiece.KNIGHT,
+				ChessPiece.BISHOP,
+				ChessPiece.KING,
+				ChessPiece.QUEEN,
+				ChessPiece.BISHOP,
+				ChessPiece.KNIGHT,
+				ChessPiece.ROOK
+		};
 		for (int i = 0; i < BOARD_WIDTH; i++) {
 			int[] loc1 = {BOARD_HEIGHT-1,i};
 			int[] loc2 = {0,i};
@@ -152,8 +159,8 @@ public class ChessGameState extends GameState {
 			player2Pieces[i+BOARD_WIDTH] = new ChessPiece(pieces[i],!player1IsWhite);
 			player2Pieces[i+BOARD_WIDTH].setLocation(loc2);
 			
-			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i];
-			pieceMap[loc2[0]][loc2[1]] = player2Pieces[i];
+			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i+BOARD_WIDTH];
+			pieceMap[loc2[0]][loc2[1]] = player2Pieces[i+BOARD_WIDTH];
 		}
 		
 		//Sets all elements in canCastle to true
@@ -342,7 +349,14 @@ public class ChessGameState extends GameState {
 		{
 			for(int j=0;j<BOARD_WIDTH;j++)
 			{
-				rtnVal+="["+pieceMap[i][j].toString()+"]";
+				if(pieceMap[i][j] != null)
+				{
+					rtnVal+=pieceMap[i][j].toString();
+				}
+				else
+				{
+					rtnVal+="[ ]";
+				}
 			}
 			rtnVal+="\n";
 		}

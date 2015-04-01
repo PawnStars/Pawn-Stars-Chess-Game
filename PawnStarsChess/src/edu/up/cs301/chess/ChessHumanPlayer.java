@@ -100,10 +100,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 		// Construct the action and send it to the game
 		GameAction action = null;
-		if (button.getId() == R.id.gameBoardSurfaceView) {
-			//TODO Implement moves
-		}
-		else if (button.getId() == R.id.resignButton) {
+		if (button.getId() == R.id.resignButton) {
 			//TODO Implement quit
 		}
 		else if (button.getId() == R.id.drawButton) {
@@ -170,8 +167,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// Find the board
 		board = (ChessBoard)activity.findViewById(R.id.gameBoardSurfaceView);
 		
-		board.setOnClickListener(this);
+		board.setOnTouchListener(this);
 		
+		board.setPieceMap(state.getPieceMap());
 		down = false;
 		
 		// if we have a game state, "simulate" that we have just received
