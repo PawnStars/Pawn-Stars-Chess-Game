@@ -43,15 +43,15 @@ public class ChessBoard extends SurfaceView
 	//TODO implement the instance variables below
 	
 	// the highlighted tiles on the screen
-	private boolean[][] selectedTiles;
+	private boolean[][] selectedTiles = new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
 	
-	private int[] selectedLoc;
+	private int[] selectedLoc = new int[2];
 
 	// true if the board is flipped upside down
 	// false if not
 	private boolean flipped = false;
 	
-	private float[] tileSize;
+	private float[] tileSize = new float[2];
 	
 	/**
 	 * constructor
@@ -251,14 +251,6 @@ public class ChessBoard extends SurfaceView
 		blackPieceColor.setColor(Color.BLACK);//black
 		highlightColor.setColor(0xAA32CD32);//faded green
 		selectColor.setColor(0xFF00FF00);//blue
-		
-		// highlighted tiles
-		selectedTiles = new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
-		
-		// the board is upside down if true
-		flipped = false;
-		
-		tileSize = new float[2];
 	}
 	
 	/**

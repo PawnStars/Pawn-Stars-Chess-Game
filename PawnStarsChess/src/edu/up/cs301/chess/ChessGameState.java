@@ -109,8 +109,8 @@ public class ChessGameState extends GameState {
 		
 		// Give each player a pawn of the appropriate color:
 		for (int i = 0; i < BOARD_WIDTH; ++i) {
-			int[] loc1 = {BOARD_HEIGHT-2,i};
-			int[] loc2 = {1,i};
+			int[] loc1 = new int[]{BOARD_HEIGHT-2,i};
+			int[] loc2 = new int[]{1,i};
 			
 			//swap locations
 			if(!player1IsWhite)
@@ -119,15 +119,22 @@ public class ChessGameState extends GameState {
 				loc1 = loc2;
 				loc2 = temp;
 			}
-			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite,loc1);
-			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite,loc2);
+			//add the pieces to the player's list
+			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite);
+			player1Pieces[i].setLocation(loc1);
+			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite);
+			player2Pieces[i].setLocation(loc2);
+			
+			//add to the piece map
+			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i];
+			pieceMap[loc2[0]][loc2[1]] = player2Pieces[i];
 		}
 
 		// Give each player the remaining pieces of the appropriate color:
 		int[] pieces = { ChessPiece.ROOK, ChessPiece.KNIGHT, ChessPiece.BISHOP,
 				ChessPiece.KING, ChessPiece.QUEEN, ChessPiece.BISHOP,
 				ChessPiece.KNIGHT, ChessPiece.ROOK };
-		for (int i = BOARD_WIDTH; i < NUM_PIECES; ++i) {
+		for (int i = 0; i < BOARD_WIDTH; i++) {
 			int[] loc1 = {BOARD_HEIGHT-1,i};
 			int[] loc2 = {0,i};
 			
@@ -138,24 +145,15 @@ public class ChessGameState extends GameState {
 				loc1 = loc2;
 				loc2 = temp;
 			}
-			player1Pieces[i] = new ChessPiece(pieces[i - BOARD_WIDTH],
-					player1IsWhite,loc1);
-			player2Pieces[i] = new ChessPiece(pieces[i - BOARD_WIDTH],
-					!player1IsWhite,loc2);
-		}
-		
-		//Put player 2's pieces on the board (in the piecemap):
-		for(ChessPiece p: player2Pieces)
-		{
-			int[] loc = p.getLocation();
-			pieceMap[loc[0]][loc[1]] = p;
-		}
-		
-		//Put player 1's pieces on the board (in the piecemap):
-		for(ChessPiece p: player1Pieces)
-		{
-			int[] loc = p.getLocation();
-			pieceMap[loc[0]][loc[1]] = p;
+			
+			player1Pieces[i+BOARD_WIDTH] = new ChessPiece(pieces[i], player1IsWhite);
+			player1Pieces[i+BOARD_WIDTH].setLocation(loc1);
+			
+			player2Pieces[i+BOARD_WIDTH] = new ChessPiece(pieces[i],!player1IsWhite);
+			player2Pieces[i+BOARD_WIDTH].setLocation(loc2);
+			
+			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i];
+			pieceMap[loc2[0]][loc2[1]] = player2Pieces[i];
 		}
 		
 		//Sets all elements in canCastle to true

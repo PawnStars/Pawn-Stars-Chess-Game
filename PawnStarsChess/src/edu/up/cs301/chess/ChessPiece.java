@@ -42,23 +42,19 @@ public class ChessPiece {
 	
 	//TODO implement location
 	//Indicates where the piece is on the board
-	private int[] location;
+	private int[] location = new int[2];
+	
 	/**
 	 * Ctor
 	 * 
 	 * @param type: Constant used to indicate which piece
 	 * @param isWhite: true if the piece is white
 	 */
-	public ChessPiece (int type, boolean isWhite, int[] location) {
-		//Make sure type is valid:
-		if (type < 6 && type >= 0) {
-			this.type = type;
-		}
-		
+	public ChessPiece (int type, boolean isWhite) {
+		this.type = type;
 		this.hasMoved = false;
 		this.isWhite = isWhite;
 		this.isAlive = true;
-		this.location = location;
 	}
 	public ChessPiece(ChessPiece piece)
 	{
@@ -142,6 +138,15 @@ public class ChessPiece {
 	public void setType(int type)
 	{
 		this.type = type;
+	}
+	
+	/**
+	 * Changes the location of this piece
+	 * @param location
+	 */
+	public void setLocation(int[] location)
+	{
+		this.location = location;
 	}
 	
 	/**

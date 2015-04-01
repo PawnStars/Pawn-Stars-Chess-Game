@@ -312,9 +312,203 @@ public class Evaluator {
 	 * @param score
 	 * @return score
 	 */
-	private static int bishopEval(ChessGameState state, int score) {
-		// TODO Auto-generated method stub
-		return 0;
+	private static int bishopEval(ChessGameState state, int oldScore) {
+		
+		int score = 0;
+		
+		//Calculate the number of bishops each player has
+		int numP1Bishops = 0;
+		int numP2Bishops = 0;
+		
+		//could have more than 2 bishops due to promotion
+		ChessPiece[] p1Bishops = new ChessPiece[ChessGameState.NUM_PIECES];
+		ChessPiece[] p2Bishops = new ChessPiece[ChessGameState.NUM_PIECES];
+		
+		boolean p1Queen = false;
+		boolean p2Queen = false;
+		
+		for(ChessPiece piece: state.getPlayer1Pieces())
+		{
+			if(piece.isAlive())
+			{
+				if(piece.getType() == ChessPiece.BISHOP)
+				{
+					p1Bishops[numP1Bishops] = piece;
+					numP1Bishops++;
+				}
+				if(piece.getType() == ChessPiece.QUEEN)
+				{
+					p1Queen = true;
+				}
+			}
+		}
+		for(ChessPiece piece: state.getPlayer2Pieces())
+		{
+			if(piece.isAlive())
+			{
+				if(piece.getType() == ChessPiece.BISHOP)
+				{
+					p2Bishops[numP2Bishops] = piece;
+					numP2Bishops++;
+				}
+				if(piece.getType() == ChessPiece.QUEEN)
+				{
+					p2Queen = true;
+				}
+			}
+		}
+		
+		//Do nothing if there are no more bishops
+		if(numP1Bishops == 0 && numP2Bishops == 0)
+		{
+			return 0;
+		}
+		
+		//bonus for both bishops being alive
+		if (numP1Bishops == 2)
+		{
+			int numPawns = state.getPlayer1PawnMaterial()/pawnVal;
+            score += 28 + (8 - numPawns) * 3;
+        }
+		if (numP2Bishops == 2)
+		{
+			int numPawns = state.getPlayer2PawnMaterial()/pawnVal;
+            score -= 28 + (8 - numPawns) * 3;
+        }
+		
+		//Penalty for being equal. We want to win, not draw.
+		if(numP1Bishops == 1 && numP2Bishops == 1 )
+		{
+			int[] locP1Bishop = p1Bishops[0].getLocation();
+			int[] locP2Bishop = p2Bishops[0].getLocation();
+			
+			boolean p1BishopLightSq = (locP1Bishop[0]%2 == locP1Bishop[1]%2);
+			boolean p2BishopLightSq = (locP2Bishop[0]%2 == locP2Bishop[1]%2);
+			if(p1BishopLightSq == p2BishopLightSq)
+			{
+				int p1ValMat = state.getPlayer1Material() - state.getPlayer1PawnMaterial();
+				int p2ValMat = state.getPlayer2Material() - state.getPlayer2PawnMaterial();
+				if(p1ValMat == p2ValMat)
+				{
+					int penalty = (oldScore + score) / 2;
+		            int loMtrl = 2 * bishopVal;
+		            int hiMtrl = 2 * (queenVal + rookVal + bishopVal);
+		            int totalMat = p1ValMat+p2ValMat;
+		            score -= interpolate(totalMat, loMtrl, penalty, hiMtrl, 0);
+				}
+			}
+		}
+		
+		//special cases of having a trapped bishop
+		ChessPiece[][] board = state.getPieceMap();
+		
+		//bishop at a7
+		boolean bishopColor = board[1][0].isWhite();
+		if(board[1][0] != null && board[1][0].getType() == ChessPiece.BISHOP)
+		{
+			//black pawn at b6
+			if(board[2][1].getType() == ChessPiece.PAWN && board[2][1].isWhite() != bishopColor)
+			{
+				//black pawn at c7
+				if(board[1][2].getType() == ChessPiece.PAWN && board[1][2].isWhite() != bishopColor)
+				{
+					if(bishopColor == state.getPlayer1Color())
+					{
+						score -= pawnVal * 3 / 2;
+					}
+					else
+					{
+						score += pawnVal * 3 / 2;
+					}
+				}
+			}
+		}
+		
+		//bishop at h7
+		bishopColor = board[1][7].isWhite();
+		if(board[1][7] != null && board[1][7].getType() == ChessPiece.BISHOP)
+		{
+			//enemy pawn at g6
+			if(board[2][6] != null && board[2][1].getType() == ChessPiece.PAWN &&
+					board[2][1].isWhite() != bishopColor)
+			{
+				//enemy pawn at f7
+				if(board[1][5] != null && board[1][2].getType() == ChessPiece.PAWN &&
+						board[1][2].isWhite() != bishopColor)
+				{
+					if(p1Queen && bishopColor == state.getPlayer1Color())
+					{
+						score -= pawnVal;
+					}
+					else
+					{
+						score -= pawnVal*3/2;
+					}
+				}
+			}
+		}
+		//bishop at a2
+		bishopColor = board[6][0].isWhite();
+		if(board[6][0] != null && board[6][0].getType() == ChessPiece.BISHOP)
+		{
+			//black pawn at b3
+			if(board[5][1].getType() == ChessPiece.PAWN && board[5][1].isWhite() != bishopColor)
+			{
+				//black pawn at c2
+				if(board[6][2].getType() == ChessPiece.PAWN && board[6][2].isWhite() != bishopColor)
+				{
+					if(bishopColor == state.getPlayer1Color())
+					{
+						score -= pawnVal * 3 / 2;
+					}
+					else
+					{
+						score += pawnVal * 3 / 2;
+					}
+				}
+			}
+		}
+		
+		//bishop at h2
+		bishopColor = board[6][7].isWhite();
+		if(board[6][7] != null && board[6][7].getType() == ChessPiece.BISHOP)
+		{
+			//enemy pawn at g3
+			if(board[5][6] != null && board[2][1].getType() == ChessPiece.PAWN &&
+					board[5][6].isWhite() != bishopColor)
+			{
+				//enemy pawn at f2
+				if(board[6][5] != null && board[1][2].getType() == ChessPiece.PAWN &&
+						board[6][5].isWhite() != bishopColor)
+				{
+					//player 1's bishop
+					if(bishopColor == state.getPlayer1Color())
+					{
+						if(p1Queen)
+						{
+							score -= pawnVal;
+						}
+						else
+						{
+							score -= pawnVal*3/2;
+						}
+					}
+					else
+					{
+						if(p2Queen)
+						{
+							score += pawnVal;
+						}
+						else
+						{
+							score += pawnVal*3/2;
+						}
+					}
+				}
+			}
+		}
+		
+		return score;
 	}
 
 	/**
