@@ -609,34 +609,66 @@ public class ChessGameState extends GameState {
 		return moveList;
 	}
 	
+	/**
+	 * Get the total worth of player 1's pieces
+	 * @return player1Material
+	 */
 	public int getPlayer1Material() {
 		return player1Material;
 	}
 
+	/**
+	 * Sets the total worth of player 1's pieces
+	 * @param player1Material
+	 */
 	public void setPlayer1Material(int player1Material) {
 		this.player1Material = player1Material;
 	}
 
+	/**
+	 * Get the total worth of player 2's pieces
+	 * @return player1Material
+	 */
 	public int getPlayer2Material() {
 		return player2Material;
 	}
 
+	/**
+	 * Sets the total worth of player 2's pieces
+	 * @param player2Material
+	 */
 	public void setPlayer2Material(int player2Material) {
 		this.player2Material = player2Material;
 	}
 	
+	/**
+	 * Get the total worth of player 1's pawns
+	 * @return player1PawnMaterial
+	 */
 	public int getPlayer1PawnMaterial() {
 		return player1PawnMaterial;
 	}
 
+	/**
+	 * Sets the total worth of player 1's pawns
+	 * @param player1PawnMaterial
+	 */
 	public void setPlayer1PawnMaterial(int player1PawnMaterial) {
 		this.player1PawnMaterial = player1PawnMaterial;
 	}
 
+	/**
+	 * Get the total worth of player 2's pawns
+	 * @return player2PawnMaterial
+	 */
 	public int getPlayer2PawnMaterial() {
 		return player2PawnMaterial;
 	}
 
+	/**
+	 * Sets the total worth of player 2's pawns
+	 * @param player2PawnMaterial
+	 */
 	public void setPlayer2PawnMaterial(int player2PawnMaterial) {
 		this.player2PawnMaterial = player2PawnMaterial;
 	}

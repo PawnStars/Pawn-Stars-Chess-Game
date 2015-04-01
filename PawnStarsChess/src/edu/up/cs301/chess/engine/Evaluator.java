@@ -1,5 +1,8 @@
 package edu.up.cs301.chess.engine;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.actions.ChessMoveAction;
@@ -304,16 +307,6 @@ public class Evaluator {
 	}
 
 	/**
-	 * See what pieces can be taken and reflect that in the score
-	 * @param state
-	 * @return score
-	 */
-	private static int threatBonus(ChessGameState state) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	/**
 	 * Add the reach of the bishops into the calculation
 	 * @param state
 	 * @param score
@@ -343,9 +336,65 @@ public class Evaluator {
 	 */
 	private static int castleBonus(ChessGameState state) {
 		// TODO Auto-generated method stub
-		return 0;
+		boolean p1Left = state.getCanCastle()[1][0];
+		boolean p1Right = state.getCanCastle()[1][1];
+		
+		boolean p2Left = state.getCanCastle()[0][0];
+		boolean p2Right = state.getCanCastle()[0][1];
+		
+		if(state.isWhoseTurn() && (p1Left||p1Right))
+		{
+			//TODO finish
+			return 0;
+		}
+		else if(!state.isWhoseTurn() && (p2Left||p2Right))
+		{
+			//TODO finish
+			return 0;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
+	/**
+	 * See what pieces can be taken and reflect that in the score
+	 * @param state
+	 * @return score
+	 */
+	private static int threatBonus(ChessGameState state) {
+		// TODO Auto-generated method stub
+		int score = 0;
+		for(ChessPiece piece:state.getPlayer1Pieces())
+		{
+			if(piece.isAlive())
+			{
+				ChessPiece[] vulnerable = attackedBy(state,piece);
+				for(ChessPiece v:vulnerable)
+				{
+					score += worth[v.getType()];
+				}
+			}
+		}
+		for(ChessPiece piece:state.getPlayer2Pieces())
+		{
+			if(piece.isAlive())
+			{
+				ChessPiece[] vulnerable = attackedBy(state,piece);
+				for(ChessPiece v:vulnerable)
+				{
+					score -= worth[v.getType()];
+				}
+			}
+		}
+		
+		int totalMat = state.getPlayer1Material()+state.getPlayer2Material();
+		
+		score -= totalMat + totalMat * totalMat / queenVal;
+        return score / 64;
+	}
+	
 	/**
 	 * Make trades favorable when you have more pieces
 	 * and only trade pawns when you have less
@@ -549,5 +598,24 @@ public class Evaluator {
         } else {
             return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
         }
+    }
+    
+    static final ChessPiece[] attackedBy(ChessGameState state,ChessPiece piece)
+    {
+    	//TODO finish
+    	ArrayList<ChessPiece> inDanger = new ArrayList<ChessPiece>();
+    	
+    	ChessMoveAction[] moves = MoveGenerator.getPieceMoves(state, piece, null, piece.isWhite(), true);
+    	for(ChessMoveAction move: moves)
+    	{
+    		ChessPiece takenPiece = move.getTakenPiece();
+    		if(takenPiece != null)
+    		{
+    			inDanger.add(takenPiece);
+    		}
+    	}
+    	
+    	ChessPiece[] rtnVal = inDanger.toArray(new ChessPiece[inDanger.size()]);
+		return rtnVal;
     }
 }
