@@ -297,6 +297,10 @@ public class ChessBoard extends SurfaceView
 		{
 			return;
 		}
+		if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
+		{
+			return;
+		}
 		else
 		{
 			this.selectedTiles = selectedTiles;
