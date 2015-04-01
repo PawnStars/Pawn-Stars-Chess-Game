@@ -45,6 +45,10 @@ public class ChessGameState extends GameState {
 	// Keep track of total worth of each piece as the game progresses:
 	private int player1Material;
 	private int player2Material;
+	
+	// Keep track of pawn worth of each piece as the game progresses:
+	private int player1PawnMaterial;
+	private int player2PawnMaterial;
 
 	/*
 	 * Keep track of whose turn it is.
@@ -253,7 +257,127 @@ public class ChessGameState extends GameState {
 		
 		return true;
 	}
+	
+	/**
+	 * Applies a move to the game state
+	 * @param move the move to be applied to this game state
+	 * @return true if successful, 
+	 * 		   false if not
+	 */
+	public boolean applyMove(ChessMoveAction move)
+	{
+		whoseTurn = !whoseTurn;
+		if(!move.isValid() && valid == true)
+		{
+			valid = false;
+		}
+		if(move.getTakenPiece() != null)
+		{
+			for(ChessPiece p:player1Pieces)
+			{
+				if(p.equals(move.getTakenPiece()))
+				{
+					//kill it and remove from board
+					p.kill();
+					int[] loc = p.getLocation();
+					pieceMap[loc[0]][loc[1]] = null;
+				}
+			}
+			for(ChessPiece p:player2Pieces)
+			{
+				if(p.equals(move.getTakenPiece()))
+				{
+					p.kill();
+					int[] loc = p.getLocation();
+					pieceMap[loc[0]][loc[1]] = null;
+				}
+			}
+		}
+		if(move.getWhichPiece() != null)
+		{
+			//Move the piece
+			int[] newLoc = move.getNewPos();
+			move.getWhichPiece().move(newLoc);
+			pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Convert the game state into a readable chess board
+	 */
+	@Override
+	public String toString()
+	{
+		String rtnVal = "";
+		
+		String turn = "";
+		if(player1IsWhite == whoseTurn)//white's turn
+		{
+			turn = "White";
+		}
+		if(player1IsWhite != whoseTurn)//black's turn
+		{
+			turn = "Black";
+		}
+		
+		String validStr = "";
+		if(valid)
+		{
+			validStr = "Valid";
+		}
+		if(!valid)
+		{
+			validStr = "Invalid";
+		}
+		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
+		
+		rtnVal += "Moves: ";
+		for(ChessMoveAction move:moveList)
+		{
+			rtnVal+=move.toString()+", ";
+		}
+		
+		rtnVal +="State\n";
+		for(int i=0;i<BOARD_HEIGHT;i++)
+		{
+			for(int j=0;j<BOARD_WIDTH;j++)
+			{
+				rtnVal+="["+pieceMap[i][j].toString()+"]";
+			}
+			rtnVal+="\n";
+		}
+		
+		return rtnVal;
+	}
 
+	/**
+	 * Checks if an array contains points that are within the board;
+	 * @param loc
+	 * @return true if the points are in bounds, false if not
+	 */
+	public static boolean outOfBounds(int[] loc)
+	{
+		if(loc == null)
+		{
+			return false;
+		}
+		if(loc.length != 2)
+		{
+			return false;
+		}
+		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT)
+		{
+			return false;
+		}
+		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH)
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	/*
 	 * The following methods are getters and setters
 	 * for all necessary variables in the class
@@ -485,126 +609,6 @@ public class ChessGameState extends GameState {
 		return moveList;
 	}
 	
-	/**
-	 * Applies a move to the game state
-	 * @param move the move to be applied to this game state
-	 * @return true if successful, 
-	 * 		   false if not
-	 */
-	public boolean applyMove(ChessMoveAction move)
-	{
-		whoseTurn = !whoseTurn;
-		if(!move.isValid() && valid == true)
-		{
-			valid = false;
-		}
-		if(move.getTakenPiece() != null)
-		{
-			for(ChessPiece p:player1Pieces)
-			{
-				if(p.equals(move.getTakenPiece()))
-				{
-					//kill it and remove from board
-					p.kill();
-					int[] loc = p.getLocation();
-					pieceMap[loc[0]][loc[1]] = null;
-				}
-			}
-			for(ChessPiece p:player2Pieces)
-			{
-				if(p.equals(move.getTakenPiece()))
-				{
-					p.kill();
-					int[] loc = p.getLocation();
-					pieceMap[loc[0]][loc[1]] = null;
-				}
-			}
-		}
-		if(move.getWhichPiece() != null)
-		{
-			//Move the piece
-			int[] newLoc = move.getNewPos();
-			move.getWhichPiece().move(newLoc);
-			pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Convert the game state into a readable chess board
-	 */
-	@Override
-	public String toString()
-	{
-		String rtnVal = "";
-		
-		String turn = "";
-		if(player1IsWhite == whoseTurn)//white's turn
-		{
-			turn = "White";
-		}
-		if(player1IsWhite != whoseTurn)//black's turn
-		{
-			turn = "Black";
-		}
-		
-		String validStr = "";
-		if(valid)
-		{
-			validStr = "Valid";
-		}
-		if(!valid)
-		{
-			validStr = "Invalid";
-		}
-		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
-		
-		rtnVal += "Moves: ";
-		for(ChessMoveAction move:moveList)
-		{
-			rtnVal+=move.toString()+", ";
-		}
-		
-		rtnVal +="State\n";
-		for(int i=0;i<BOARD_HEIGHT;i++)
-		{
-			for(int j=0;j<BOARD_WIDTH;j++)
-			{
-				rtnVal+="["+pieceMap[i][j].toString()+"]";
-			}
-			rtnVal+="\n";
-		}
-		
-		return rtnVal;
-	}
-
-	/**
-	 * Checks if an array contains points that are within the board;
-	 * @param loc
-	 * @return true if the points are in bounds, false if not
-	 */
-	public static boolean outOfBounds(int[] loc)
-	{
-		if(loc == null)
-		{
-			return false;
-		}
-		if(loc.length != 2)
-		{
-			return false;
-		}
-		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT)
-		{
-			return false;
-		}
-		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH)
-		{
-			return false;
-		}
-		return true;
-	}
-	
 	public int getPlayer1Material() {
 		return player1Material;
 	}
@@ -619,5 +623,21 @@ public class ChessGameState extends GameState {
 
 	public void setPlayer2Material(int player2Material) {
 		this.player2Material = player2Material;
+	}
+	
+	public int getPlayer1PawnMaterial() {
+		return player1PawnMaterial;
+	}
+
+	public void setPlayer1PawnMaterial(int player1PawnMaterial) {
+		this.player1PawnMaterial = player1PawnMaterial;
+	}
+
+	public int getPlayer2PawnMaterial() {
+		return player2PawnMaterial;
+	}
+
+	public void setPlayer2PawnMaterial(int player2PawnMaterial) {
+		this.player2PawnMaterial = player2PawnMaterial;
 	}
 }

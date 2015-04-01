@@ -16,7 +16,8 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  *
  */
 public class Evaluator {
-	//TODO replace with 
+	
+	// Exact piece table values/material values from Stockfish AI
 	private static final int pawnVal = 92;
 	private static final int rookVal = 593;
 	private static final int bishopVal = 385;
@@ -26,7 +27,6 @@ public class Evaluator {
 	
 	private static final int worth[] = {pawnVal,rookVal,bishopVal,knightVal,queenVal,kingVal};
 	
-	// Exact piece table values from Stockfish AI
 	/** Piece/square table for king during middle game. */
 	private static final int[][] kingMidTbP1 = 
 	{
@@ -158,10 +158,21 @@ public class Evaluator {
 	private static final int[][][] endGameTableP1 = {pawnEndTbP1,rookMidTbP1,bishopEndTbP1,knightEndTbP1,queenMidTbP1,kingEndTbP1};
 	
 	//copies of player 1's tables reversed
+	private static final int[][] kingMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] kingEndTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] pawnMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] pawnEndTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] knightMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] knightEndTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] bishopMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] bishopEndTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] queenMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][] rookMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	
 	private static final int[][][] midGameTableP2 = new int[ChessPiece.NUM_TYPES][][];
 	private static final int[][][] endGameTableP2 = new int[ChessPiece.NUM_TYPES][][];
 	
-	// make a reverse copy of this 3d array for player 2
+	// make a reverse copy of these arrays for player 2
 	static
 	{
 		for(int i=0;i<ChessPiece.NUM_TYPES;i++)
@@ -170,25 +181,84 @@ public class Evaluator {
 			{
 				for(int k=0;k<ChessGameState.BOARD_WIDTH;k++)
 				{
-					midGameTableP2[i][j][j] = 
-						midGameTableP1[i][ChessGameState.BOARD_HEIGHT-1-j][ChessGameState.BOARD_WIDTH-1-k];
+					int oppJ = ChessGameState.BOARD_HEIGHT-1-j;
+					int oppK = ChessGameState.BOARD_WIDTH-1-k;
+					midGameTableP2[i][j][j] = midGameTableP1[i][oppJ][oppK];
 					
-					endGameTableP2[i][j][j] = 
-							endGameTableP1[i][ChessGameState.BOARD_HEIGHT-1-j][ChessGameState.BOARD_WIDTH-1-k];
+					endGameTableP2[i][j][j] = endGameTableP1[i][oppJ][oppK];
+					if(i == ChessPiece.PAWN)
+					{
+						pawnMidTbP2[j][k] = pawnMidTbP1[oppJ][oppK];
+						pawnEndTbP2[j][k] = pawnEndTbP1[oppJ][oppK];
+					}
+					else if(i == ChessPiece.ROOK)
+					{
+						rookMidTbP2[j][k] = rookMidTbP1[oppJ][oppK];
+					}
+					else if(i == ChessPiece.BISHOP)
+					{
+						bishopMidTbP2[j][k] = bishopMidTbP1[oppJ][oppK];
+						bishopEndTbP2[j][k] = bishopEndTbP1[oppJ][oppK];
+					}
+					else if(i == ChessPiece.KNIGHT)
+					{
+						knightMidTbP2[j][k] = knightMidTbP1[oppJ][oppK];
+						knightEndTbP2[j][k] = knightEndTbP1[oppJ][oppK];
+					}
+					else if(i==ChessPiece.QUEEN)
+					{
+						queenMidTbP2[j][k] = queenMidTbP1[oppJ][oppK];
+					}
+					else if(i==ChessPiece.KING)
+					{
+						kingMidTbP2[j][k] = kingMidTbP1[oppJ][oppK];
+						kingEndTbP2[j][k] = kingEndTbP1[oppJ][oppK];
+					}
 				}
 			}
 		}
 	}
-	final static int midGamePawnMat = queenVal + 2*rookVal + 2*bishopVal;
-	//end game/mid game doesn't matter much for rooks
-	final static int midGameKnightMat = queenVal + 2*rookVal + bishopVal + knightVal + 6*pawnVal;
-	//end game/mid game doesn't matter much for bishops
-	//end game/mid game doesn't matter much for queens
-	final static int midGameKingMat = queenVal + 2*rookVal + 2*bishopVal;
 	
-	final static int[] midGameMaterial = {midGamePawnMat,0,midGameKnightMat,0,0,midGameKingMat};
-	//final int t1 = qV + 2 * rV + 2 * bV;//higher limit
-    //final int t2 = rV;//lower limit
+	/*
+	 * The mid game tables can be used for this piece when
+	 * the player has this much material on the board.
+	 * 
+	 * Some pieces don't have values because their
+	 * presence indicates it is not end game. They
+	 * get a special calculation.
+	 */
+	final static int midGamePawnMat = queenVal + 2*rookVal + 2*bishopVal;
+	final static int rookCalc = -1;
+	final static int midGameKnightMat = queenVal + 2*rookVal + bishopVal + knightVal + 6*pawnVal;
+	final static int bishopCalc = 0;
+	final static int queenCalc = 0;
+	final static int midGameUpperKingMat = queenVal + 2*rookVal + 2*bishopVal;
+	
+	final static int[] midGameMaterial = {
+		midGamePawnMat,
+		rookCalc,
+		midGameKnightMat,
+		bishopCalc,
+		queenCalc,
+		midGameUpperKingMat
+	};
+	
+	
+	final static int endGamePawnMat = rookVal;
+	//It is not end game if there is a rook on the board.
+	final static int endGameKnightMat = knightVal + 8*pawnVal;
+	//It is not end game if there is a bishop on the board.
+	//It is not end game if there is a queen on the board.
+	final static int endGameKingMat = rookVal;
+	
+	final static int[] endGameMaterial = {
+		endGamePawnMat,
+		rookCalc,
+		endGameKnightMat,
+		bishopCalc,
+		queenCalc,
+		endGameKingMat
+	};
 	/**
 	 * Evaluates a game state and assigns each player a score
 	 */
@@ -205,7 +275,7 @@ public class Evaluator {
         score += threatBonus(state);
         score += kingSafety(state);
         score = endGameEval(state, score);
-        //TODO implement score setting correctly
+        
         state.setPlayer1Points(score);
         state.setPlayer2Points(-score);
         
@@ -284,8 +354,42 @@ public class Evaluator {
 	 * @return score
 	 */
 	private static int tradeBonus(ChessGameState state) {
-		// TODO Auto-generated method stub
-		return 0;
+		int p1Mat = state.getPlayer1Material();
+		int p2Mat = state.getPlayer1Material();
+		
+		int p1PawnMat = state.getPlayer1PawnMaterial();
+		int p2PawnMat = state.getPlayer2PawnMaterial();
+		
+        //positive if p1 is winning
+        int deltaScore = p1Mat - p2Mat;
+        int pBonus = 0;
+        
+        int x;
+        if(deltaScore > 0)//use the winning player's pawn worth
+        {
+        	x = p1PawnMat;
+        }
+        else
+        {
+        	x = p2PawnMat;
+        }
+        //trade pawns in most cases
+        pBonus += interpolate(x, 0, -30 * deltaScore / 100, 6 * pawnVal, 0);
+        
+        if(deltaScore > 0)//use the winning player's material worth
+        {
+        	x = p2Mat;
+        }
+        else
+        {
+        	x = p1Mat;
+        }
+        
+        //trade more valuable pieces when you are winning
+        int maxSigMaterial = queenVal + 2 * rookVal + 2 * bishopVal + 2 * knightVal;
+        pBonus += interpolate(x, 0, 30 * deltaScore / 100, maxSigMaterial, 0);
+
+        return pBonus;
 	}
 
 	/**
@@ -348,26 +452,83 @@ public class Evaluator {
 				int type = p.getType();
 				int[] loc = p.getLocation();
 				
-				int score1 = midGameTableP1[type][loc[0]][loc[1]];
-				int score2 = endGameTableP1[type][loc[0]][loc[1]];
-				//TODO finish
-				//if()
-				
+				//use interpolation
+				if(endGameMaterial[type] > 0)
+				{
+					int scoreMid = midGameTableP1[type][loc[0]][loc[1]];
+					int scoreEnd = endGameTableP1[type][loc[0]][loc[1]];
+					
+					//the material of the pieces that matter
+					int p2SigMat = p2Material-p2MaterialPawns;
+					
+					int p2MatUpper = midGameMaterial[type];
+					int p2MatLower = endGameMaterial[type];
+					
+					score += interpolate(p2SigMat, p2MatLower, scoreEnd, p2MatUpper, scoreMid);
+				}
+				else if(endGameMaterial[type] == bishopCalc)
+				{
+					score += midGameTableP1[type][loc[0]][loc[1]];
+				}
+				else if(endGameMaterial[type] == queenCalc)
+				{
+					score += midGameTableP1[type][loc[0]][loc[1]];
+				}
+				else if(endGameMaterial[type] == rookCalc)
+				{
+					int numPawns = p2MaterialPawns/pawnVal;
+					int scoreMid = midGameTableP1[type][loc[0]][loc[1]];
+					
+					//value of a rook depends on the number of opponent pawns
+					score += scoreMid*Math.min(numPawns, 6)/6;
+				}
 				
 			}
 		}
+		
 		for(ChessPiece p: state.getPlayer2Pieces())
 		{
 			if(p.isAlive())
 			{
 				int type = p.getType();
 				int[] loc = p.getLocation();
-				//TODO finish this side
+				
+				//use interpolation
+				if(endGameMaterial[type] > 0)
+				{
+					int scoreMid = midGameTableP2[type][loc[0]][loc[1]];
+					int scoreEnd = endGameTableP2[type][loc[0]][loc[1]];
+					
+					//the material of the pieces that matter
+					int p1SigMat = p1Material-p1MaterialPawns;
+					
+					int p1MatUpper = midGameMaterial[type];
+					int p1MatLower = endGameMaterial[type];
+					
+					score -= interpolate(p1SigMat, p1MatLower, scoreEnd, p1MatUpper, scoreMid);
+				}
+				else if(endGameMaterial[type] == bishopCalc)
+				{
+					score -= midGameTableP2[type][loc[0]][loc[1]];
+				}
+				else if(endGameMaterial[type] == queenCalc)
+				{
+					score -= midGameTableP2[type][loc[0]][loc[1]];
+					/*
+					 * TODO implement an increase to the score depending on how many
+					 * pieces the queen can capture
+					 */
+				}
+				else if(endGameMaterial[type] == rookCalc)
+				{
+					int numPawns = p1MaterialPawns/pawnVal;
+					int scoreMid = midGameTableP1[type][loc[0]][loc[1]];
+					
+					//value of a rook depends on the number of opponent pawns
+					score -= scoreMid*Math.min(numPawns, 6)/6;
+				}
 			}
 		}
-		
-		score = score + p1Material - p2Material;
-		
 		
 		return score;
 	}
