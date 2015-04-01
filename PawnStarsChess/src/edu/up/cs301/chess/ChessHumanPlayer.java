@@ -1,12 +1,16 @@
 package edu.up.cs301.chess;
 
 import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.actions.DrawAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
+import edu.up.cs301.game.util.MessageBox;
+import android.content.DialogInterface;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -100,10 +104,17 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// Construct the action and send it to the game
 		GameAction action = null;
 		if (button.getId() == R.id.resignButton) {
-			//TODO Implement quit
+			//make the activity think it received a back button
+			KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_BACK);
+			activity.onKeyDown(KeyEvent.KEYCODE_BACK,event);
 		}
 		else if (button.getId() == R.id.drawButton) {
-			//TODO Implement draw
+			DrawAction act = new DrawAction(this,isWhite());
+			ChessGameState newState = new ChessGameState(state);
+			newState.applyMove(act);
+			
+			sendInfo(newState);
+			state = newState;
 		}
 		else if (button.getId() == R.id.flipBoardButton) {
 			
@@ -205,6 +216,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			
 			if(v == board)
 			{
+				//TODO sound feedback/vibration
 				//get the tile the event corresponds to
 				float[] tileSize = board.getTileSize();
 				int tileX = (int) (event.getX()/tileSize[0]);
@@ -262,10 +274,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					//is a valid location to move the piece to
 					if(validLocs[tileY][tileX] == true)
 					{
-						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
+						ChessGameState newState = new ChessGameState(state);
+						ChessPiece takenPiece = newState.getPieceMap()[tileY][tileX];
 						
 						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
-						state.applyMove(act);
+						newState.applyMove(act);
+						
+						sendInfo(newState);
 					}
 					lastPieceSelected = null;
 					

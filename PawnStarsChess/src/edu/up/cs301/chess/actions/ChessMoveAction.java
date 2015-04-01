@@ -38,6 +38,8 @@ public class ChessMoveAction extends GameAction {
 	//Whether or not the move is valid
 	private boolean valid;
 	
+	//TODO could make it possible to undo a turn with this info and the last position
+	
 	/**
 	 * Constructor for the ChessMoveAction class.
 	 * 

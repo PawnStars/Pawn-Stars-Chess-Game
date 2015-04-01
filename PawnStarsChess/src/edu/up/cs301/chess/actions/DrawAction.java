@@ -28,21 +28,17 @@ public class DrawAction extends GameAction {
 	//the player who asks for a draw
 	private ChessPlayer player1;
 	
-	//the player who gets a message about it
-	private ChessPlayer player2;
-	
 	//the message player2 will receive
 	private String msg;
 	
 	/**
 	 * Default constructor. It sets the player instance variable
 	 */
-	public DrawAction(GamePlayer player1, GamePlayer player2) {
+	public DrawAction(GamePlayer player1, boolean player1IsWhite) {
 		super(player1);
 		if(player1 instanceof ChessPlayer)
 		{
 			this.player1 = (ChessPlayer)player1;
-			this.player2 = (ChessPlayer)player2;
 			//TODO get the name of who lost somehow
 		}
 	}
@@ -71,13 +67,6 @@ public class DrawAction extends GameAction {
 		return player1;
 	}
 
-	/**
-	 * Get the player who will receive the draw request
-	 * @return Player receiving a draw request
-	 */
-	public ChessPlayer getPlayer2() {
-		return player2;
-	}
 
 	
 }
