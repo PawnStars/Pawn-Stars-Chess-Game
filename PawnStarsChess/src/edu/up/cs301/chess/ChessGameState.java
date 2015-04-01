@@ -812,7 +812,7 @@ public class ChessGameState extends GameState {
 		}
 		if(numConnected == 1)
 		{
-			//player.setWhite(!player1IsWhite);
+			player.setWhite(!player1IsWhite);
 		}
 		if(playerIdx[0] == playerId || playerIdx[1] == playerId)
 		{
