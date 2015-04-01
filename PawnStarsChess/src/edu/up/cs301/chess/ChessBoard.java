@@ -295,8 +295,8 @@ public class ChessBoard extends SurfaceView
 	 * 		  j the index of the columns across the chess board
 	 */
 	public void setSelectedLoc(int i,int j) {
-		this.selectedLoc[0] = i;
-		this.selectedLoc[1] = j;
+		this.selectedLoc[1] = i;
+		this.selectedLoc[0] = j;
 		invalidate();
 	}
 
