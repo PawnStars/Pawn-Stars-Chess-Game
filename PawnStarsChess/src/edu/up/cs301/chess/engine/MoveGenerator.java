@@ -8,6 +8,7 @@ import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.actions.PawnMove;
 
 /**
  * This generates a list of moves that the AI will use to make a move.
@@ -28,9 +29,13 @@ public class MoveGenerator {
 	 * @param player the current player
 	 * @return an array of moves
 	 */
-	public static final ChessMoveAction[] getPossibleMoves(ChessGameState state,
+	public static ChessMoveAction[] getPossibleMoves(ChessGameState state,
 			ChessPlayer player)
 	{
+		if(state == null || player == null)
+		{
+			return null;
+		}
 		ArrayList<ChessMoveAction[]> moveList2d = new ArrayList<ChessMoveAction[]>();
 		//player 1
 		if(state.isPlayer1IsWhite() == true && player.isWhite() == true)
@@ -59,7 +64,6 @@ public class MoveGenerator {
 				{
 					if(pieces[i].isAlive())
 					{
-						//TODO add the arrays together
 						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
 						moveList2d.add(newActions);
 					}
@@ -88,27 +92,27 @@ public class MoveGenerator {
 		return removeIllegalMoves(state, moveList, player);
 	}
 	
-	public static final ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
+	public static ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final ChessMoveAction[] getCapturesAndChecks(ChessGameState state, ChessPlayer player)
+	public static ChessMoveAction[] getCapturesAndChecks(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final ChessMoveAction[] getCaptures(ChessGameState state, ChessPlayer player)
+	public static ChessMoveAction[] getCaptures(ChessGameState state, ChessPlayer player)
 	{
 		return null;
 	}
 	
-	public static final boolean isInCheck(ChessGameState state, ChessPlayer player)
+	public static boolean isInCheck(ChessGameState state, ChessPlayer player)
 	{
 		return false;
 	}
 	
-	public static final boolean givesCheck(ChessGameState state, ChessPlayer player, ChessMoveAction move)
+	public static boolean givesCheck(ChessGameState state, ChessPlayer player, ChessMoveAction move)
 	{
 		return false;
 	}
@@ -119,7 +123,7 @@ public class MoveGenerator {
 	 * @param player
 	 * @return
 	 */
-	public static final boolean canTakeKing(ChessGameState state, ChessPlayer player)
+	public static boolean canTakeKing(ChessGameState state, ChessPlayer player)
 	{
 		ChessPiece[] moveablePieces;
 		boolean moveColor;
@@ -156,15 +160,23 @@ public class MoveGenerator {
 	 * @param legal
 	 * @return an array of moves
 	 */
-	public static final ChessMoveAction[] getPieceMoves(ChessGameState state,
+	public static ChessMoveAction[] getPieceMoves(ChessGameState state,
 			ChessPiece piece, ChessPlayer currPlayer, boolean color, boolean legal)
 	{
+		//check for null pointers
+		if(state == null || piece == null)
+		{
+			return null;
+		}
 		
 		int type = piece.getType();
+		int[] loc = piece.getLocation();
+		if(type == ChessPiece.INVALID || loc == null)
+		{
+			return null;
+		}
 		
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
-		
-		int[] loc = piece.getLocation();
 		
 		if(type == ChessPiece.PAWN)
 		{
@@ -191,33 +203,36 @@ public class MoveGenerator {
 				{
 					newLoc[0] -= i;
 				}
-				// Don't need to check for out of bounds because of promotion
-				ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 				
-				//can't take a piece like this
-				if(taken == null)
+				if(!ChessGameState.outOfBounds(newLoc))
 				{
-					moveList.add(new ChessMoveAction(currPlayer, piece, newLoc, taken));
+					ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+					
+					//can't take a piece vertically
+					if(taken == null)
+					{
+						moveList.add(new ChessMoveAction(currPlayer, piece, newLoc, taken));
+					}
 				}
 			}
 			int[][] attackLoc;
-			if(piece.isWhite())
+			if(piece.isWhite()==state.isPlayer1IsWhite())//player 1
 			{
 				attackLoc = new int[][]{
-						{loc[0]-1,loc[1]+1},
+						{loc[0]+1,loc[1]-1},
 						{loc[0]+1,loc[1]+1}
 				};
 			}
-			else
+			else//player 2
 			{
 				attackLoc = new int[][]{
 						{loc[0]-1,loc[1]-1},
-						{loc[0]+1,loc[1]-1}
+						{loc[0]-1,loc[1]+1}
 				};
 			}
 			
 			//add the left and right capture moves
-			for(int i=0;i<2;i++)
+			for(int i=0;i<PawnMove.NUM_PAWN_ATTACKS_NORMAL;i++)
 			{
 				if(!ChessGameState.outOfBounds(attackLoc[i]))
 				{
@@ -432,7 +447,7 @@ public class MoveGenerator {
 	 * @param moves
 	 * @return a list of legal moves
 	 */
-	public static final ChessMoveAction[] removeIllegalMoves(ChessGameState state,
+	public static ChessMoveAction[] removeIllegalMoves(ChessGameState state,
 			ChessMoveAction[] moves, ChessPlayer currPlayer)
 	{
 		
@@ -468,6 +483,4 @@ public class MoveGenerator {
 		
 		return legalMoves;
 	}
-	
-	
 }

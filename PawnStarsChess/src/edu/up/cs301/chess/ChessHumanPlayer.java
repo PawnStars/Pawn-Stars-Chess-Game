@@ -49,13 +49,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	private GameMainActivity activity;
 	
 	//TODO: implement isWhite
-	private boolean isWhite;
+	private boolean isWhite = true;//ask for this somehow
 	
 	private boolean down;
 	
 	private ChessPiece lastPieceSelected;
 	
-	private boolean[][] validLocs;
+	private boolean[][] validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	
 	
 	/**
@@ -66,7 +66,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public ChessHumanPlayer(String name) {
 		super(name);
-		validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	}
 
 	/**
@@ -125,11 +124,19 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	@Override
 	public void receiveInfo(GameInfo info) {
-		// ignore the message if it's not a CounterState message
-		if (!(info instanceof ChessGameState)) return;
+		// ignore the message if it's not a ChessGameState message
+		if (!(info instanceof ChessGameState))
+		{
+			return;
+		}
+		ChessGameState newState = (ChessGameState)info;
 		
+		if(newState.equals(state))
+		{
+			return;
+		}
 		// update our state; then update the display
-		this.state = (ChessGameState)info;
+		this.state = newState;
 		updateDisplay();
 	}
 	
@@ -169,8 +176,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		board.setOnTouchListener(this);
 		
-		board.setPieceMap(state.getPieceMap());
-		down = false;
+		//down = false;
 		
 		// if we have a game state, "simulate" that we have just received
 		// the state from the game so that the GUI values are updated
@@ -188,75 +194,84 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	}
 
 	public boolean onTouch(View v, MotionEvent event) {
-		// TODO Auto-generated method stub
-		
-		//get the tile the event corresponds to
-		float[] tileSize = board.getTileSize();
-		int tileX = (int) (event.getX()/tileSize[0]);
-		int tileY = (int) (event.getY()/tileSize[1]);
-		
-		// Make sure it is within bounds
-		if(tileX < 0 || tileX > ChessGameState.BOARD_HEIGHT*tileSize[0])
+		v.onTouchEvent(event);
+		if(event.getAction() == MotionEvent.ACTION_DOWN)
 		{
-			return false;
+			down = true;
 		}
-		if(tileY < 0 || tileX > ChessGameState.BOARD_WIDTH*tileSize[0])
+		else if(event.getAction() == MotionEvent.ACTION_UP && down)
 		{
-			return false;
-		}
-		
-		int[] selectedLoc = {tileX,tileY};
-		ChessPiece pieceSelected = state.getPieceMap()[tileX][tileY];
-		if(event.getAction() == MotionEvent.ACTION_DOWN && down == false)
-		{
-			//selected a tile with a piece on it of the same color
-			if(pieceSelected != null && pieceSelected.isWhite() == isWhite())
-			{
-				down = true;
-				
-				//pass selected tile to ChessBoard
-				board.setSelectedLoc(selectedLoc);
-				
-				//get valid locations for that piece
-				ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this,isWhite(), true);
-				
-				//add the valid moves into a bitboard
-				for(int i=0;i<validMoves.length;i++)
-				{
-					int[] newPos = validMoves[i].getNewPos();
-					validLocs[newPos[0]][newPos[1]] = true;
-				}
-				board.setSelectedTiles(validLocs);
-			}
-			//didn't select a tile with a piece on it or it is of a different color
-			else if(lastPieceSelected == null || lastPieceSelected.isWhite() != isWhite())
-			{
-				//is a valid location to move the piece to
-				if(validLocs[tileX][tileY] == true)
-				{
-					ChessPiece takenPiece = state.getPieceMap()[tileX][tileY];
-					ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
-					state.applyMove(act);
-				}
-				else//invalid location
-				{
-					down = false;
-					
-					//clear selected tiles
-					board.setSelectedLoc(null);
-					
-					// Clear valid locations
-					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-					board.setSelectedTiles(null);
-				}
-			}
-		}
-		else if(event.getAction() == MotionEvent.ACTION_UP)
-		{
-			down = false;
 			v.performClick();
+			
+			if(v == board)
+			{
+				//get the tile the event corresponds to
+				float[] tileSize = board.getTileSize();
+				int tileX = (int) (event.getX()/tileSize[0]);
+				int tileY = (int) (event.getY()/tileSize[1]);
+				int[] selectedLoc = new int[2];
+				selectedLoc[0] = tileY;
+				selectedLoc[1] = tileX;
+				
+				// Make sure it is within bounds
+				if(!ChessGameState.outOfBounds(selectedLoc))
+				{
+					return false;
+				}
+				if(state == null || state.getPieceMap() == null)
+				{
+					return false;
+				}
+				
+				down = false;
+				
+				ChessPiece pieceSelected = state.getPieceMap()[tileX][tileY];
+				
+				//selected a tile with a piece on it of the same color
+				if(pieceSelected != null && pieceSelected.isWhite() == isWhite())
+				{
+					//pass selected tile to ChessBoard
+					board.setSelectedLoc(tileY,tileX);
+					
+					//get valid locations for that piece
+					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this,isWhite(), true);
+					
+					if(validMoves != null)
+					{
+						//add the valid moves into a bitboard
+						for(int i=0;i<validMoves.length;i++)
+						{
+							int[] newPos = validMoves[i].getNewPos();
+							validLocs[newPos[0]][newPos[1]] = true;
+						}
+						board.setSelectedTiles(validLocs);
+					}
+				}
+				//didn't select a tile with a piece on it or it is of a different color
+				else if(lastPieceSelected == null || lastPieceSelected.isWhite() != isWhite())
+				{
+					//is a valid location to move the piece to
+					if(validLocs[tileY][tileX] == true)
+					{
+						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
+						
+						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
+						state.applyMove(act);
+					}
+					else//invalid location
+					{
+						//clear selected tiles
+						board.setSelectedLoc(-1,-1);
+						
+						// Clear valid locations
+						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+						board.setSelectedTiles(null);
+					}
+				}
+				lastPieceSelected = pieceSelected;
+			}
 		}
-		lastPieceSelected = pieceSelected;
+		
 		return true;
 	}
 

@@ -128,12 +128,12 @@ public class ChessBoard extends SurfaceView
 			{
 				for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 				{
-					if(selectedLoc[0] == i && selectedLoc[1] == j)
+					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j)
 					{
 						// Draw the selected tile
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], selectColor);
 					}
-					else if(selectedTiles[i][j] == true && selectedTiles != null)
+					else if(selectedTiles != null && selectedTiles[i][j] == true && selectedTiles != null)
 					{
 						// Draw the highlighted tiles
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], highlightColor);
@@ -150,11 +150,11 @@ public class ChessBoard extends SurfaceView
 			}
 			
 			// Draw the chess notation text horizontally
-			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			/*for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
 				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
 				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}
+			}*/
 			
 			// Draw each piece in its respective color
 			if(pieceMap != null)
@@ -163,16 +163,24 @@ public class ChessBoard extends SurfaceView
 				{
 					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 					{
-						if(pieceMap[i][j] != null)
+						ChessPiece piece = pieceMap[i][j];
+						if(piece != null)
 						{
-							if(pieceMap[i][j].isWhite())
+							float x = j*tileSize[0];
+							float y = (int)((i+0.80)*tileSize[1]);
+							int type = piece.getType();
+							if(type >= 0 && type < whitePieceStrs.length)
 							{
-								canvas.drawText(whitePieceStrs[pieceMap[i][j].getType()], j*tileSize[0], (int)((i+0.80)*tileSize[1]), whitePieceColor);
+								if(piece.isWhite())
+								{
+									canvas.drawText(whitePieceStrs[piece.getType()], x, y, whitePieceColor);
+								}
+								else
+								{
+									canvas.drawText(blackPieceStrs[piece.getType()], x, y, blackPieceColor);
+								}
 							}
-							else
-							{
-								canvas.drawText(blackPieceStrs[pieceMap[i][j].getType()], j*tileSize[0], (int)((i+0.80)*tileSize[1]), blackPieceColor);
-							}
+							
 						}
 					}
 				}
@@ -185,20 +193,24 @@ public class ChessBoard extends SurfaceView
 				for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 				{
 					int newJ = ChessGameState.BOARD_WIDTH-j;
-					if(selectedLoc[0] == i && selectedLoc[1] == j)
+					float left = i*tileSize[0];
+					float top = newJ*tileSize[1];
+					float right = (i+1)*tileSize[0];
+					float bottom = (newJ+1)*tileSize[1];
+					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j)
 					{
 						// Draw the selected tile
-						canvas.drawRect(i*tileSize[0], newJ*tileSize[1], (i+1)*tileSize[0], (newJ+1)*tileSize[1], selectColor);
+						canvas.drawRect(left, top, right, bottom, selectColor);
 					}
-					else if(selectedTiles[i][j] == true && selectedTiles != null)
+					else if(selectedTiles != null && selectedTiles[i][j] == true && selectedTiles != null)
 					{
 						// Draw the highlighted tiles
-						canvas.drawRect(i*tileSize[0], newJ*tileSize[1], (i+1)*tileSize[0], (newJ+1)*tileSize[1], highlightColor);
+						canvas.drawRect(left, top, right, bottom, highlightColor);
 					}
 					else if((i%2) == (j%2))
 					{
 						// Draw tiles
-						canvas.drawRect(i*tileSize[0], newJ*tileSize[1], (i+1)*tileSize[0], (newJ+1)*tileSize[1], tileColor);
+						canvas.drawRect(left, top, right, bottom, tileColor);
 					}
 				}
 				
@@ -207,11 +219,11 @@ public class ChessBoard extends SurfaceView
 			}
 			
 			// Draw the chess notation text horizontally
-			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			/*for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
 				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
 				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}
+			}*/
 			
 			// Draw each piece in its respective color
 			if(pieceMap != null)
@@ -221,15 +233,18 @@ public class ChessBoard extends SurfaceView
 					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 					{
 						int newJ = ChessGameState.BOARD_WIDTH-j;
-						if(pieceMap[i][j] != null)
+						ChessPiece piece = pieceMap[i][j];
+						if(piece != null)
 						{
-							if(pieceMap[i][j].isWhite())
+							float x = newJ*tileSize[0];
+							float y = (float) ((i+0.8)*tileSize[1]);
+							if(piece.isWhite())
 							{
-								canvas.drawText(whitePieceStrs[pieceMap[i][j].getType()], newJ*tileSize[0], (int)((i+0.80)*tileSize[1]), whitePieceColor);
+								canvas.drawText(whitePieceStrs[piece.getType()], x, y, whitePieceColor);
 							}
 							else
 							{
-								canvas.drawText(blackPieceStrs[pieceMap[i][j].getType()], newJ*tileSize[0], (int)((i+0.80)*tileSize[1]), blackPieceColor);
+								canvas.drawText(blackPieceStrs[piece.getType()], x, y, blackPieceColor);
 							}
 						}
 					}
@@ -274,10 +289,12 @@ public class ChessBoard extends SurfaceView
 
 	/** 
 	 * Sets the new location where the player touched
-	 * @param selectedLoc
+	 * @param i the index of the row down the chess board
+	 * 		  j the index of the columns across the chess board
 	 */
-	public void setSelectedLoc(int[] selectedLoc) {
-		this.selectedLoc = selectedLoc;
+	public void setSelectedLoc(int i,int j) {
+		this.selectedLoc[0] = i;
+		this.selectedLoc[1] = j;
 	}
 
 	/**

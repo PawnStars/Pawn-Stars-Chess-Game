@@ -72,7 +72,9 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 				//TODO implement what each move does
 			}
 			else {
-				//TODO implement what each move does
+				ChessGameState newState = new ChessGameState(gameState);
+				newState.applyMove(act);
+				gameState = newState;
 			}
 			return true;
 			
@@ -132,7 +134,14 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	public String checkIfGameOver() {
 		
 		//TODO check if the game's over
-		return null;
+		if(gameState.isGameOver())
+		{
+			return "Game over.";
+		}
+		else
+		{
+			return "";
+		}
 	}
 
 }// class CounterLocalGame

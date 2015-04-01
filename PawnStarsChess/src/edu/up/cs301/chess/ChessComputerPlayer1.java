@@ -4,6 +4,7 @@ import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
+import edu.up.cs301.game.Game;
 import edu.up.cs301.game.GameComputerPlayer;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.Tickable;
@@ -20,8 +21,8 @@ import edu.up.cs301.game.util.Tickable;
 public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPlayer, Tickable {
 	
     private int smart;
-    private ChessGameState gameState;
-    
+    protected ChessGameState gameState;
+    private boolean isWhite = false;//ask for this somehow
 	/**
      * Constructor for objects of class CounterComputerPlayer1
      * 
@@ -52,7 +53,18 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		}
 		else if (info instanceof ChessGameState) {
 			// if we indeed have a counter-state, update the GUI
-			gameState = (ChessGameState)info;
+			ChessGameState newState = (ChessGameState)info;
+			if(newState == null || newState.equals(gameState))
+			{
+				return;
+			}
+			
+			gameState = newState;
+			boolean success = makeMove();
+			if(!success)
+			{
+				System.out.println(name+" did not make a move.");
+			}
 		}
 	}
 	
@@ -60,21 +72,34 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * Generates a move according to the AI's intelligence
 	 * level.
 	 */
-	public void makeMove()
+	public boolean makeMove()
 	{
+		//TODO check if it can make a move
+		ChessGameState newState = new ChessGameState(gameState);
 		if(smart == 0)
 		{
 			//Random move
-			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(gameState, this);
-			int randomIndex = (int) (Math.random()*(possibleActions.length));
-			gameState.applyMove(possibleActions[randomIndex]);
+			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this);
+			if(possibleActions != null && possibleActions.length > 0)
+			{
+				int randomIndex = (int) (Math.random()*(possibleActions.length));
+				possibleActions[randomIndex].setPlayer(this);
+				newState.applyMove(possibleActions[randomIndex]);
+			}
+			else
+			{
+				return false;
+			}
+			//TODO do something if there are no possible actions
 		}
 		else if(smart > 0)
 		{
-			ChessMoveAction bestMove = Search.findMove(this, gameState, smart);
-			gameState.applyMove(bestMove);
+			ChessMoveAction bestMove = Search.findMove(this, newState, smart);
+			newState.applyMove(bestMove);
 		}
-		//TODO implement AI
+		gameState = newState;
+		sendInfo(gameState);
+		return true;
 	}
 
 	/**
@@ -83,7 +108,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * 		   false if not.
 	 */
 	public boolean isWhite() {
-		//TODO: implement color
-		return false;
+		return isWhite;
+	}
+	
+	public void setWhite(boolean color)
+	{
+		isWhite = color;
 	}
 }

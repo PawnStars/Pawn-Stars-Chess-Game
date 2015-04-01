@@ -184,14 +184,27 @@ public class ChessGameState extends GameState {
 	public ChessGameState(ChessGameState orig) {
 		
 		//Sets all variables equal to the original ChessGameState
-		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
-
-		//Creates copies of the pieces and puts them in the board
 		
+		//Creates copies of the pieces and puts them in the board
+		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
 		player1Pieces = ChessPiece.copyPieceList(pieceMap,orig.getPlayer1Pieces());
 		player2Pieces = ChessPiece.copyPieceList(pieceMap,orig.getPlayer2Pieces());
-		//TODO place the pieces in the board
 		
+		for(ChessPiece piece:player1Pieces)
+		{
+			int[] loc = piece.getLocation();
+			pieceMap[loc[0]][loc[1]] = piece;
+		}
+		
+		for(ChessPiece piece:player2Pieces)
+		{
+			int[] loc = piece.getLocation();
+			pieceMap[loc[0]][loc[1]] = piece;
+		}
+		
+		moveList = orig.getMoveList().clone();
+		
+		//Primitive values do not need to be copied
 		player1Points = orig.getPlayer1Points();
 		player2Points = orig.getPlayer2Points();
 
@@ -205,10 +218,24 @@ public class ChessGameState extends GameState {
 		canCastle = orig.getCanCastle();
 
 		player1IsWhite = orig.getPlayer1Color();
+		
+		player1InCheck = orig.isPlayer1InCheck();
+		player2InCheck = orig.isPlayer2InCheck();
+		
+		isGameOver = orig.isGameOver();
+		
+		player1Points = orig.getPlayer1Points();
+		player2Points = orig.getPlayer2Points();
+		
+		valid = orig.isValid();
+		
+		player1Material = orig.getPlayer1Material();
+		player2Material = orig.getPlayer2Material();
+		
+		player1PawnMaterial = orig.getPlayer1PawnMaterial();
+		player2PawnMaterial = orig.getPlayer2PawnMaterial();
 	}
 
-	
-	
 	/**
 	 * Checks to see if the ChessGameState passed in is 
 	 * equal to the original ChessGameState. If so, return 
@@ -271,6 +298,11 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean applyMove(ChessMoveAction move)
 	{
+		if(move == null)
+		{
+			return false;
+		}
+		
 		whoseTurn = !whoseTurn;
 		if(!move.isValid() && valid == true)
 		{
@@ -379,11 +411,11 @@ public class ChessGameState extends GameState {
 		{
 			return false;
 		}
-		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT)
+		if(loc[0] < 0 || loc[0] > ChessGameState.BOARD_HEIGHT-1)
 		{
 			return false;
 		}
-		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH)
+		if(loc[1] < 0 || loc[1] > ChessGameState.BOARD_WIDTH-1)
 		{
 			return false;
 		}
@@ -683,5 +715,13 @@ public class ChessGameState extends GameState {
 	 */
 	public void setPlayer2PawnMaterial(int player2PawnMaterial) {
 		this.player2PawnMaterial = player2PawnMaterial;
+	}
+	
+	/**
+	 * Returns true if this state can be sent to the other player
+	 * @return true if valid
+	 */
+	public boolean isValid() {
+		return valid;
 	}
 }

@@ -35,9 +35,6 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 	//The chessboard to draw on
 	private ChessBoard board;
 	
-	// the most recent game state, as given to us by the ChessLocalGame
-	private ChessGameState currentGameState = null;
-	
 	// If this player is running the GUI, the activity (null if the player is
 	// not running a GUI).
 	private Activity activityForGui = null;
@@ -56,31 +53,6 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		super(name, intelligence);
 	}
 	
-    /**
-     * callback method--game's state has changed
-     * 
-     * @param info
-     * 		the information (presumably containing the game's state)
-     */
-	@Override
-	protected void receiveInfo(GameInfo info) {
-		// perform superclass behavior
-		super.receiveInfo(info);
-		
-		Log.i("computer player", "receiving");
-		
-		// if there is no game, ignore
-		if (game == null) {
-			return;
-		}
-		else if (info instanceof ChessGameState) {
-			// if we indeed have a counter-state, update the GUI
-			currentGameState = (ChessGameState)info;
-			updateDisplay();
-		}
-	}
-	
-	
 	/** 
 	 * sets the counter value in the text view
 	 *  */
@@ -92,10 +64,10 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 			guiHandler.post(
 					new Runnable() {
 						public void run() {
-						if (currentGameState != null) {
-							board.setPieceMap(currentGameState.getPieceMap());
-							player1Score.setText(currentGameState.getPlayer1Points());
-							player2Score.setText(currentGameState.getPlayer2Points());
+						if (gameState != null) {
+							board.setPieceMap(gameState.getPieceMap());
+							player1Score.setText(gameState.getPlayer1Points());
+							player2Score.setText(gameState.getPlayer2Points());
 						}
 					}});
 		}
@@ -140,7 +112,7 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		board = (ChessBoard) activityForGui.findViewById(R.id.gameBoardSurfaceView);
 		
 		// if the state is non=null, update the display
-		if (currentGameState != null) {
+		if (gameState != null) {
 			updateDisplay();
 		}
 	}

@@ -54,10 +54,17 @@ public class Search {
 		int index = (sortedMoves.length-1)*intelligence/MAX_INTELLIGENCE;
 		//int index = sortedMoves.length-1;
 		
-		//make a copy of the move with a reference to the player
-		ChessMoveAction chosenMove = new ChessMoveAction(player, sortedMoves[index]);
-		
-		return chosenMove;
+		if(sortedMoves != null && sortedMoves.length > 0)
+		{
+			//make a copy of the move with a reference to the player
+			ChessMoveAction chosenMove = new ChessMoveAction(player, sortedMoves[index]);
+			
+			return chosenMove;
+		}
+		else
+		{
+			return null;
+		}
 	}
 	
 	/**

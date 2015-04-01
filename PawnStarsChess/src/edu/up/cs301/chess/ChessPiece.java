@@ -28,6 +28,8 @@ public class ChessPiece {
 	public static final int QUEEN = 4;
 	public static final int KING = 5;
 	
+	public static final int INVALID = -1;
+	
 	public static final int NUM_TYPES = 6;
 	
 	//Keeps track of what color piece is and if they have moved
@@ -38,7 +40,7 @@ public class ChessPiece {
 	private boolean isAlive;
 	
 	//Indicates which type of piece it is.
-	private int type = -1; 
+	private int type = INVALID; 
 	
 	//TODO implement location
 	//Indicates where the piece is on the board

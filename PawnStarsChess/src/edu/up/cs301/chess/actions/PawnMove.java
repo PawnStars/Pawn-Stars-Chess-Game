@@ -29,6 +29,8 @@ public class PawnMove extends ChessMoveAction {
 	public final int FIRST_MOVE = 2;
 	public final int NONE = 3;
 	
+	public final static int NUM_PAWN_ATTACKS_NORMAL = 2;
+	
 	// The type of this move
 	private int type;
 	
