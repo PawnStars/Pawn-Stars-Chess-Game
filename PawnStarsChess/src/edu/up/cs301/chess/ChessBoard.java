@@ -197,12 +197,14 @@ public class ChessBoard extends SurfaceView
 					float top = newJ*tileSize[1];
 					float right = (i+1)*tileSize[0];
 					float bottom = (newJ+1)*tileSize[1];
-					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j)
+					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j 
+							&& !ChessGameState.outOfBounds(selectedLoc))
 					{
 						// Draw the selected tile
 						canvas.drawRect(left, top, right, bottom, selectColor);
 					}
-					else if(selectedTiles != null && selectedTiles[i][j] == true && selectedTiles != null)
+					else if(selectedTiles != null && selectedTiles[i][j] == true 
+							&& !ChessGameState.outOfBounds(selectedLoc))
 					{
 						// Draw the highlighted tiles
 						canvas.drawRect(left, top, right, bottom, highlightColor);
@@ -295,6 +297,7 @@ public class ChessBoard extends SurfaceView
 	public void setSelectedLoc(int i,int j) {
 		this.selectedLoc[0] = i;
 		this.selectedLoc[1] = j;
+		invalidate();
 	}
 
 	/**

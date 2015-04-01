@@ -136,6 +136,8 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		//TODO check if the game's over
 		if(gameState.isGameOver())
 		{
+			//if(gameState.isPlayer1Won())
+			//TODO implement
 			return "Game over.";
 		}
 		else

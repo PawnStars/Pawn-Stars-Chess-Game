@@ -24,9 +24,11 @@ public class ChessGameState extends GameState {
 	public static final int BOARD_WIDTH = 8; // Number of spaces wide
 	public static final int BOARD_HEIGHT = 8; // Number of spaces tall
 
+	private static final int MAX_MOVES_SINCE_CAPTURE = 50;
+	
 	// to satisfy Serializable interface
 	private static final long serialVersionUID = 7737493762369851826L;
-
+	
 	/*
 	 * Represents the board. Each piece is represented by its own character.
 	 * A null character means no piece is there. Player 1 is given the
@@ -61,8 +63,11 @@ public class ChessGameState extends GameState {
 	private boolean player1InCheck;
 	private boolean player2InCheck;
 
-	// Keep track of when the game is over
+	// Keep track of when the game is over and who won
 	private boolean isGameOver;
+
+	private boolean player1Won;
+	private boolean player2Won;
 
 	// Keep track of which players can castle left or castle right
 	private boolean[][] canCastle;
@@ -104,6 +109,7 @@ public class ChessGameState extends GameState {
 		isGameOver = false;
 		player1Points = 0;
 		player2Points = 0;
+		lastCapture = 0;
 		valid = true;
 		moveList = new ArrayDeque<ChessMoveAction>();
 		
@@ -309,6 +315,15 @@ public class ChessGameState extends GameState {
 			return false;
 		}
 		
+		//statemate
+		if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
+		{
+			isGameOver = true;
+			player1Won = false;
+			player2Won = false;
+			return false;
+		}
+		
 		whoseTurn = !whoseTurn;
 		if(!move.isValid() && valid == true)
 		{
@@ -316,6 +331,7 @@ public class ChessGameState extends GameState {
 		}
 		if(move.getTakenPiece() != null)
 		{
+			lastCapture = 0;
 			for(ChessPiece p:player1Pieces)
 			{
 				if(p.equals(move.getTakenPiece()))
@@ -342,8 +358,11 @@ public class ChessGameState extends GameState {
 			int[] newLoc = move.getNewPos();
 			move.getWhichPiece().move(newLoc);
 			pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
+			lastCapture++;
 			return true;
 		}
+		
+		
 		return false;
 	}
 	
@@ -729,5 +748,21 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean isValid() {
 		return valid;
+	}
+	
+	public boolean isPlayer1Won() {
+		return player1Won;
+	}
+
+	public void setPlayer1Won(boolean player1Won) {
+		this.player1Won = player1Won;
+	}
+
+	public boolean isPlayer2Won() {
+		return player2Won;
+	}
+
+	public void setPlayer2Won(boolean player2Won) {
+		this.player2Won = player2Won;
 	}
 }
