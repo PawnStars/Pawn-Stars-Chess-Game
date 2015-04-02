@@ -303,7 +303,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						for(int i=0;i<validMoves.length;i++)
 						{
 							int[] newPos = validMoves[i].getNewPos();
-							validLocs[newPos[0]][newPos[1]] = true;
+							validLocs[newPos[0]][newPos[0]] = true;//TODO this could be wrong
 						}
 						board.setSelectedTiles(validLocs);
 					}
