@@ -2,8 +2,6 @@ package edu.up.cs301.chess;
 
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
-import edu.up.cs301.chess.engine.MoveGenerator;
-import edu.up.cs301.chess.engine.Search;
 import edu.up.cs301.game.Game;
 import edu.up.cs301.game.GameComputerPlayer;
 import edu.up.cs301.game.infoMsg.GameInfo;
@@ -84,6 +82,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public boolean makeMove()
 	{
+		/*
 		//TODO check if it can make a move
 		ChessGameState newState = new ChessGameState(gameState);
 		if(smart == 0)
@@ -108,7 +107,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			newState.applyMove(bestMove);
 		}
 		gameState = newState;
-		sendInfo(gameState);
+		sendInfo(gameState);*/
 		return true;
 	}
 

@@ -133,7 +133,7 @@ public class ChessBoard extends SurfaceView
 						// Draw the selected tile
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], selectColor);
 					}
-					else if(selectedTiles != null && selectedTiles[i][j] == true && selectedTiles != null)
+					else if(selectedTiles != null && selectedTiles[i][j] == true)
 					{
 						// Draw the highlighted tiles
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], highlightColor);

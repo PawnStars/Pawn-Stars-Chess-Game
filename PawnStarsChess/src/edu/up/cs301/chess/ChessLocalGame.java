@@ -79,9 +79,9 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 				//TODO implement what each move does
 			}
 			else {
-				ChessGameState newState = new ChessGameState(gameState);
-				newState.applyMove(act);
-				gameState = newState;
+				//ChessGameState newState = new ChessGameState(gameState);
+				//newState.applyMove(act);
+				//gameState = newState;
 			}
 			return true;
 			

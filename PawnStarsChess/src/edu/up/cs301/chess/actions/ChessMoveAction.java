@@ -73,6 +73,39 @@ public class ChessMoveAction extends GameAction {
 	}
 	
 	/**
+	 * Constructor for the ChessMoveAction class.
+	 * 
+	 * @param player
+	 *            the player making the move
+	 * @param whichPiece
+	 * 			the piece the player moved
+	 * @param newPos
+	 * 			position the player is trying to move the piece to
+	 */
+	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos) {
+		super(player);
+		valid = false;
+		if(player instanceof ChessPlayer)
+		{
+			if(takenPiece == null)
+			{
+				valid = true;
+			}
+			else
+			{
+				whichColor = ((ChessPlayer)player).isWhite();
+				if(whichColor != takenPiece.isWhite())
+				{
+					valid = true;
+				}
+			}
+		}
+		
+		this.whichPiece = whichPiece;
+		this.newPos = newPos;
+	}
+	
+	/**
 	 * Copy constructor for adding a player to an invalid ChessMoveAction
 	 * @param player
 	 * @param action
