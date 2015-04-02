@@ -295,7 +295,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					board.setSelectedLoc(tileY,tileX);
 					
 					//get valid locations for that piece
-					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, lastPieceSelected, this,isWhite(), true);
+					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, pieceSelected, this,isWhite(), true);
 					
 					if(validMoves != null && validMoves.length > 0)
 					{
@@ -303,10 +303,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						for(int i=0;i<validMoves.length;i++)
 						{
 							int[] newPos = validMoves[i].getNewPos();
-							validLocs[newPos[0]][newPos[1]] = true;
+							validLocs[newPos[0]][newPos[0]] = true;//TODO this could be wrong
 						}
 						board.setSelectedTiles(validLocs);
 					}
+					lastPieceSelected = pieceSelected;
 				}
 				
 				//didn't select a tile with a piece on it or it is of a different color

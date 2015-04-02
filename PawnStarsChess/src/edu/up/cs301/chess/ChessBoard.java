@@ -275,6 +275,14 @@ public class ChessBoard extends SurfaceView
 	 * @param 2d array of every piece on the board
 	 */
 	public void setPieceMap(ChessPiece[][] pieceMap) {
+		if(pieceMap == null)
+		{
+			return;
+		}
+		if(pieceMap.length != ChessGameState.BOARD_HEIGHT || pieceMap[0].length != ChessGameState.BOARD_WIDTH)
+		{
+			return;
+		}
 		this.pieceMap = pieceMap;
 		invalidate();
 	}
@@ -285,8 +293,19 @@ public class ChessBoard extends SurfaceView
 	 * @param 2d array of every piece on the board
 	 */
 	public void setSelectedTiles(boolean[][] selectedTiles) {
-		this.selectedTiles = selectedTiles;
-		invalidate();
+		if(selectedTiles == null)
+		{
+			return;
+		}
+		if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
+		{
+			return;
+		}
+		else
+		{
+			this.selectedTiles = selectedTiles;
+			invalidate();
+		}
 	}
 
 	/** 
@@ -295,9 +314,14 @@ public class ChessBoard extends SurfaceView
 	 * 		  j the index of the columns across the chess board
 	 */
 	public void setSelectedLoc(int i,int j) {
-		this.selectedLoc[1] = i;
-		this.selectedLoc[0] = j;
-		invalidate();
+		int[] newSelectedLoc = new int[2];
+		newSelectedLoc[1] = i;
+		newSelectedLoc[0] = j;
+		if(!ChessGameState.outOfBounds(newSelectedLoc))
+		{
+			selectedLoc = newSelectedLoc;
+			invalidate();
+		}
 	}
 
 	/**

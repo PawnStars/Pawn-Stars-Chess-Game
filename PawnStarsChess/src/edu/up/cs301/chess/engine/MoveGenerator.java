@@ -201,11 +201,11 @@ public class MoveGenerator {
 				
 				if(piece.isWhite())
 				{
-					newLoc[0] += i;
+					newLoc[0] -= i;
 				}
 				else
 				{
-					newLoc[0] -= i;
+					newLoc[0] += i;
 				}
 				
 				if(!ChessGameState.outOfBounds(newLoc))
@@ -223,15 +223,15 @@ public class MoveGenerator {
 			if(piece.isWhite()==state.isPlayer1IsWhite())//player 1
 			{
 				attackLoc = new int[][]{
-						{loc[0]+1,loc[1]-1},
-						{loc[0]+1,loc[1]+1}
+						{loc[0]-1,loc[1]-1},
+						{loc[0]-1,loc[1]+1}
 				};
 			}
 			else//player 2
 			{
 				attackLoc = new int[][]{
-						{loc[0]-1,loc[1]-1},
-						{loc[0]-1,loc[1]+1}
+						{loc[0]+1,loc[1]-1},
+						{loc[0]+1,loc[1]+1}
 				};
 			}
 			
