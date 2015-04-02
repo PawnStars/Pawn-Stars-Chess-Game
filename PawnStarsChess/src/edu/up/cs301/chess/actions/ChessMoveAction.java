@@ -74,7 +74,7 @@ public class ChessMoveAction extends GameAction {
 			valid = false;
 			return;
 		}
-		this.newPos = newPos;
+		this.newPos = newPos.clone();
 		
 	}
 	

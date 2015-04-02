@@ -164,7 +164,7 @@ public class ChessBoard extends SurfaceView
 					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 					{
 						ChessPiece piece = pieceMap[i][j];
-						if(piece != null)
+						if(piece != null && piece.isAlive())
 						{
 							float x = j*tileSize[0];
 							float y = (int)((i+0.80)*tileSize[1]);

@@ -139,9 +139,9 @@ public class ChessGameState extends GameState {
 			}
 			//add the pieces to the player's list
 			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite);
-			player1Pieces[i].setLocation(loc1);
+			player1Pieces[i].setLocation(loc1.clone());
 			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite);
-			player2Pieces[i].setLocation(loc2);
+			player2Pieces[i].setLocation(loc2.clone());
 			
 			//add to the piece map
 			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i];
@@ -334,54 +334,59 @@ public class ChessGameState extends GameState {
 		if(act instanceof ChessMoveAction)
 		{
 			ChessMoveAction move = (ChessMoveAction)act;
-			//statemate
-			if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
+			ChessPlayer player = ((ChessPlayer)act.getPlayer());
+			if(player.isPlayer1() == whoseTurn)
 			{
-				isGameOver = true;
-				player1Won = false;
-				player2Won = false;
+				//statemate
+				if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
+				{
+					isGameOver = true;
+					player1Won = false;
+					player2Won = false;
+					return false;
+				}
+				
+				whoseTurn = !whoseTurn;
+				if(!move.isValid() && valid == true)
+				{
+					valid = false;
+				}
+				if(move.getTakenPiece() != null)
+				{
+					lastCapture = 0;
+					for(ChessPiece p:player1Pieces)
+					{
+						if(p.equals(move.getTakenPiece()))
+						{
+							//kill it and remove from board
+							p.kill();
+							int[] loc = p.getLocation();
+							pieceMap[loc[0]][loc[1]] = null;
+						}
+					}
+					for(ChessPiece p:player2Pieces)
+					{
+						if(p.equals(move.getTakenPiece()))
+						{
+							p.kill();
+							int[] loc = p.getLocation();
+							pieceMap[loc[0]][loc[1]] = null;
+						}
+					}
+				}
+				if(move.getWhichPiece() != null)
+				{
+					//Move the piece
+					int[] oldLoc = move.getWhichPiece().getLocation().clone();
+					int[] newLoc = move.getNewPos().clone();
+					move.getWhichPiece().move(newLoc);
+					pieceMap[oldLoc[0]][oldLoc[1]] = null;
+					pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
+					lastCapture++;
+					return true;
+				}
 				return false;
 			}
-			
-			whoseTurn = !whoseTurn;
-			if(!move.isValid() && valid == true)
-			{
-				valid = false;
-			}
-			if(move.getTakenPiece() != null)
-			{
-				lastCapture = 0;
-				for(ChessPiece p:player1Pieces)
-				{
-					if(p.equals(move.getTakenPiece()))
-					{
-						//kill it and remove from board
-						p.kill();
-						int[] loc = p.getLocation();
-						pieceMap[loc[0]][loc[1]] = null;
-					}
-				}
-				for(ChessPiece p:player2Pieces)
-				{
-					if(p.equals(move.getTakenPiece()))
-					{
-						p.kill();
-						int[] loc = p.getLocation();
-						pieceMap[loc[0]][loc[1]] = null;
-					}
-				}
-			}
-			if(move.getWhichPiece() != null)
-			{
-				//Move the piece
-				int[] newLoc = move.getNewPos();
-				move.getWhichPiece().move(newLoc);
-				pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
-				lastCapture++;
-				return true;
-			}
-			
-			
 			return false;
 		}
 		else

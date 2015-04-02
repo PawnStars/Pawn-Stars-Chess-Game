@@ -63,7 +63,7 @@ public class ChessPiece {
 		this.hasMoved = piece.getHasMoved();
 		this.isWhite = piece.isWhite();
 		this.isAlive = piece.isAlive();
-		this.location = piece.getLocation();
+		this.location = piece.getLocation().clone();
 		this.type = piece.getType();
 	}
 	
@@ -123,7 +123,7 @@ public class ChessPiece {
 	public void move(int[] newLoc)
 	{
 		hasMoved = true;
-		location = newLoc;
+		location = newLoc.clone();
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class ChessPiece {
 	 */
 	public void setLocation(int[] location)
 	{
-		this.location = location;
+		this.location = location.clone();
 	}
 	
 	/**

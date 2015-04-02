@@ -277,46 +277,53 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				}
 				
 				down = false;
-				
-				ChessPiece pieceSelected = state.getPieceMap()[tileY][tileX];
-				
+				ChessPiece pieceSelected;
+				if(state.getPieceMap()[tileY][tileX] != null)
+				{
+					pieceSelected = new ChessPiece(state.getPieceMap()[tileY][tileX]);
+				}
+				else
+				{
+					pieceSelected = null;
+				}
 				//selected that same piece
-				if(lastPieceSelected == pieceSelected)
+				if(pieceSelected != null)
 				{
-					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-					board.setSelectedTiles(validLocs);
-					board.setSelectedLoc(-1, -1);//make the selected location invalid
-				}
-				
-				//selected a tile with a piece on it of the same color
-				else if(pieceSelected != null && pieceSelected.isWhite() == isWhite())
-				{
-					//pass selected tile to ChessBoard
-					board.setSelectedLoc(tileY,tileX);
-					
-					//get valid locations for that piece
-					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(state, pieceSelected, this,isWhite(), true);
-					
-					if(validMoves != null && validMoves.length > 0)
+					if(lastPieceSelected == pieceSelected)
 					{
-						
-						//add the valid moves into a bitboard
-						for(int i=0;i<validMoves.length;i++)
-						{
-							if(validMoves[i].isValid())
-							{
-								System.out.println(validMoves[i]);
-								int[] newPos = validMoves[i].getNewPos();//TODO could be wrong
-								validLocs[newPos[0]][newPos[1]] = true;
-							}
-						}
+						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 						board.setSelectedTiles(validLocs);
+						board.setSelectedLoc(-1, -1);//make the selected location invalid
 					}
-					lastPieceSelected = pieceSelected;
+					//selected a tile with a piece on it of the same color
+					if(pieceSelected.isWhite() == isWhite())
+					{
+						//pass selected tile to ChessBoard
+						board.setSelectedLoc(tileY,tileX);
+						
+						ChessGameState newState = new ChessGameState(state);
+						//get valid locations for that piece
+						ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(newState, pieceSelected, this,isWhite(), true);
+						
+						if(validMoves != null && validMoves.length > 0)
+						{
+							//add the valid moves into a bitboard
+							for(int i=0;i<validMoves.length;i++)
+							{
+								if(validMoves[i].isValid())
+								{
+									System.out.println(validMoves[i]);
+									int[] newPos = validMoves[i].getNewPos();//TODO could be wrong
+									validLocs[newPos[0]][newPos[1]] = true;
+								}
+							}
+							board.setSelectedTiles(validLocs);
+						}
+						lastPieceSelected = pieceSelected;
+					}
 				}
-				
 				//didn't select a tile with a piece on it or it is of a different color
-				else if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
+				if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
 				{
 					//is a valid location to move the piece to
 					if(validLocs[tileY][tileX] == true)

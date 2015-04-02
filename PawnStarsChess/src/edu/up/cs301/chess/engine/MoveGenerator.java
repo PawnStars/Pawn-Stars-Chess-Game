@@ -129,17 +129,18 @@ public class MoveGenerator {
 		boolean moveColor;
 		if(state.isWhoseTurn())//player 1's turn
 		{
-			moveablePieces = state.getPlayer1Pieces();
+			moveablePieces = state.getPlayer1Pieces().clone();
 			moveColor = state.getPlayer1Color();
 		}
 		else//player 2's turn
 		{
-			moveablePieces = state.getPlayer2Pieces();
+			moveablePieces = state.getPlayer2Pieces().clone();
 			moveColor = !state.getPlayer1Color();
 		}
 		for(ChessPiece p: moveablePieces)
 		{
-			ChessMoveAction[] moves = getPieceMoves(state,p,player,moveColor,false);
+			ChessPiece copyOfP = new ChessPiece(p);
+			ChessMoveAction[] moves = getPieceMoves(state,copyOfP,player,moveColor,false);
 			if(moves != null)
 			{
 				for(ChessMoveAction move: moves)
@@ -174,7 +175,7 @@ public class MoveGenerator {
 		}
 		
 		int type = piece.getType();
-		int[] loc = piece.getLocation();
+		int[] loc = piece.getLocation().clone();
 		if(type == ChessPiece.INVALID || loc == null)
 		{
 			return null;
@@ -442,6 +443,7 @@ public class MoveGenerator {
 		{
 			return false;
 		}
+		int[] newPieceLoc = newLoc.clone();
 		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 		
 		//space is occupied
@@ -450,13 +452,14 @@ public class MoveGenerator {
 			if(taken.isWhite() != color)
 			{
 				//add a move if it can take a piece
-				moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+				
+				moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
 			}
 			return true;
 		}
 		else //unoccupied
 		{
-			moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+			moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
 		}
 		return false;
 	}
