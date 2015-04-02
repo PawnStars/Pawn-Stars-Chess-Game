@@ -60,8 +60,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	
 	private ChessPiece lastPieceSelected;
 	
-	private boolean[][] validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-	
 	private boolean isPlayer1;
 	
 	protected boolean sentPlayerID;
@@ -265,6 +263,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				int[] selectedLoc = new int[2];
 				selectedLoc[0] = tileY;
 				selectedLoc[1] = tileX;
+				boolean[][] validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -286,9 +285,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				{
 					pieceSelected = null;
 				}
-				//selected that same piece
+				
 				if(pieceSelected != null)
 				{
+					//selected the same piece twice
 					if(lastPieceSelected == pieceSelected)
 					{
 						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
@@ -298,6 +298,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					//selected a tile with a piece on it of the same color
 					if(pieceSelected.isWhite() == isWhite())
 					{
+						//clear the valid locations first
+						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+						
 						//pass selected tile to ChessBoard
 						board.setSelectedLoc(tileY,tileX);
 						
@@ -328,13 +331,18 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					//is a valid location to move the piece to
 					if(validLocs[tileY][tileX] == true)
 					{
+						//make a copy of the state before trying to apply the move
 						ChessGameState newState = new ChessGameState(state);
 						ChessPiece takenPiece = newState.getPieceMap()[tileY][tileX];
 						
+						//create and apply the move
 						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
 						newState.applyMove(act);
+						state = newState;
 						
-						sendInfo(newState);
+						//send the updated state
+						sendInfo(state);
+						
 					}
 					lastPieceSelected = null;
 					

@@ -335,7 +335,9 @@ public class ChessGameState extends GameState {
 		{
 			ChessMoveAction move = (ChessMoveAction)act;
 			ChessPlayer player = ((ChessPlayer)act.getPlayer());
-			if(player.isPlayer1() == whoseTurn)
+			
+			//check if it is this player's turn
+			if(player != null && player.isPlayer1() == whoseTurn)
 			{
 				//statemate
 				if(lastCapture > MAX_MOVES_SINCE_CAPTURE)

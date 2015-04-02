@@ -58,12 +58,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			return;
 		}
 		else if (info instanceof ChessGameState) {
-			// if we indeed have a counter-state, update the GUI
+			// if we indeed have a chess game state, update the GUI
 			ChessGameState newState = (ChessGameState)info;
+			
+			//null check and make sure a move was made
 			if(newState == null || newState.equals(gameState))
 			{
 				return;
 			}
+			
+			//send player info to the state if it wasn't done already
 			if(!sentPlayerID)
 			{
 				sentPlayerID = newState.setPlayerInfo(this);

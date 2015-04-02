@@ -32,13 +32,15 @@ public class MoveGenerator {
 	public static ChessMoveAction[] getPossibleMoves(ChessGameState state,
 			ChessPlayer player)
 	{
+		//null check
 		if(state == null || player == null)
 		{
 			return null;
 		}
+		//going to contain each array of moves in a 2d array
 		ArrayList<ChessMoveAction[]> moveList2d = new ArrayList<ChessMoveAction[]>();
-		//player 1
-		if(state.isPlayer1IsWhite() == true && player.isWhite() == true)
+		
+		if(player.isPlayer1())//player 1
 		{
 			if(state.isWhoseTurn())//true if player 1's turn
 			{
@@ -87,9 +89,11 @@ public class MoveGenerator {
 				moveList[i++] = action;
 			}
 		}
+		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, player);
 		
+		//TODO scramble the order of the moves??
 		//remove the moves that would get the king captured
-		return removeIllegalMoves(state, moveList, player);
+		return moves;
 	}
 	
 	public static ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
@@ -125,14 +129,14 @@ public class MoveGenerator {
 	 */
 	public static boolean canTakeKing(ChessGameState state, ChessPlayer player)
 	{
-		ChessPiece[] moveablePieces;
-		boolean moveColor;
-		if(state.isWhoseTurn())//player 1's turn
+		ChessPiece[] moveablePieces = null;
+		boolean moveColor = false;
+		if(state.isWhoseTurn() && player.isPlayer1())//player 1's turn
 		{
 			moveablePieces = state.getPlayer1Pieces().clone();
 			moveColor = state.getPlayer1Color();
 		}
-		else//player 2's turn
+		else if(!state.isWhoseTurn() && !player.isPlayer1())//player 2's turn
 		{
 			moveablePieces = state.getPlayer2Pieces().clone();
 			moveColor = !state.getPlayer1Color();
@@ -175,7 +179,7 @@ public class MoveGenerator {
 		}
 		
 		int type = piece.getType();
-		int[] loc = piece.getLocation().clone();
+		int[] loc = piece.getLocation();
 		if(type == ChessPiece.INVALID || loc == null)
 		{
 			return null;
@@ -220,15 +224,24 @@ public class MoveGenerator {
 					}
 				}
 			}
-			int[][] attackLoc;
-			if(piece.isWhite()==state.isPlayer1IsWhite())//player 1
+			
+			/*
+			 * Initialize to an invalid location so it does not get turned into a move 
+			 * unless player 1 or player 2 can make the move.
+			 * 
+			 * */
+			int[][] attackLoc = new int[][]{
+					{-1,-1},
+					{-1,-1}
+			};
+			if(piece.isWhite() && state.isPlayer1IsWhite())//player 1
 			{
 				attackLoc = new int[][]{
 						{loc[0]-1,loc[1]-1},
 						{loc[0]-1,loc[1]+1}
 				};
 			}
-			else//player 2
+			else if(!piece.isWhite() && !state.isPlayer1IsWhite())//player 2
 			{
 				attackLoc = new int[][]{
 						{loc[0]+1,loc[1]-1},
@@ -323,7 +336,6 @@ public class MoveGenerator {
 			{
 				if(!ChessGameState.outOfBounds(newLoc[i]))
 				{
-					//System.out.println("["+newLoc[i][0]+"]"+"["+newLoc[i][1]+"]");
 					ChessPiece taken = state.getPieceMap()[newLoc[i][0]][newLoc[i][1]];
 					
 					//space is occupied
