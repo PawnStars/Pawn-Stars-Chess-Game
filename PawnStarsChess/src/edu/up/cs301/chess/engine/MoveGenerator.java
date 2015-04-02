@@ -197,15 +197,15 @@ public class MoveGenerator {
 			for(int i=1;i<=numVertMoves;i++)
 			{
 				
-				int[] newLoc = loc;
+				int[] newLoc = loc.clone();
 				
-				if(piece.isWhite())
+				if(currPlayer.isPlayer1())
 				{
-					newLoc[0] -= i;
+					newLoc[0] += i;
 				}
 				else
 				{
-					newLoc[0] += i;
+					newLoc[0] -= i;
 				}
 				
 				if(!ChessGameState.outOfBounds(newLoc))
@@ -256,7 +256,7 @@ public class MoveGenerator {
 			//horizontal to the right
 			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
-				int[] newLoc = {i,loc[1]};
+				int[] newLoc = new int[]{i,loc[1]};
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
@@ -268,7 +268,7 @@ public class MoveGenerator {
 			//horizontal to the left
 			for(int i=loc[0]-1;i>=0;i--)
 			{
-				int[] newLoc = {i,loc[1]};
+				int[] newLoc = new int[]{i,loc[1]};
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
@@ -280,7 +280,7 @@ public class MoveGenerator {
 			//vertical going up
 			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
-				int[] newLoc = {loc[0],i};
+				int[] newLoc = new int[]{loc[0],i};
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
@@ -292,7 +292,7 @@ public class MoveGenerator {
 			//vertical going down
 			for(int i=loc[0]-1;i>=0;i--)
 			{
-				int[] newLoc = {loc[0],i};
+				int[] newLoc = new int[]{loc[0],i};
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
@@ -322,7 +322,7 @@ public class MoveGenerator {
 			{
 				if(!ChessGameState.outOfBounds(newLoc[i]))
 				{
-					System.out.println("["+newLoc[i][0]+"]"+"["+newLoc[i][1]+"]");
+					//System.out.println("["+newLoc[i][0]+"]"+"["+newLoc[i][1]+"]");
 					ChessPiece taken = state.getPieceMap()[newLoc[i][0]][newLoc[i][1]];
 					
 					//space is occupied
@@ -348,7 +348,8 @@ public class MoveGenerator {
 			//top right
 			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]++)
 			{
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				int[] newPieceLoc = newLoc.clone();
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
 				{
 					break;
@@ -358,7 +359,8 @@ public class MoveGenerator {
 			//top left
 			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]++)
 			{
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				int[] newPieceLoc = newLoc.clone();
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
 				{
 					break;
@@ -368,7 +370,8 @@ public class MoveGenerator {
 			//bottom right
 			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]--)
 			{
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				int[] newPieceLoc = newLoc.clone();
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
 				{
 					break;
@@ -378,7 +381,8 @@ public class MoveGenerator {
 			//bottom left
 			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]--)
 			{
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				int[] newPieceLoc = newLoc.clone();
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
 				if(done == true)
 				{
 					break;

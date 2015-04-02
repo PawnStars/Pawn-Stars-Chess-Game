@@ -68,8 +68,14 @@ public class ChessMoveAction extends GameAction {
 		}
 		
 		this.whichPiece = whichPiece;
-		this.newPos = newPos;
 		this.takenPiece = takenPiece;
+		if(newPos == null || ChessGameState.outOfBounds(newPos))
+		{
+			valid = false;
+			return;
+		}
+		this.newPos = newPos;
+		
 	}
 	
 	/**

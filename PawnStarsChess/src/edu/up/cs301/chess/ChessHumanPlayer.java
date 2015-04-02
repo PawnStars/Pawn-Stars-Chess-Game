@@ -299,11 +299,16 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					
 					if(validMoves != null && validMoves.length > 0)
 					{
+						
 						//add the valid moves into a bitboard
 						for(int i=0;i<validMoves.length;i++)
 						{
-							int[] newPos = validMoves[i].getNewPos();
-							validLocs[newPos[0]][newPos[0]] = true;//TODO this could be wrong
+							if(validMoves[i].isValid())
+							{
+								System.out.println(validMoves[i]);
+								int[] newPos = validMoves[i].getNewPos();//TODO could be wrong
+								validLocs[newPos[0]][newPos[1]] = true;
+							}
 						}
 						board.setSelectedTiles(validLocs);
 					}

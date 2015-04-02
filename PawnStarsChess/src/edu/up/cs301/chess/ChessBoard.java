@@ -133,7 +133,7 @@ public class ChessBoard extends SurfaceView
 						// Draw the selected tile
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], selectColor);
 					}
-					else if(selectedTiles != null && selectedTiles[i][j] == true && selectedTiles != null)
+					else if(selectedTiles != null && selectedTiles[j][i] == true)
 					{
 						// Draw the highlighted tiles
 						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], highlightColor);
@@ -146,15 +146,15 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				//canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally
-			/*for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
 				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
 				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}*/
+			}
 			
 			// Draw each piece in its respective color
 			if(pieceMap != null)
@@ -217,15 +217,15 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				//canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally
-			/*for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
 				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
 				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}*/
+			}
 			
 			// Draw each piece in its respective color
 			if(pieceMap != null)
