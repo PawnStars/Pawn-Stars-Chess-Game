@@ -4,7 +4,6 @@ import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
-import edu.up.cs301.game.Game;
 import edu.up.cs301.game.GameComputerPlayer;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.Tickable;
@@ -20,13 +19,24 @@ import edu.up.cs301.game.util.Tickable;
  */
 public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPlayer, Tickable {
 	
+	/*
+	 * The intelligence of the AI
+	 * A value of MAX_INTELLIGENCE corresponds to a deeper search
+	 * for the best move and selecting the best one. Lower values
+	 * correspond to a shallower search and a lower inclination to
+	 * pick the best move.
+	 */
     protected int smart;
+    
+    // The current game state according to this player
     protected ChessGameState gameState;
+    
+    //true if this player is white, false if not
     protected boolean isWhite;
     
+    //true if this player is player1 in the game state, false if not
     protected boolean isPlayer1;
     
-    protected boolean sentPlayerID;
 	/**
      * Constructor for objects of class CounterComputerPlayer1
      * 
@@ -38,7 +48,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         super(name);
         smart = intelligence;
         
-        //pick white or black randomly
+        /*
+         * Pick white or black randomly. The game state will
+         * decide which player's choice goes through depending
+         * on how fast they initialize the state.
+         */
+        
         isWhite = Math.random() > 0.5;
     }
     
@@ -68,10 +83,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			
 			//send player info to the state if it wasn't done already
-			if(!sentPlayerID)
-			{
-				sentPlayerID = newState.setPlayerInfo(this);
-			}
 			
 			gameState = newState;
 			boolean success = makeMove();
@@ -88,32 +99,47 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public boolean makeMove()
 	{
+		boolean success = false;
+		
 		//TODO check if it can make a move
 		ChessGameState newState = new ChessGameState(gameState);
+		
 		if(smart == 0)
 		{
-			//Random move
+			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this);
+			
+			//Check if the move generator found any possible moves
 			if(possibleActions != null && possibleActions.length > 0)
 			{
 				int randomIndex = (int) (Math.random()*(possibleActions.length));
-				possibleActions[randomIndex].setPlayer(this);
-				newState.applyMove(possibleActions[randomIndex]);
+				
+				if(possibleActions[randomIndex] != null)
+				{
+					possibleActions[randomIndex].setPlayer(this);
+					success = newState.applyMove(possibleActions[randomIndex]);
+					System.out.println(possibleActions[randomIndex]);
+				}
 			}
 			else
 			{
-				return false;
+				//TODO do something if there are no possible actions
+				System.out.println("Counld not generate any valid moves.");
 			}
-			//TODO do something if there are no possible actions
 		}
 		else if(smart > 0)
 		{
 			ChessMoveAction bestMove = Search.findMove(this, newState, smart);
-			newState.applyMove(bestMove);
+			success = newState.applyMove(bestMove);
 		}
-		gameState = newState;
-		sendInfo(gameState);
-		return true;
+		
+		//send the new game state if it worked
+		if(success)
+		{
+			gameState = newState;
+			sendInfo(gameState);
+		}
+		return success;
 	}
 
 	/**

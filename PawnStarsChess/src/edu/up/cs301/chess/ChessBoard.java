@@ -293,12 +293,16 @@ public class ChessBoard extends SurfaceView
 	 * @param 2d array of every piece on the board
 	 */
 	public void setSelectedTiles(boolean[][] selectedTiles) {
+		
+		//clear the tiles
 		if(selectedTiles == null)
 		{
-			return;
+			this.selectedTiles = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+			invalidate();
 		}
-		if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
+		else if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
 		{
+			//this is an error
 			return;
 		}
 		else

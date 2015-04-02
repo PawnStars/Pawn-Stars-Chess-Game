@@ -8,7 +8,6 @@ import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
-import edu.up.cs301.game.util.MessageBox;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.KeyEvent;
@@ -56,13 +55,17 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	//TODO: implement isWhite
 	private boolean isWhite = true;//ask for this somehow
 	
+	//true if the user is holding down, false if not
 	private boolean down;
 	
+	//the last piece the player touched
 	private ChessPiece lastPieceSelected;
 	
+	//true if this player is player 1 in the game state
 	private boolean isPlayer1;
 	
-	protected boolean sentPlayerID;
+	//the valid locations for a move using the lastPieceSelected
+	private boolean[][] validLocs;
 	
 	/**
 	 * constructor
@@ -148,8 +151,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		{
 			return;
 		}
-		if(!sentPlayerID)
-			sentPlayerID = newState.setPlayerInfo(this);
+		newState.setPlayerInfo(this);
 		// update our state; then update the display
 		this.state = newState;
 		updateDisplay();
@@ -216,6 +218,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			}
 		};
 		
+		//make a dialog to ask which color the human wants to be
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setMessage(colorQuestion);
 		builder.setTitle(pickColorTitle);
@@ -229,9 +232,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		if (state != null)
 		{
 			state.setPlayer1IsWhite(isPlayer1 == isWhite);
-			sentPlayerID = state.setPlayerInfo(this);
+			state.setPlayerInfo(this);
 			receiveInfo(state);
-			
 		}
 	}
 	/**
@@ -256,14 +258,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			if(v == board)
 			{
 				//TODO sound feedback/vibration
-				//get the tile the event corresponds to
+				
 				float[] tileSize = board.getTileSize();
 				int tileX = (int) (event.getX()/tileSize[0]);
 				int tileY = (int) (event.getY()/tileSize[1]);
-				int[] selectedLoc = new int[2];
-				selectedLoc[0] = tileY;
-				selectedLoc[1] = tileX;
-				boolean[][] validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+				int[] selectedLoc = new int[]{tileY,tileX};
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -286,46 +285,47 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					pieceSelected = null;
 				}
 				
-				if(pieceSelected != null)
+				//clear the selected locations first
+				board.setSelectedTiles(null);
+				
+				//make the selected location invalid
+				board.setSelectedLoc(-1, -1);
+				
+				//selected a piece of the same color different from the last one
+				if(pieceSelected != null && pieceSelected.isWhite() == isWhite() && !lastPieceSelected.equals(pieceSelected))
 				{
-					//selected the same piece twice
-					if(lastPieceSelected == pieceSelected)
+					//reset the valid locations
+					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+					
+					//pass selected tile to ChessBoard
+					board.setSelectedLoc(tileY,tileX);
+					
+					//make a new state to ensure the current state is not modified
+					ChessGameState newState = new ChessGameState(state);
+					
+					//get valid moves for that piece
+					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(newState, pieceSelected, this,isWhite(), true);
+					
+					if(validMoves != null && validMoves.length > 0)
 					{
-						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-						board.setSelectedTiles(validLocs);
-						board.setSelectedLoc(-1, -1);//make the selected location invalid
-					}
-					//selected a tile with a piece on it of the same color
-					if(pieceSelected.isWhite() == isWhite())
-					{
-						//clear the valid locations first
-						validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-						
-						//pass selected tile to ChessBoard
-						board.setSelectedLoc(tileY,tileX);
-						
-						ChessGameState newState = new ChessGameState(state);
-						//get valid locations for that piece
-						ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(newState, pieceSelected, this,isWhite(), true);
-						
-						if(validMoves != null && validMoves.length > 0)
+						//add the valid moves into a bitboard(8x8 array of booleans)
+						for(int i=0;i<validMoves.length;i++)
 						{
-							//add the valid moves into a bitboard
-							for(int i=0;i<validMoves.length;i++)
+							if(validMoves[i].isValid())
 							{
-								if(validMoves[i].isValid())
-								{
-									System.out.println(validMoves[i]);
-									int[] newPos = validMoves[i].getNewPos();//TODO could be wrong
-									validLocs[newPos[0]][newPos[1]] = true;
-								}
+								int[] newPos = validMoves[i].getNewPos();
+								validLocs[newPos[0]][newPos[1]] = true;
 							}
-							board.setSelectedTiles(validLocs);
 						}
-						lastPieceSelected = pieceSelected;
+						board.setSelectedTiles(validLocs.clone());
 					}
+					lastPieceSelected = pieceSelected;
 				}
-				//didn't select a tile with a piece on it or it is of a different color
+				
+				/*
+				 * Didn't select a tile with a piece on it or it is of a different color,
+				 * so the last piece could possibly move here.
+				 */
 				if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
 				{
 					//is a valid location to move the piece to
@@ -342,34 +342,48 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						
 						//send the updated state
 						sendInfo(state);
-						
 					}
-					lastPieceSelected = null;
-					
-					//clear selected tiles
-					board.setSelectedLoc(-1,-1);//make the selected location invalid
-					
-					// Clear valid locations
-					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-					board.setSelectedTiles(validLocs);
+					else
+					{
+						/*
+						 * the user tried to make an invalid move, so
+						 * clear piece selections.
+						 */
+						lastPieceSelected = null;
+					}
 				}
 			}
 		}
 		return true;
 	}
 
+	/**
+	 * Returns true if this player is
+	 * player 1 in the game state.
+	 */
 	public boolean isPlayer1() {
 		return isPlayer1;
 	}
 
+	/**
+	 * Sets this player as white or black
+	 * @param true for white and false for black.
+	 */
 	public void setWhite(boolean isWhite) {
 		this.isWhite = isWhite;
 	}
 
+	/**
+	 * Sets this player as player 1 or player 2
+	 * in the game state.
+	 */
 	public void setPlayer1(boolean isPlayer1) {
 		this.isPlayer1 = isPlayer1;
 	}
 
+	/**
+	 * Returns this player's unique ID number.
+	 */
 	public int getPlayerID() {
 		return playerNum;
 	}
