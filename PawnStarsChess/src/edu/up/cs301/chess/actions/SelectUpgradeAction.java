@@ -15,7 +15,7 @@ import edu.up.cs301.game.actionMsg.GameAction;
  * @author Derek Schumacher
  * @author Scott Rowland
  * @author Allison Liedtke
- * @version March 2015
+ * @version April 2015
  *
  */
 public class SelectUpgradeAction extends GameAction {
@@ -28,16 +28,20 @@ public class SelectUpgradeAction extends GameAction {
 	//the current piece
 	private ChessPiece piece;
 	
+	//its new type
+	private int type;
+	
 	/**
 	 * Default constructor
 	 * @param Player the Player who made the move
 	 * @param ChessPiece the piece being promoted
 	 * @param int the type of piece the pawn will become
 	 */
-	public SelectUpgradeAction(GamePlayer player, ChessPiece currentPiece) {
+	public SelectUpgradeAction(GamePlayer player, ChessPiece currentPiece, int type) {
 		super(player);
 		//TODO check if it is the right player
 		this.piece = currentPiece;
+		this.type = type;
 	}
 
 	/**
@@ -47,12 +51,13 @@ public class SelectUpgradeAction extends GameAction {
 	public ChessPiece getPiece() {
 		return piece;
 	}
-
+	
 	/**
-	 * Set the new type of the piece
-	 * @param the type of the new piece
+	 * Returns the type the player selected
+	 * @return the pawn's new type
 	 */
-	public void setType(int type) {
-		piece.setType(type);
+	public int getType()
+	{
+		return type;
 	}
 }

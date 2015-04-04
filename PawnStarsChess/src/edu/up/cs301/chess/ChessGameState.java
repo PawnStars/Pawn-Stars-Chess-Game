@@ -2,8 +2,12 @@ package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Iterator;
+
+import android.util.Log;
 
 import edu.up.cs301.chess.actions.*;
+import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
 
@@ -40,8 +44,12 @@ public class ChessGameState extends GameState {
 	private ChessPiece[][] pieceMap;
 
 	// Arrays to keep track of which pieces are alive/dead:
+	private ChessPiece[][] pieces;
+	
+	//The array of pieces for each player
 	private ChessPiece[] player1Pieces;
 	private ChessPiece[] player2Pieces;
+	
 
 	// Keep track of current score as the game progresses:
 	private int player1Points;
@@ -82,37 +90,24 @@ public class ChessGameState extends GameState {
 	 */
 	private boolean player1IsWhite; 
 	
-	/*
-	 * The index of the two players.
-	 * Player 1 is at element 0 and player 2 is at element 1.
-	 */
-	private int[] playerIdx = new int[2];
-	
-	//the index to start on when players give their index to the state
-	private int numConnected = 0;
-	
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
-	
-	// Keep track of whether or not this state represents a valid state of the board
-	private boolean valid;
 	
 	/*
 	 * The number of moves since the last capture.
 	 * Can be used to indicate a stalemate.
 	 */
 	private int lastCapture;
-	//TODO implement statemate
 	
-
 	/**
 	 * constructor, initializing the ChessGameState to its initial state
 	 * 
 	 */
 	public ChessGameState(boolean player1White) {
 		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
-		player1Pieces = new ChessPiece[NUM_PIECES];
-		player2Pieces = new ChessPiece[NUM_PIECES];
+		pieces = new ChessPiece[MAX_PLAYERS][NUM_PIECES];
+		player1Pieces = pieces[0];
+		player2Pieces = pieces[1];
 	
 		whoseTurn = player1White;
 		player1IsWhite = player1White;
@@ -122,7 +117,6 @@ public class ChessGameState extends GameState {
 		player1Points = 0;
 		player2Points = 0;
 		lastCapture = 0;
-		valid = true;
 		moveList = new ArrayDeque<ChessMoveAction>();
 		
 		// Give each player a pawn of the appropriate color:
@@ -205,28 +199,36 @@ public class ChessGameState extends GameState {
 		
 		//Creates copies of the pieces and puts them in the board
 		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
-		player1Pieces = ChessPiece.copyPieceList(pieceMap,orig.getPlayer1Pieces());
-		player2Pieces = ChessPiece.copyPieceList(pieceMap,orig.getPlayer2Pieces());
 		
-		for(ChessPiece piece:player1Pieces)
+		
+		player1Pieces = ChessPiece.copyPieceList(orig.getPlayer1Pieces());
+		player2Pieces = ChessPiece.copyPieceList(orig.getPlayer2Pieces());
+		
+		pieces = new ChessPiece[MAX_PLAYERS][NUM_PIECES];
+		pieces[0] = player1Pieces;
+		pieces[1] = player2Pieces;
+		
+		for(int i=0;i<MAX_PLAYERS;i++)
 		{
-			int[] loc = piece.getLocation();
-			if(!outOfBounds(loc))
+			for(int j=0;j<NUM_PIECES;j++)
 			{
-				pieceMap[loc[0]][loc[1]] = piece;
+				int[] loc = pieces[i][j].getLocation();
+				if(!outOfBounds(loc))
+				{
+					pieceMap[loc[0]][loc[1]] = pieces[i][j];
+				}
 			}
 		}
 		
-		for(ChessPiece piece:player2Pieces)
+		//copy each move
+		moveList = new ArrayDeque<ChessMoveAction>();
+		Iterator<ChessMoveAction> it = orig.getMoveList().iterator();
+		while(it.hasNext())
 		{
-			int[] loc = piece.getLocation();
-			if(!outOfBounds(loc))
-			{
-				pieceMap[loc[0]][loc[1]] = piece;
-			}
+			ChessMoveAction move = it.next();
+			ChessMoveAction newMove = new ChessMoveAction(move.getPlayer(),move);
+			moveList.add(newMove);
 		}
-		
-		moveList = orig.getMoveList().clone();//TODO clone the elements
 		
 		//Primitive values do not need to be copied
 		player1Points = orig.getPlayer1Points();
@@ -251,13 +253,13 @@ public class ChessGameState extends GameState {
 		player1Points = orig.getPlayer1Points();
 		player2Points = orig.getPlayer2Points();
 		
-		valid = orig.isValid();
-		
 		player1Material = orig.getPlayer1Material();
 		player2Material = orig.getPlayer2Material();
 		
 		player1PawnMaterial = orig.getPlayer1PawnMaterial();
 		player2PawnMaterial = orig.getPlayer2PawnMaterial();
+		
+		lastCapture = orig.getLastCapture();
 	}
 
 	/**
@@ -290,9 +292,9 @@ public class ChessGameState extends GameState {
 			return false;
 		
 		// Check if the player's piece arrays are equal
-		if(!ChessPiece.pieceArrayEquals(player1Pieces, comp.getPlayer1Pieces()))
+		if(!Arrays.deepEquals(player1Pieces, comp.getPlayer1Pieces()))
 			return false;
-		if(!ChessPiece.pieceArrayEquals(player2Pieces, comp.getPlayer2Pieces()))
+		if(!Arrays.deepEquals(player2Pieces, comp.getPlayer2Pieces()))
 			return false;
 		
 		// Check if all primitive instance variables are equals
@@ -307,9 +309,11 @@ public class ChessGameState extends GameState {
 
 		if(isGameOver != comp.isGameOver()) return false;
 
-		if(canCastle != comp.getCanCastle()) return false;
+		if(canCastle != comp.getCanCastle()) return false;//TODO fix this
 
 		if(player1IsWhite != comp.getPlayer1Color()) return false;
+		
+		//TODO Check if moveList is equal
 		
 		return true;
 	}
@@ -322,76 +326,158 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean applyMove(GameAction act)
 	{
-		if(act == null)
+		//Do not apply the move if the game is over or there is no move.
+		if(act == null || isGameOver)
 		{
 			return false;
 		}
 		if(act instanceof DrawAction)
 		{
-			//TODO implement
+			isGameOver = true;
+			player1Won = true;
+			player2Won = true;
 			return true;
+		}
+		if(act instanceof ChooseColorAction)
+		{
+			ChooseColorAction action = (ChooseColorAction)act;
+			player1IsWhite = action.isWhichColor();
+			return true;
+		}
+		if(act instanceof SelectUpgradeAction)
+		{
+			SelectUpgradeAction action = (SelectUpgradeAction)act;
+			ChessPiece upgradePiece = action.getPiece();
+			for(int i=0;i<MAX_PLAYERS;i++)
+			{
+				for(int j=0;j<NUM_PIECES;j++)
+				{
+					ChessPiece p = pieces[i][j];
+					if(p.equals(upgradePiece))
+					{
+						p.setType(action.getType());
+						return true;
+					}
+				}
+			}
+			return false;//didn't find the piece
 		}
 		if(act instanceof ChessMoveAction)
 		{
 			ChessMoveAction move = (ChessMoveAction)act;
 			ChessPlayer player = ((ChessPlayer)act.getPlayer());
+			ChessPiece takenPiece = move.getTakenPiece();
+			ChessPiece whichPiece = move.getWhichPiece();
+			boolean foundTaken = false;
+			boolean foundWhich = false;
 			
 			//check if it is this player's turn
 			if(player != null && player.isPlayer1() == whoseTurn)
 			{
-				//statemate
+				whoseTurn = !whoseTurn;
+				
+				//Statemate
 				if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
 				{
 					isGameOver = true;
 					player1Won = false;
 					player2Won = false;
-					return false;
-				}
-				
-				whoseTurn = !whoseTurn;
-				if(!move.isValid() && valid == true)
-				{
-					valid = false;
-				}
-				if(move.getTakenPiece() != null)
-				{
-					lastCapture = 0;
-					for(ChessPiece p:player1Pieces)
-					{
-						if(p.equals(move.getTakenPiece()))
-						{
-							//kill it and remove from board
-							p.kill();
-							int[] loc = p.getLocation();
-							pieceMap[loc[0]][loc[1]] = null;
-						}
-					}
-					for(ChessPiece p:player2Pieces)
-					{
-						if(p.equals(move.getTakenPiece()))
-						{
-							p.kill();
-							int[] loc = p.getLocation();
-							pieceMap[loc[0]][loc[1]] = null;
-						}
-					}
-				}
-				if(move.getWhichPiece() != null)
-				{
-					//Move the piece
-					int[] oldLoc = move.getWhichPiece().getLocation().clone();
-					int[] newLoc = move.getNewPos().clone();
-					move.getWhichPiece().move(newLoc);
-					pieceMap[oldLoc[0]][oldLoc[1]] = null;
-					pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
-					lastCapture++;
 					return true;
 				}
+				
+				for(int i=0;i<MAX_PLAYERS;i++)
+				{
+					for(int j=0;j<NUM_PIECES;j++)
+					{
+						ChessPiece p = pieces[i][j];
+						if(p.equals(takenPiece))
+						{
+							//remove the piece from the board
+							takenPiece = p;
+							foundTaken = true;
+						}
+						//find the piece to be moved
+						if(p.equals(whichPiece))
+						{
+							whichPiece = p;
+							foundWhich = true;
+						}
+					}
+				}
+				
+				if(takenPiece == null)
+				{
+					lastCapture++;
+				}
+				
+				if(foundWhich && whichPiece != null)
+				{
+					//Move the piece
+					int[] oldLoc = whichPiece.getLocation().clone();
+					int[] newLoc = move.getNewPos().clone();
+					
+					//If a piece was taken, kill it and remove its reference
+					if(foundTaken && takenPiece != null)
+					{
+						int[] takenLoc = takenPiece.getLocation();
+						if(!outOfBounds(takenLoc))
+						{
+							takenPiece.kill();
+							pieceMap[takenLoc[0]][takenLoc[1]] = null;
+							lastCapture = 0;
+						}
+					}
+					
+					//If the new position is a valid position, make the move.
+					if(!outOfBounds(newLoc) && !outOfBounds(oldLoc))
+					{
+						whichPiece.move(newLoc);
+						ChessPiece movedPiece = new ChessPiece(whichPiece);
+						pieceMap[newLoc[0]][newLoc[1]] = movedPiece;
+						pieceMap[oldLoc[0]][oldLoc[1]] = null;
+						moveList.add(move);
+					}
+					
+					//Check if the game is over or if a player is in check.
+					boolean p1CanTakeKing = MoveGenerator.canTakeKing(this, true);
+					boolean p2CanTakeKing = MoveGenerator.canTakeKing(this, false);
+					
+					//Someone is in check or checkmate.
+					if(p1CanTakeKing || p2CanTakeKing)
+					{
+						if(p1CanTakeKing && whoseTurn)
+						{
+							isGameOver = true;
+							player1Won = true;
+						}
+						if(p2CanTakeKing && !whoseTurn)
+						{
+							isGameOver = true;
+							player2Won = true;
+						}
+						if(p1CanTakeKing && !whoseTurn)
+						{
+							player2InCheck = true;
+						}
+						if(p2CanTakeKing && whoseTurn)
+						{
+							player1InCheck = true;
+						}
+					}
+					
+					return true;
+				}
+				else//Could not find the piece to move
+				{
+					return false;
+				}
+			}
+			else//Could not find player or not the player's turn
+			{
 				return false;
 			}
-			return false;
 		}
-		else
+		else//Cannot handle whatever move was given.
 		{
 			return false;
 		}
@@ -415,31 +501,24 @@ public class ChessGameState extends GameState {
 			turn = "Black";
 		}
 		
-		String validStr = "";
-		if(valid)
-		{
-			validStr = "Valid";
-		}
-		if(!valid)
-		{
-			validStr = "Invalid";
-		}
-		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
+		rtnVal+="Turn: "+turn+"\n";
 		
+		//List the moves made so far
 		rtnVal += "Moves: ";
 		for(ChessMoveAction move:moveList)
 		{
-			rtnVal+=move.toString()+", ";
+			rtnVal+=move.toString()+",";
 		}
 		
-		rtnVal +="State\n";
+		//Print the board
+		rtnVal +="\nState\n";
 		for(int i=0;i<BOARD_HEIGHT;i++)
 		{
 			for(int j=0;j<BOARD_WIDTH;j++)
 			{
 				if(pieceMap[i][j] != null)
 				{
-					rtnVal+=pieceMap[i][j].toString();
+					rtnVal+="["+pieceMap[i][j].toCharacter()+"]";
 				}
 				else
 				{
@@ -773,14 +852,6 @@ public class ChessGameState extends GameState {
 		this.player2PawnMaterial = player2PawnMaterial;
 	}
 	
-	/**
-	 * Returns true if this state can be sent to the other player
-	 * @return true if valid
-	 */
-	public boolean isValid() {
-		return valid;
-	}
-	
 	public boolean isPlayer1Won() {
 		return player1Won;
 	}
@@ -796,47 +867,8 @@ public class ChessGameState extends GameState {
 	public void setPlayer2Won(boolean player2Won) {
 		this.player2Won = player2Won;
 	}
-	/**
-	 * @return the player1Idx
-	 */
-	public int getPlayer1Idx() {
-		return playerIdx[1];
-	}
 
-	/**
-	 * @param player1Idx the player1Idx to set
-	 */
-	public boolean setPlayerInfo(ChessPlayer player)
-	{
-		boolean playerIsWhite = player.isWhite();
-		int playerId = player.getPlayerID();
-		
-		//the first to connect gets to choose color
-		if(numConnected == 0)
-		{
-			player1IsWhite = player.isWhite();
-			//player.setWhite(true);
-		}
-		if(numConnected == 1)
-		{
-			player.setWhite(!player1IsWhite);
-		}
-		if(playerIdx[0] == playerId || playerIdx[1] == playerId)
-		{
-			return true;
-		}
-		if(numConnected < 0 || numConnected >= MAX_PLAYERS)
-		{
-			return false;
-		}
-		this.playerIdx[numConnected++] = playerId;
-		return true;
-	}
-
-	/**
-	 * @return the player2Idx
-	 */
-	public int getPlayer2Idx() {
-		return playerIdx[1];
+	public int getLastCapture() {
+		return lastCapture;
 	}
 }

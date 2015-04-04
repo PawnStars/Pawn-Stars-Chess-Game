@@ -2,10 +2,8 @@ package edu.up.cs301.chess;
 
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
-import edu.up.cs301.game.infoMsg.GameInfo;
 import android.app.Activity;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.TextView;
 
 

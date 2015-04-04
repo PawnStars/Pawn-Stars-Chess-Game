@@ -45,7 +45,7 @@ public class ChessBoard extends SurfaceView
 	// the highlighted tiles on the screen
 	private boolean[][] selectedTiles = new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
 	
-	private int[] selectedLoc = new int[2];
+	private int[] selectedLoc = new int[]{-1,-1};
 
 	// true if the board is flipped upside down
 	// false if not
@@ -146,7 +146,7 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally
@@ -217,7 +217,7 @@ public class ChessBoard extends SurfaceView
 				}
 				
 				// Draw the chess notation text vertically
-				canvas.drawText(""+(i+1), 0, (int)((i+0.66)*tileSize[0]), textColor);
+				canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
 			}
 			
 			// Draw the chess notation text horizontally
@@ -234,12 +234,12 @@ public class ChessBoard extends SurfaceView
 				{
 					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 					{
-						int newJ = ChessGameState.BOARD_WIDTH-j;
+						int newI = ChessGameState.BOARD_WIDTH-i;
 						ChessPiece piece = pieceMap[i][j];
 						if(piece != null)
 						{
-							float x = newJ*tileSize[0];
-							float y = (float) ((i+0.8)*tileSize[1]);
+							float x = j*tileSize[0];
+							float y = (float) ((newI+0.8)*tileSize[1]);
 							if(piece.isWhite())
 							{
 								canvas.drawText(whitePieceStrs[piece.getType()], x, y, whitePieceColor);
@@ -321,11 +321,8 @@ public class ChessBoard extends SurfaceView
 		int[] newSelectedLoc = new int[2];
 		newSelectedLoc[1] = i;
 		newSelectedLoc[0] = j;
-		if(!ChessGameState.outOfBounds(newSelectedLoc))
-		{
-			selectedLoc = newSelectedLoc;
-			invalidate();
-		}
+		selectedLoc = newSelectedLoc;
+		invalidate();
 	}
 
 	/**

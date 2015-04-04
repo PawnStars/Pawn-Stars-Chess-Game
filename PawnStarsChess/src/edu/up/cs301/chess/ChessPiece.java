@@ -29,6 +29,7 @@ public class ChessPiece {
 	public static final int KING = 0;
 	
 	public static final int INVALID = -1;
+	public static final int[] INVALID_LOCATION = new int[]{-1,-1};
 	
 	public static final int NUM_TYPES = 6;
 	
@@ -114,6 +115,9 @@ public class ChessPiece {
 	public void kill()
 	{
 		isAlive = false;
+		
+		//set the location as invalid, not sure if necessary
+		location = new int[]{-1,-1};
 	}
 	
 	/**
@@ -153,41 +157,17 @@ public class ChessPiece {
 	}
 	
 	/**
-	 * Does a deep copy of a 2d array of ChessPieces
-	 * 
-	 * @param an 8x8 array
-	 * @return a deep copy of the 2d array
-	 */
-	public static ChessPiece[][] copyPieceMap(ChessPiece[][] map)
-	{
-		if(map == null)
-		{
-			return null;
-		}
-		ChessPiece[][] newMap = new ChessPiece[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
-		for(int i=0;i<ChessGameState.BOARD_WIDTH;i++)
-		{
-			for(int j=0;j<ChessGameState.BOARD_HEIGHT;j++)
-			{
-				if(map[i][j] != null)
-				{
-					newMap[i][j] = new ChessPiece(map[i][j]);
-				}
-			}
-		}
-		return newMap;
-	}
-	
-	/**
 	 * Does a deep copy of an array of ChessPieces and puts the new pieces in the map
 	 * 
 	 * @param an array of length 16
 	 * @return a deep copy of the array
 	 */
-	public static ChessPiece[] copyPieceList(ChessPiece[][] map, ChessPiece[] list)
+	public static ChessPiece[] copyPieceList(ChessPiece[] list)
 	{
 		if(list.length != ChessGameState.NUM_PIECES)
+		{
 			return null;
+		}
 		ChessPiece[] newList = new ChessPiece[ChessGameState.NUM_PIECES];
 		
 		//make copy of the list
@@ -196,27 +176,6 @@ public class ChessPiece {
 			if(list[k] != null)
 			{
 				newList[k] = new ChessPiece(list[k]);
-			}
-		}
-		
-		//replace the ones in the map
-		for(int i=0;i<ChessGameState.BOARD_WIDTH;i++)
-		{
-			for(int j=0;j<ChessGameState.BOARD_HEIGHT;j++)
-			{
-				if(map[i][j] != null)
-				{
-					for(int k=0;k<ChessGameState.NUM_PIECES;k++)
-					{
-						if(list[k] != null)
-						{
-							if(list[k].equals(map[i][j]))
-							{
-								map[i][j] = list[k];
-							}
-						}
-					}
-				}
 			}
 		}
 		
@@ -323,7 +282,9 @@ public class ChessPiece {
 					{
 						//both not null
 						if(!(map1[row][col].equals(map2[row][col])))
+						{
 							return false;
+						}
 					}
 					else
 					{
@@ -348,65 +309,84 @@ public class ChessPiece {
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		
 		if (obj == null)
 			return false;
-		
-		// Cast to ChessPiece if it is a ChessPiece
 		if (getClass() != obj.getClass())
 			return false;
 		ChessPiece other = (ChessPiece) obj;
-		
-		// Compare instance variables
 		if (hasMoved != other.hasMoved)
 			return false;
 		if (isAlive != other.isAlive)
 			return false;
 		if (isWhite != other.isWhite)
 			return false;
+		if (!Arrays.equals(location, other.location))
+			return false;
 		if (type != other.type)
 			return false;
-		
 		return true;
 	}
-
+	
 	@Override
 	public String toString()
 	{
-		String typeStr = "";
+		String rtnVal = "";
 		if(type == PAWN)
 		{
-			typeStr = "p";
+			rtnVal = "p";
 		}
 		if(type == QUEEN)
 		{
-			typeStr = "q";
+			rtnVal = "q";
 		}
 		if(type == KING)
 		{
-			typeStr = "k";
+			rtnVal = "k";
 		}
 		if(type == ROOK)
 		{
-			typeStr = "r";
+			rtnVal = "r";
 		}
 		if(type == BISHOP)
 		{
-			typeStr = "b";
+			rtnVal = "b";
 		}
 		if(type == KNIGHT)
 		{
-			typeStr = "k";
+			rtnVal = "k";
 		}
 		if(!isWhite)
 		{
-			typeStr = typeStr.toUpperCase(Locale.US);
+			rtnVal = rtnVal.toUpperCase(Locale.US);
 		}
-		return "["+typeStr+"]";
+		
+		rtnVal = "("+rtnVal+" ";
+		
+		//convert to chess notation
+		//TODO doesn't work for special moves
+		rtnVal += (char)(97+location[1]);
+		rtnVal += ChessGameState.BOARD_HEIGHT-location[0];
+		rtnVal += ")";
+		
+		return rtnVal;
+	}
+	public String toCharacter()
+	{
+		if(type == INVALID)
+		{
+			return "";
+		}
+		if(isWhite)
+		{
+			return ChessBoard.whitePieceStrs[type];
+		}
+		else
+		{
+			return ChessBoard.blackPieceStrs[type];
+		}
 	}
 	
 	

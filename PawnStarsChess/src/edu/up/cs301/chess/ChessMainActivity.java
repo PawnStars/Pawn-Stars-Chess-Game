@@ -59,13 +59,13 @@ public class ChessMainActivity extends GameMainActivity {
 		playerTypes.add(new GamePlayerType("Computer Player (smart)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
-				return new ChessComputerPlayer1(name,1);
+				return new ChessComputerPlayer1(name,10);
 			}});
 		
 		playerTypes.add(new GamePlayerType("Computer Player (smart GUI)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
-				return new ChessComputerPlayer1(name,1);
+				return new ChessComputerPlayer1(name,10);
 			}});
 
 		// Create a game configuration class for Chess:

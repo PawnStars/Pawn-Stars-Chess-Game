@@ -1,15 +1,16 @@
 package edu.up.cs301.chess;
 
-import edu.up.cs301.chess.actions.ChessMoveAction;
-import edu.up.cs301.chess.actions.DrawAction;
+import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
-import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
+import edu.up.cs301.game.util.MessageBox;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,17 +53,17 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	// the android activity that we are running
 	private GameMainActivity activity;
 	
-	//TODO: implement isWhite
-	private boolean isWhite = true;//ask for this somehow
+	//true if this player is white, false if this player is black
+	private boolean isWhite = true;
 	
 	//true if the user is holding down, false if not
 	private boolean down;
 	
 	//the last piece the player touched
-	private ChessPiece lastPieceSelected;
+	protected ChessPiece lastPieceSelected;
 	
 	//true if this player is player 1 in the game state
-	private boolean isPlayer1;
+	//private boolean isPlayer1;
 	
 	//the valid locations for a move using the lastPieceSelected
 	private boolean[][] validLocs;
@@ -106,8 +107,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// if we are not yet connected to a game, ignore
 		if (game == null) return;
 
-		// Construct the action and send it to the game
-		GameAction action = null;
 		if (button.getId() == R.id.resignButton) {
 			//make the activity think it received a back button
 			KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_BACK);
@@ -115,21 +114,16 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		}
 		else if (button.getId() == R.id.drawButton) {
 			DrawAction act = new DrawAction(this,isWhite());
-			ChessGameState newState = new ChessGameState(state);
-			newState.applyMove(act);
 			
-			sendInfo(newState);
-			state = newState;
+			game.sendAction(act);
 		}
 		else if (button.getId() == R.id.flipBoardButton) {
-			
+			board.flipBoard();
 		}
 		else {
 			// something else was pressed: ignore
 			return;
 		}
-		
-		game.sendAction(action); // send action to the game
 	}// onClick
 	
 	/**
@@ -145,16 +139,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		{
 			return;
 		}
-		ChessGameState newState = (ChessGameState)info;
 		
-		if(newState == null || newState.equals(state))
-		{
-			return;
-		}
-		newState.setPlayerInfo(this);
 		// update our state; then update the display
-		this.state = newState;
+		state = (ChessGameState)info;
 		updateDisplay();
+		Log.d("human player", "state updated:"+state);
 	}
 	
 	/**
@@ -200,40 +189,30 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				activity.getResources().getString(R.string.dialog_white_label);
 		String blackLabel =
 				activity.getResources().getString(R.string.dialog_black_label);
-		String pickColorTitle =
-				activity.getResources().getString(R.string.dialog_title);
 		
-		android.content.DialogInterface.OnClickListener posListener =
+		android.content.DialogInterface.OnClickListener whiteListener =
 				new android.content.DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which) {
 				setWhite(true);
+				startGame();
 			}
 		};
-		android.content.DialogInterface.OnClickListener negListener =
+		android.content.DialogInterface.OnClickListener blackListener =
 				new android.content.DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which) {
 				setWhite(false);
+				startGame();
 			}
 		};
 		
 		//make a dialog to ask which color the human wants to be
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(colorQuestion);
-		builder.setTitle(pickColorTitle);
-		builder.setPositiveButton(whiteLabel, posListener);
-		builder.setNegativeButton(blackLabel, negListener);
-		AlertDialog alert = builder.create();
-		alert.show();
+		MessageBox.popUpChoice(colorQuestion, whiteLabel, blackLabel, whiteListener, blackListener, activity);
 		
-		// if we have a game state, "simulate" that we have just received
-		// the state from the game so that the GUI values are updated
-		if (state != null)
+		if(!isPlayer1())
 		{
-			state.setPlayer1IsWhite(isPlayer1 == isWhite);
-			state.setPlayerInfo(this);
-			receiveInfo(state);
+			board.flipBoard();
 		}
 	}
 	/**
@@ -291,8 +270,15 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				//make the selected location invalid
 				board.setSelectedLoc(-1, -1);
 				
+				//selected the same piece twice
+				if(lastPieceSelected != null && lastPieceSelected.equals(pieceSelected))
+				{
+					lastPieceSelected = null;
+					return true;
+				}
+				
 				//selected a piece of the same color different from the last one
-				if(pieceSelected != null && pieceSelected.isWhite() == isWhite() && !lastPieceSelected.equals(pieceSelected))
+				if(pieceSelected != null && pieceSelected.isWhite() == isWhite() && !pieceSelected.equals(lastPieceSelected))
 				{
 					//reset the valid locations
 					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
@@ -311,7 +297,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						//add the valid moves into a bitboard(8x8 array of booleans)
 						for(int i=0;i<validMoves.length;i++)
 						{
-							if(validMoves[i].isValid())
+							if(validMoves[i] != null && validMoves[i].isValid())
 							{
 								int[] newPos = validMoves[i].getNewPos();
 								validLocs[newPos[0]][newPos[1]] = true;
@@ -329,7 +315,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
 				{
 					//is a valid location to move the piece to
-					if(validLocs[tileY][tileX] == true)
+					if(validLocs != null && validLocs[tileY][tileX] == true)
 					{
 						//make a copy of the state before trying to apply the move
 						ChessGameState newState = new ChessGameState(state);
@@ -337,20 +323,19 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						
 						//create and apply the move
 						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
-						newState.applyMove(act);
-						state = newState;
 						
-						//send the updated state
-						sendInfo(state);
+						//game.sendAction(act);//idk if this is necessary
+						if(game instanceof ChessLocalGame)
+						{
+							ChessLocalGame chessGame = (ChessLocalGame)game;
+							chessGame.makeMove(act);
+						}
 					}
-					else
-					{
-						/*
-						 * the user tried to make an invalid move, so
-						 * clear piece selections.
-						 */
-						lastPieceSelected = null;
-					}
+					/*
+					 * the user either tried to make an invalid move or made
+					 * a move, so clear piece selections.
+					 */
+					lastPieceSelected = null;
 				}
 			}
 		}
@@ -362,7 +347,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 * player 1 in the game state.
 	 */
 	public boolean isPlayer1() {
-		return isPlayer1;
+		return playerNum == 0;//return isPlayer1;
 	}
 
 	/**
@@ -377,9 +362,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 * Sets this player as player 1 or player 2
 	 * in the game state.
 	 */
-	public void setPlayer1(boolean isPlayer1) {
+	/*public void setPlayer1(boolean isPlayer1) {
 		this.isPlayer1 = isPlayer1;
-	}
+	}*/
 
 	/**
 	 * Returns this player's unique ID number.
@@ -388,7 +373,52 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		return playerNum;
 	}
 	
-	
+	public void startGame()
+	{
+		// if we have a game state, "simulate" that we have just received
+		// the state from the game so that the GUI values are updated
+		if (state != null)
+		{
+			ChooseColorAction act = new ChooseColorAction(this,isWhite);
+			if(game instanceof ChessLocalGame)
+			{
+				ChessLocalGame chessGame = (ChessLocalGame)game;
+				chessGame.makeMove(act);
+			}
+			updateDisplay();//TODO fix this
+		}
+	}
 
+	public int selectUpgrade() {
+		CharSequence upgradeChoices[] = new CharSequence[] {"Queen", "Knight", "Rook", "Bishop"};
+		//int[] types = new int[]{ChessPiece.QUEEN,ChessPiece.KNIGHT,ChessPiece.ROOK,ChessPiece.BISHOP};
+
+		//TODO fix
+		/*AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle("Pick a new piece.");
+		
+		android.content.DialogInterface.OnClickListener pieceListener =
+				new android.content.DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int which) {
+				//ChessLocalGame chessGame = (ChessLocalGame)game;
+	    		int[] types = new int[]{ChessPiece.QUEEN,ChessPiece.KNIGHT,ChessPiece.ROOK,ChessPiece.BISHOP};
+				SelectUpgradeAction newAct = new SelectUpgradeAction(super, lastPieceSelected, types[which]);
+				//chessGame.makeMove(act);
+			}
+		};
+		
+		builder.setItems(upgradeChoices, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int which) {
+		    	if(game instanceof ChessLocalGame)
+				{
+					
+				}
+		        //return types[which];
+		    }
+		});
+		builder.show();*/
+		return 0;
+	}
 }// class CounterHumanPlayer
 

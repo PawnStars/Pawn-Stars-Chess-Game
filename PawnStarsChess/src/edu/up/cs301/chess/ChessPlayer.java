@@ -21,4 +21,6 @@ public interface ChessPlayer extends GamePlayer
 	public int getPlayerID();
 	
 	public void setWhite(boolean color);
+	
+	public int selectUpgrade();
 }

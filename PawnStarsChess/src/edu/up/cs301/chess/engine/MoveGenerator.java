@@ -1,8 +1,8 @@
 package edu.up.cs301.chess.engine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
+
+import android.util.Log;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
@@ -17,7 +17,7 @@ import edu.up.cs301.chess.actions.PawnMove;
  * @author Anthony Donaldson
  * @author Derek Schumacher
  * @author Scott Rowland
- * @version March 2015
+ * @version April 2015
  *
  */
 public class MoveGenerator {
@@ -38,55 +38,61 @@ public class MoveGenerator {
 			return null;
 		}
 		//going to contain each array of moves in a 2d array
-		ArrayList<ChessMoveAction[]> moveList2d = new ArrayList<ChessMoveAction[]>();
+		ChessMoveAction[][] moveList2d = new ChessMoveAction[ChessGameState.NUM_PIECES][];
 		
 		if(player.isPlayer1())//player 1
 		{
-			if(state.isWhoseTurn())//true if player 1's turn
+			ChessPiece[] pieces = state.getPlayer1Pieces();
+			for(int i=0;i<ChessGameState.NUM_PIECES;i++)
 			{
-				ChessPiece[] pieces = state.getPlayer1Pieces();
-				for(int i=0;i<ChessGameState.NUM_PIECES;i++)
+				if(pieces[i].isAlive())
 				{
-					if(pieces[i].isAlive())
-					{
-						//get all possible moves the player can make
-						//including ones that do not protect the king
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
-						moveList2d.add(newActions);
-					}
+					/*
+					 * get all possible moves the player can make
+					 * including ones that do not protect the king
+					 */
+					ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
+					moveList2d[i] = newActions;
 				}
 			}
 		}
 		else //player 2
 		{
-			if(!state.isWhoseTurn())
+			ChessPiece[] pieces = state.getPlayer2Pieces();
+			for(int i=0;i<ChessGameState.NUM_PIECES;i++)
 			{
-				ChessPiece[] pieces = state.getPlayer1Pieces();
-				for(int i=0;i<ChessGameState.NUM_PIECES;i++)
+				if(pieces[i].isAlive())
 				{
-					if(pieces[i].isAlive())
-					{
-						ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
-						moveList2d.add(newActions);
-					}
+					ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, player.isWhite(), false);
+					moveList2d[i] = newActions;
 				}
 			}
 		}
+		
 		//Calculate the length of the new array
 		int length = 0;
-		for(ChessMoveAction[] actions: moveList2d)
+		for(int i=0;i<ChessGameState.NUM_PIECES;i++)
 		{
-			length+= actions.length;
+			if(moveList2d[i] != null)
+			{
+				length += moveList2d[i].length;
+			}
 		}
 		
 		//Add every move into the array
 		ChessMoveAction[] moveList = new ChessMoveAction[length];
-		int i=0;
-		for(ChessMoveAction[] actions: moveList2d)
+		int c=0;
+		for(int i=0;i<ChessGameState.NUM_PIECES;i++)
 		{
-			for(ChessMoveAction action:actions)
+			if(moveList2d[i] != null)
 			{
-				moveList[i++] = action;
+				for(int j=0;j<moveList2d[i].length;j++)
+				{
+					if(moveList2d[i][j] != null)
+					{
+						moveList[c++] = moveList2d[i][j];
+					}
+				}
 			}
 		}
 		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, player);
@@ -127,32 +133,42 @@ public class MoveGenerator {
 	 * @param player
 	 * @return
 	 */
-	public static boolean canTakeKing(ChessGameState state, ChessPlayer player)
+	public static boolean canTakeKing(ChessGameState state, boolean isPlayer1)
 	{
-		ChessPiece[] moveablePieces = null;
-		boolean moveColor = false;
-		if(state.isWhoseTurn() && player.isPlayer1())//player 1's turn
+		ChessPiece[] moveablePieces;
+		boolean moveColor;
+		if(state.isWhoseTurn() && isPlayer1)//player 1's turn
 		{
 			moveablePieces = state.getPlayer1Pieces().clone();
-			moveColor = state.getPlayer1Color();
+			moveColor = state.isPlayer1IsWhite();
 		}
-		else if(!state.isWhoseTurn() && !player.isPlayer1())//player 2's turn
+		else if(!state.isWhoseTurn() && !isPlayer1)//player 2's turn
 		{
 			moveablePieces = state.getPlayer2Pieces().clone();
-			moveColor = !state.getPlayer1Color();
+			moveColor = !state.isPlayer1IsWhite();
 		}
-		for(ChessPiece p: moveablePieces)
+		else
 		{
-			ChessPiece copyOfP = new ChessPiece(p);
-			ChessMoveAction[] moves = getPieceMoves(state,copyOfP,player,moveColor,false);
-			if(moves != null)
+			return false;
+		}
+		if(moveablePieces != null)
+		{
+			for(ChessPiece p: moveablePieces)
 			{
-				for(ChessMoveAction move: moves)
+				ChessPiece copyOfP = new ChessPiece(p);
+				ChessMoveAction[] moves = getPieceMoves(state,copyOfP,null,!moveColor,false);
+				if(moves != null)
 				{
-					if(move != null && move.getTakenPiece() != null &&
-							move.getTakenPiece().getType() == ChessPiece.KING)
+					for(ChessMoveAction move: moves)
 					{
-						return true;
+						if(move != null && move.getTakenPiece() != null)
+						{
+							ChessPiece piece = move.getTakenPiece();
+							if(piece.getType() == ChessPiece.KING)
+							{
+								return true;
+							}
+						}
 					}
 				}
 			}
@@ -203,14 +219,13 @@ public class MoveGenerator {
 			{
 				
 				int[] newLoc = loc.clone();
-				
-				if(currPlayer.isPlayer1())
+				if(piece.isWhite())//TODO make sure this works
 				{
-					newLoc[0] += i;
+					newLoc[0] -= i;
 				}
 				else
 				{
-					newLoc[0] -= i;
+					newLoc[0] += i;
 				}
 				
 				if(!ChessGameState.outOfBounds(newLoc))
@@ -222,6 +237,12 @@ public class MoveGenerator {
 					{
 						moveList.add(new ChessMoveAction(currPlayer, piece, newLoc, taken));
 					}
+					else
+					{
+						i=100;
+						//break out of the loop somehow
+						//dont want to move to the place behind a piece
+					}
 				}
 			}
 			
@@ -230,10 +251,7 @@ public class MoveGenerator {
 			 * unless player 1 or player 2 can make the move.
 			 * 
 			 * */
-			int[][] attackLoc = new int[][]{
-					{-1,-1},
-					{-1,-1}
-			};
+			int[][] attackLoc = new int[][]{ChessPiece.INVALID_LOCATION,ChessPiece.INVALID_LOCATION};
 			if(piece.isWhite() && state.isPlayer1IsWhite())//player 1
 			{
 				attackLoc = new int[][]{
@@ -267,12 +285,15 @@ public class MoveGenerator {
 		}
 		else if(type == ChessPiece.ROOK || type == ChessPiece.QUEEN)
 		{
+			
 			//horizontal to the right
 			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
-				int[] newLoc = new int[]{i,loc[1]};
+				int[] newLoc = new int[2];
+				newLoc[0] = i;
+				newLoc[1] = loc[1];
 				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -282,9 +303,11 @@ public class MoveGenerator {
 			//horizontal to the left
 			for(int i=loc[0]-1;i>=0;i--)
 			{
-				int[] newLoc = new int[]{i,loc[1]};
+				int[] newLoc = new int[2];
+				newLoc[0] = i;
+				newLoc[1] = loc[1];
 				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -294,9 +317,11 @@ public class MoveGenerator {
 			//vertical going up
 			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
-				int[] newLoc = new int[]{loc[0],i};
+				int[] newLoc = new int[2];
+				newLoc[0] = loc[0];
+				newLoc[1] = i;
 				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -306,9 +331,11 @@ public class MoveGenerator {
 			//vertical going down
 			for(int i=loc[0]-1;i>=0;i--)
 			{
-				int[] newLoc = new int[]{loc[0],i};
+				int[] newLoc = new int[2];
+				newLoc[0] = loc[0];
+				newLoc[1] = i;
 				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -362,7 +389,7 @@ public class MoveGenerator {
 			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]++)
 			{
 				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -373,7 +400,7 @@ public class MoveGenerator {
 			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]++)
 			{
 				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -384,7 +411,7 @@ public class MoveGenerator {
 			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]--)
 			{
 				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -395,7 +422,7 @@ public class MoveGenerator {
 			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]--)
 			{
 				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,currPlayer.isWhite());
+				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
 				if(done == true)
 				{
 					break;
@@ -411,7 +438,7 @@ public class MoveGenerator {
 				{
 					if(i != loc[0] && j != loc[1])
 					{
-						addMove(state,piece,moveList,new int[]{i,j},currPlayer,currPlayer.isWhite());
+						addMove(state,piece,moveList,new int[]{i,j},currPlayer,color);
 					}
 				}
 			}
@@ -420,13 +447,16 @@ public class MoveGenerator {
 		
 		if(legal)
 		{
-			return removeIllegalMoves(state, rtnVal,currPlayer);
+			rtnVal =  removeIllegalMoves(state, rtnVal,currPlayer);
 		}
-		else
+		/*String debugMsg = "";
+		debugMsg+="Possible moves: ";
+		for(ChessMoveAction move:rtnVal)
 		{
-			return rtnVal;
+			debugMsg +=move.toString()+" ";
 		}
-		
+		Log.d("Move Generator", debugMsg);*/
+		return rtnVal;
 	}
 	
 	/**
@@ -437,13 +467,13 @@ public class MoveGenerator {
 	 * @param moveList
 	 * @param newLoc
 	 * @param player
-	 * @return true if successful
+	 * @return true if this move takes a piece
 	 */
 	private static boolean addMove(ChessGameState state,
 			ChessPiece piece, ArrayList<ChessMoveAction> moveList,
 			int[] newLoc, ChessPlayer player, boolean color)
 	{
-		if(newLoc == null || newLoc.length != 2 )
+		if(newLoc == null || newLoc.length != 2)
 		{
 			return false;
 		}
@@ -452,6 +482,14 @@ public class MoveGenerator {
 			return false;
 		}
 		if(state == null || state.getPieceMap() == null)
+		{
+			return false;
+		}
+		if(moveList == null)
+		{
+			return false;
+		}
+		if(piece == null)
 		{
 			return false;
 		}
@@ -464,7 +502,6 @@ public class MoveGenerator {
 			if(taken.isWhite() != color)
 			{
 				//add a move if it can take a piece
-				
 				moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
 			}
 			return true;
@@ -472,8 +509,8 @@ public class MoveGenerator {
 		else //unoccupied
 		{
 			moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -499,24 +536,46 @@ public class MoveGenerator {
 		}
 		
 		// Find which states allow the king to be taken
-		Stack<Integer> removeList = new Stack<Integer>();
+		int numRemoved = 0;
 		for(int i=0;i<nextStates.length;i++)
 		{
-			if(canTakeKing(nextStates[i], currPlayer))
+			if(canTakeKing(nextStates[i], !currPlayer.isPlayer1()))
 			{
-				removeList.push(Integer.valueOf(i));
+				moves[i] = null;
+				numRemoved++;
 			}
 		}
 		
-		// Remove the last elements first so the indices don't change
-		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>(Arrays.asList(moves));
-		while(!removeList.isEmpty())
+		// Remove moves that take your own pieces
+		for(int i=0;i<moves.length;i++)
 		{
-			moveList.remove(removeList.pop().intValue());
+			if(moves[i] != null)
+			{
+				if(moves[i].getTakenPiece() != null)
+				{
+					if(currPlayer != null)
+					{
+						if(moves[i].getTakenPiece().isWhite() == currPlayer.isWhite())
+						{
+							moves[i] = null;
+							numRemoved++;
+						}
+					}
+				}
+			}
 		}
 		
-		// Make into normal array
-		ChessMoveAction[] legalMoves = moveList.toArray(new ChessMoveAction[moveList.size()]);
+		// Make a new array with the null moves removed
+		int j=0;
+		ChessMoveAction[] legalMoves = new ChessMoveAction[moves.length-numRemoved];
+		
+		for(int i=0;i<moves.length;i++)
+		{
+			if(moves[i] != null)
+			{
+				legalMoves[j++] = moves[i];
+			}
+		}
 		
 		return legalMoves;
 	}

@@ -2,6 +2,7 @@ package edu.up.cs301.chess;
 
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
 import edu.up.cs301.game.GameComputerPlayer;
@@ -70,6 +71,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		
 		// if there is no game, ignore
 		if (game == null) {
+			Log.d("computer player", "no game");
 			return;
 		}
 		else if (info instanceof ChessGameState) {
@@ -77,18 +79,17 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			ChessGameState newState = (ChessGameState)info;
 			
 			//null check and make sure a move was made
-			if(newState == null || newState.equals(gameState))
+			if(newState.equals(gameState))
 			{
+				Log.d("computer player", "equal game state");
 				return;
 			}
-			
-			//send player info to the state if it wasn't done already
-			
-			gameState = newState;
-			boolean success = makeMove();
-			if(!success)
+			else
 			{
-				System.out.println(name+" did not make a move.");
+				//TODO look for bugs here
+				gameState = (ChessGameState)info;
+				
+				makeMove();
 			}
 		}
 	}
@@ -99,47 +100,75 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public boolean makeMove()
 	{
-		boolean success = false;
-		
 		//TODO check if it can make a move
+		if(gameState == null)
+		{
+			return false;
+		}
 		ChessGameState newState = new ChessGameState(gameState);
-		
+		ChessMoveAction chosenMove = null;
 		if(smart == 0)
 		{
 			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this);
 			
+			//scramble the order of the moves
+			for(int i=0;i<(possibleActions.length/2)-1;i++)
+			{
+				if(Math.random() > 0.25)
+				{
+					int randomIndex = (int) (Math.random()*(possibleActions.length));
+					ChessMoveAction temp = possibleActions[i];
+					
+					possibleActions[i] = possibleActions[randomIndex];
+					possibleActions[randomIndex] = temp;
+					
+				}
+			}
 			//Check if the move generator found any possible moves
 			if(possibleActions != null && possibleActions.length > 0)
 			{
-				int randomIndex = (int) (Math.random()*(possibleActions.length));
-				
-				if(possibleActions[randomIndex] != null)
+				for(int i=0;i<possibleActions.length;i++)
 				{
-					possibleActions[randomIndex].setPlayer(this);
-					success = newState.applyMove(possibleActions[randomIndex]);
-					System.out.println(possibleActions[randomIndex]);
+					chosenMove = new ChessMoveAction(this,possibleActions[i]);
+					if(chosenMove != null && chosenMove.isValid())
+					{
+						break;
+					}
+					else
+					{
+						chosenMove = null;
+					}
 				}
-			}
-			else
-			{
-				//TODO do something if there are no possible actions
-				System.out.println("Counld not generate any valid moves.");
 			}
 		}
 		else if(smart > 0)
 		{
 			ChessMoveAction bestMove = Search.findMove(this, newState, smart);
-			success = newState.applyMove(bestMove);
+			bestMove = new ChessMoveAction(this,bestMove);
+			chosenMove = bestMove;
 		}
 		
 		//send the new game state if it worked
-		if(success)
+		if(chosenMove != null)
 		{
-			gameState = newState;
-			sendInfo(gameState);
+			Log.d("computer player", "Sending this move: "+chosenMove);
+			if(game instanceof ChessLocalGame)
+			{
+				ChessLocalGame chessGame = (ChessLocalGame)game;
+				return chessGame.makeMove(chosenMove);
+			}
+			else
+			{
+				Log.d("computer player", "Did not receive a chess local game.");
+				return false;
+			}
 		}
-		return success;
+		else
+		{
+			Log.d("computer player", "Failed to make a move.");
+			return false;
+		}
 	}
 
 	/**
@@ -168,21 +197,22 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * @return boolean true if this player is player 1
 	 */
 	public boolean isPlayer1() {
-		return isPlayer1;
-	}
-
-	/**
-	 * Sets the player as player 1 in the game state if
-	 * the parameter is true.
-	 * 
-	 * @param boolean true if this is player 1
-	 */
-	public void setPlayer1(boolean isPlayer1) {
-		this.isPlayer1 = isPlayer1;
+		return playerNum == 0;//return isPlayer1;
 	}
 
 	public int getPlayerID() {
 		return playerNum;
+	}
+
+	public int selectUpgrade() {
+		if(smart == 0)
+		{
+			return ChessPiece.KNIGHT;
+		}
+		else
+		{
+			return ChessPiece.QUEEN;
+		}
 	}
 	
 	

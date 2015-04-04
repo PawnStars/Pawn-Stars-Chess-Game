@@ -1,7 +1,5 @@
 package edu.up.cs301.chess.actions;
 
-import java.util.Arrays;
-
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
@@ -21,7 +19,7 @@ import edu.up.cs301.game.actionMsg.GameAction;
 public class ChessMoveAction extends GameAction {
 	
 	// to satisfy the serializable interface
-	private static final long serialVersionUID = 28062497013L;
+	private static final long serialVersionUID = 2806249547013L;
 	
 	//The piece moved by the player
 	private ChessPiece whichPiece;
@@ -48,34 +46,42 @@ public class ChessMoveAction extends GameAction {
 	 * @param whichPlayer
 	 *            value to initialize which player is white
 	 */
-	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece) {
+	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece)
+	{
 		super(player);
-		valid = false;
-		if(player instanceof ChessPlayer)
+		valid = true;
+		
+		this.takenPiece = takenPiece;
+		if(player != null && player instanceof ChessPlayer)
 		{
-			if(takenPiece == null)
-			{
-				valid = true;
-			}
-			else
+			if(takenPiece != null)
 			{
 				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor != takenPiece.isWhite())
+				if(whichColor == takenPiece.isWhite())
 				{
-					valid = true;
+					valid = false;
 				}
 			}
 		}
 		
 		this.whichPiece = whichPiece;
-		this.takenPiece = takenPiece;
-		if(newPos == null || ChessGameState.outOfBounds(newPos))
+		if(whichPiece == null)
 		{
 			valid = false;
-			return;
 		}
-		this.newPos = newPos.clone();
 		
+		if(newPos == null)
+		{
+			valid = false;
+		}
+		else
+		{
+			this.newPos = newPos.clone();
+		}
+		if(ChessGameState.outOfBounds(newPos))
+		{
+			valid = false;
+		}
 	}
 	
 	/**
@@ -85,26 +91,40 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction(GamePlayer player, ChessMoveAction action) {
 		super(player);
-		valid = false;
+		valid = true;
 		if(player instanceof ChessPlayer)
 		{
-			if(takenPiece == null)
-			{
-				valid = true;
-			}
-			else
+			if(action != null && action.getTakenPiece() != null)
 			{
 				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor != action.getTakenPiece().isWhite())
+				if(whichColor == action.getTakenPiece().isWhite())
 				{
-					valid = true;
+					valid = false;
 				}
 			}
 		}
-		
-		this.whichPiece = action.getWhichPiece();
-		this.newPos = action.getNewPos();
-		this.takenPiece = action.getTakenPiece();
+		else
+		{
+			valid = false;
+		}
+		if(action == null)
+		{
+			valid = false;
+		}
+		else
+		{
+			this.whichPiece = action.getWhichPiece();
+			if(whichPiece == null)
+			{
+				valid = false;
+			}
+			this.newPos = action.getNewPos();
+			if(newPos == null)
+			{
+				valid = false;
+			}
+			this.takenPiece = action.getTakenPiece();
+		}
 	}
 
 	/**
@@ -148,25 +168,22 @@ public class ChessMoveAction extends GameAction {
 	public String toString()
 	{
 		String rtnVal = "";
-		rtnVal += whichPiece.toString();
-		int[] loc = whichPiece.getLocation();
-		
-		//convert to chess notation
-		//TODO doesn't work for special moves
-		rtnVal += (char)(97+loc[1]);
-		rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
-		rtnVal += " ";
-		
-		
-		rtnVal += (char)(97+newPos[1]);
-		rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
-		rtnVal += " ";
-		
+		if(valid)
+		{
+			rtnVal += whichPiece.toString();
+			int[] loc = whichPiece.getLocation();
+			
+			//convert to chess notation
+			//TODO doesn't work for special moves
+			rtnVal += (char)(97+loc[1]);
+			rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
+			rtnVal += " ";
+			
+			
+			rtnVal += (char)(97+newPos[1]);
+			rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
+			rtnVal += " ";
+		}
 		return rtnVal;
 	}
-	
-	
-	
-	
-	
 }//class CounterMoveAction

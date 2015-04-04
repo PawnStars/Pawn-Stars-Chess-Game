@@ -1,11 +1,6 @@
 package edu.up.cs301.chess;
 
-import edu.up.cs301.chess.actions.ChessMoveAction;
-import edu.up.cs301.chess.actions.DrawAction;
-import edu.up.cs301.chess.actions.PawnMove;
-import edu.up.cs301.chess.actions.ResignAction;
-import edu.up.cs301.chess.actions.RookMove;
-import edu.up.cs301.chess.actions.SelectUpgradeAction;
+import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.LocalGame;
 import edu.up.cs301.game.actionMsg.GameAction;
@@ -18,7 +13,7 @@ import android.util.Log;
  * @author Derek Schumacher
  * @author Scott Rowland
  * @author Allison Liedtke
- * @version March 2015
+ * @version April 2015
  */
 public class ChessLocalGame extends LocalGame implements ChessGame {
 
@@ -33,9 +28,13 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	 * 		false if not 
 	 */
 	@Override
-	public boolean canMove(int playerIdx) {
-		//TODO: implement turns
-		if(gameState.isWhoseTurn() && playerIdx == 1)
+	public boolean canMove(int playerIdx)
+	{
+		if(gameState.isWhoseTurn() && playerIdx == 0)
+		{
+			return true;
+		}
+		else if(!gameState.isWhoseTurn() && playerIdx == 1)
 		{
 			return true;
 		}
@@ -51,10 +50,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	public ChessLocalGame() {
 		// initialize the game state with a default board setup
 		this.gameState = new ChessGameState(true);
-		
-		/*TODO implement a part where the player selects their
-		 * color or one is randomly chosen.
-		 * */
 	}
 
 	/**
@@ -78,28 +73,80 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			if (act instanceof RookMove) {
 				//TODO implement what each move does
 			}
-			else {
-				ChessGameState newState = new ChessGameState(gameState);
-				newState.applyMove(act);
-				gameState = newState;
+			else
+			{
+				if(canMove(getPlayerIdx(act.getPlayer())))
+				{
+					ChessGameState newState = new ChessGameState(gameState);
+					newState.applyMove(act);
+					gameState = newState;
+					sendAllUpdatedState();
+				}
 			}
 			return true;
-			
 		}
 		else if (action instanceof SelectUpgradeAction) {
 			//TODO implement what each move does
+			SelectUpgradeAction act = (SelectUpgradeAction)action;
+			ChessGameState newState = new ChessGameState(gameState);
+			newState.applyMove(act);
+			gameState = newState;
+			sendAllUpdatedState();
+			return true;
 		}
 		else if (action instanceof ResignAction) {
 			//TODO implement what each move does
+			ResignAction act = (ResignAction)action;
+			int losingPlayer = getPlayerIdx(act.getPlayer());
+			ChessGameState newState = new ChessGameState(gameState);
+			
+			if(losingPlayer == 0)
+			{
+				newState.setPlayer2Won(true);
+			}
+			else
+			{
+				newState.setPlayer2Won(true);
+			}
+			
+			gameState = newState;
+			sendAllUpdatedState();
+			return true;
 		}
 		else if (action instanceof DrawAction) {
 			//TODO implement what each move does
+			return false;
+		}
+		else if(action instanceof ChooseColorAction)
+		{
+			//whoever sends the choose color action determines color
+			ChooseColorAction act = (ChooseColorAction)action;
+			gameState = new ChessGameState(act.isPlayer1IsWhite());
+			sendAllUpdatedState();
+			
+			//manually send the new states
+			for(int i=0;i<players.length;i++)
+			{
+				if(players[i] instanceof ChessPlayer)
+				{
+					ChessPlayer p = (ChessPlayer)players[i];
+					if(p.isPlayer1())
+					{
+						p.setWhite(act.isWhichColor());
+					}
+					else
+					{
+						p.setWhite(!act.isWhichColor());
+					}
+				}
+			}
+			return true;
 		}
 		else {
 			// denote that this was an illegal move
+			Log.i("action", "invalid move");
 			return false;
 		}
-		return true;
 	}//makeMove
 	
 	/**
@@ -140,12 +187,28 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	@Override
 	public String checkIfGameOver() {
 		
-		//TODO check if the game's over
 		if(gameState.isGameOver())
 		{
-			//if(gameState.isPlayer1Won())
-			//TODO implement
-			return "Game over.";
+			Log.i("game", "game over");
+			
+			//both players winning means there was a draw
+			if(gameState.isPlayer1Won() && gameState.isPlayer2Won())
+			{
+				return "The game has ended in a draw.";
+			}
+			
+			//Find the name of the player who won
+			String winningPlayerName = "";
+			if(gameState.isPlayer1Won())
+			{
+				winningPlayerName  = playerNames[0];
+			}
+			if(gameState.isPlayer2Won())
+			{
+				winningPlayerName  = playerNames[0];
+			}
+			
+			return "The game is over. "+winningPlayerName+" has won.";
 		}
 		else
 		{
