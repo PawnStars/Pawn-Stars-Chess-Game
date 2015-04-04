@@ -802,17 +802,13 @@ public class ChessGameState extends GameState {
 	public boolean setPlayerInfo(ChessPlayer player) {
 		boolean playerIsWhite = player.isWhite();
 		int playerId = player.getPlayerID();
-		//TODO: fix this later. For now, just always make player 1 white:
+		// TODO: fix this later. For now, just always make player 1 white:
 		player1IsWhite = true;
 		/*
-		// the first to connect gets to choose color
-		if (numConnected == 0) {
-			player1IsWhite = player.isWhite();
-			// player.setWhite(true);
-		}
-		if (numConnected == 1) {
-			player.setWhite(!player1IsWhite);
-		}*/
+		 * // the first to connect gets to choose color if (numConnected == 0) {
+		 * player1IsWhite = player.isWhite(); // player.setWhite(true); } if
+		 * (numConnected == 1) { player.setWhite(!player1IsWhite); }
+		 */
 		if (playerIdx[0] == playerId || playerIdx[1] == playerId) {
 			return true;
 		}
@@ -836,7 +832,7 @@ public class ChessGameState extends GameState {
 	 * @return
 	 */
 	public boolean[][] getPossibleMoves(ChessPiece piece) {
-		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		boolean[][] moves = null;// = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
 
 		if (piece == null)
 			return null;// something bad happened
@@ -846,35 +842,154 @@ public class ChessGameState extends GameState {
 		int xLocation = location[1];
 		int yLocation = location[0];
 
-		if (ChessPiece.PAWN == piece.getType()) {
-			if (yLocation - 1 > 0) {
-				if (this.pieceMap[yLocation - 1][xLocation] == null) {
-					moves[xLocation][yLocation - 1] = true;
-				}
-			}
-			// See if the squares in front have taken:
-			if (piece.getHasMoved() == false) {
-				if (yLocation - 2 > 0) {
-					if (this.pieceMap[yLocation - 2][xLocation] == null) {
-						moves[xLocation][yLocation - 2] = true;
-					}
-				}
-			}
+		switch (piece.getType()) {
+		case ChessPiece.PAWN:
+			moves = getPawnMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.KNIGHT:
+			moves = getKnightMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.BISHOP:
+			moves = getBishopMoves(xLocation, yLocation, piece);
+			break;
+		}
 
-			// See if the pawn can attack from its current location:
-			if (xLocation - 1 > 0 && yLocation - 1 > 0) {
-				if (this.pieceMap[yLocation - 1][xLocation - 1] != null) {
-					moves[xLocation - 1][yLocation - 1] = true;
+		return moves;
+
+	}
+
+	/**
+	 * Checks the possible spots a pawn can move to
+	 * 
+	 * @param xLocation
+	 *            x-coordinate of selected piece
+	 * @param yLocation
+	 *            y-coordinate of selected piece
+	 * @param piece
+	 *            currently selected piece
+	 * @return a 2-D array representing the spaces the given pawn can move. True
+	 *         means the piece can move there, false means it can not move
+	 *         there.
+	 */
+	public boolean[][] getPawnMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		if (yLocation - 1 >= 0) {
+			if (this.pieceMap[yLocation - 1][xLocation] == null) {
+				moves[xLocation][yLocation - 1] = true;
+			}
+		}
+		// See if the squares in front are taken:
+		if (piece.getHasMoved() == false) {
+			if (yLocation - 2 >= 0) {
+				if (this.pieceMap[yLocation - 2][xLocation] == null) {
+					moves[xLocation][yLocation - 2] = true;
 				}
 			}
+		}
 
-			if (xLocation + 1 < BOARD_WIDTH && yLocation - 1 > 0) {
-				if (this.pieceMap[yLocation - 1][xLocation + 1] != null) {
-					moves[xLocation + 1][yLocation - 1] = true;
-				}
+		// See if the pawn can attack from its current location:
+		if (xLocation - 1 >= 0 && yLocation - 1 >= 0) {
+			if (this.pieceMap[yLocation - 1][xLocation - 1] != null) {
+				moves[xLocation - 1][yLocation - 1] = true;
+			}
+		}
+
+		if (xLocation + 1 < BOARD_WIDTH && yLocation - 1 >= 0) {
+			if (this.pieceMap[yLocation - 1][xLocation + 1] != null) {
+				moves[xLocation + 1][yLocation - 1] = true;
 			}
 		}
 
 		return moves;
 	}
+
+	/**
+	 * Checks the possible spots a knight can move to
+	 * 
+	 * @param xLocation
+	 *            x-coordinate of selected piece
+	 * @param yLocation
+	 *            y-coordinate of selected piece
+	 * @param piece
+	 *            currently selected piece
+	 * @return 2D array representing the board. True means the piece can move
+	 *         there false means it can not move there
+	 */
+	public boolean[][] getKnightMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		//Pass by reference into checkKnightSpot...
+		
+		// Check up two right one (or right one up two)
+		checkKnightSpot(piece, xLocation + 1, yLocation - 2, moves);
+
+		// Check down two right one (or right one two down):
+		checkKnightSpot(piece, xLocation + 1, yLocation + 2, moves);
+
+		// Check up two left one (or left one up two)
+		checkKnightSpot(piece, xLocation - 1, yLocation - 2, moves);
+
+		// Check down two left one (or left one two down):
+		checkKnightSpot(piece, xLocation - 1, yLocation + 2, moves);
+
+		// Check left two one up (or one up two left):
+		checkKnightSpot(piece, xLocation - 2, yLocation - 1, moves);
+
+		// Check left two one down (or one down two left):
+		checkKnightSpot(piece, xLocation - 2, yLocation + 1, moves);
+
+		// Check right two one down:
+		checkKnightSpot(piece, xLocation + 2, yLocation - 1, moves);
+
+		// Check right two one up:
+		checkKnightSpot(piece, xLocation + 2, yLocation + 1, moves);
+
+		return moves;
+	}
+
+	/**
+	 * Alters moves array to determine which location knight can move to
+	 * 
+	 * @param xLocation x-coordinate to be checked
+	 * @param yLocation y-coordinate to be checked
+	 * @param moves array to be modified
+	 */
+	private void checkKnightSpot(ChessPiece piece, int xLocation,
+			int yLocation, boolean[][] moves) {
+		if (yLocation >= 0 && yLocation < BOARD_HEIGHT && xLocation >= 0
+				&& xLocation < BOARD_WIDTH) {
+			// See if the spot is taken:
+			if (this.pieceMap[yLocation][xLocation] == null) {
+				moves[xLocation][yLocation] = true;
+			} else if (piece
+					.differentColor(this.pieceMap[yLocation][xLocation])) {
+				// If the pieces are different colors, the knight can move to
+				// that spot (and take the piece)
+				moves[xLocation][yLocation] = true;
+			}
+		}
+	}
+	
+	private boolean [][] getBishopMoves(int xLocation, int yLocation, ChessPiece piece) {
+		boolean [][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		//TODO:Can't test this until pieces can move around...
+		/*
+		//Check northwest direction:
+		int i = xLocation -1;
+		int j = yLocation + 1;
+		
+		while (this.pieceMap[yLocation][xLocation] == null) {
+			moves[xLocation][yLocation] = true;
+		}
+		
+		//Check northeast direction:
+		
+		//Check southwest direction:
+		
+		//Check southeast direction:
+		*/
+		return moves;
+	}
+
 }

@@ -409,5 +409,14 @@ public class ChessPiece {
 		return "["+typeStr+"]";
 	}
 	
+	/**
+	 * Checks to see if piece is the same color as this piece.
+	 * 
+	 * @param piece
+	 * @return true if the pieces are the same color, false otherwise
+	 */
+	public boolean differentColor(ChessPiece piece){
+		return !(this.isWhite && piece.isWhite);
+	}
 	
 }
