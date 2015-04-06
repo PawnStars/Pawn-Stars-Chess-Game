@@ -49,4 +49,16 @@ public class PawnMove extends ChessMoveAction {
 	public int getType() {
 		return type;
 	}
+	
+	@Override
+	public String toString()
+	{
+		//TODO finish
+		String main = super.toString();
+		if(type == PROMOTION)
+		{
+			return "";
+		}
+		return"";
+	}
 }

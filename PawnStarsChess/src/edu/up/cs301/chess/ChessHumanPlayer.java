@@ -28,7 +28,7 @@ import android.view.View.OnClickListener;
  * @author Derek Schumacher
  * @author Scott Rowland
  * @author Allison Liedtke
- * @version March 2015
+ * @version April 2015
  */
 public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, OnClickListener, OnTouchListener {
 
@@ -143,7 +143,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// update our state; then update the display
 		state = (ChessGameState)info;
 		updateDisplay();
-		Log.d("human player", "state updated:"+state);
+		//Log.d("human player", "state updated:"+state);
 	}
 	
 	/**
@@ -385,7 +385,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				ChessLocalGame chessGame = (ChessLocalGame)game;
 				chessGame.makeMove(act);
 			}
-			updateDisplay();//TODO fix this
+			updateDisplay();
 		}
 	}
 

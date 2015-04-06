@@ -170,7 +170,7 @@ public class ChessMoveAction extends GameAction {
 		String rtnVal = "";
 		if(valid)
 		{
-			rtnVal += whichPiece.toString();
+			rtnVal += whichPiece.toCharacter();
 			int[] loc = whichPiece.getLocation();
 			
 			//convert to chess notation
@@ -178,7 +178,6 @@ public class ChessMoveAction extends GameAction {
 			rtnVal += (char)(97+loc[1]);
 			rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
 			rtnVal += " ";
-			
 			
 			rtnVal += (char)(97+newPos[1]);
 			rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];

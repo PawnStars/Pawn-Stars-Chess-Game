@@ -374,8 +374,6 @@ public class ChessGameState extends GameState {
 			//check if it is this player's turn
 			if(player != null && player.isPlayer1() == whoseTurn)
 			{
-				whoseTurn = !whoseTurn;
-				
 				//Statemate
 				if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
 				{
@@ -465,6 +463,8 @@ public class ChessGameState extends GameState {
 						}
 					}
 					
+					whoseTurn = !whoseTurn;
+					
 					return true;
 				}
 				else//Could not find the piece to move
@@ -502,6 +502,7 @@ public class ChessGameState extends GameState {
 		}
 		
 		rtnVal+="Turn: "+turn+"\n";
+		rtnVal+="Score: "+player1Points+"\n";
 		
 		//List the moves made so far
 		rtnVal += "Moves: ";
@@ -518,11 +519,13 @@ public class ChessGameState extends GameState {
 			{
 				if(pieceMap[i][j] != null)
 				{
+					//print the character corresponding to the chess piece
 					rtnVal+="["+pieceMap[i][j].toCharacter()+"]";
 				}
 				else
 				{
-					rtnVal+="[ ]";
+					//empty tiles on the board
+					rtnVal+="[_]";
 				}
 			}
 			rtnVal+="\n";
@@ -538,6 +541,7 @@ public class ChessGameState extends GameState {
 	 */
 	public static boolean outOfBounds(int[] loc)
 	{
+		//Check for null
 		if(loc == null)
 		{
 			return true;
@@ -546,6 +550,8 @@ public class ChessGameState extends GameState {
 		{
 			return true;
 		}
+		
+		//Check for coordinates outside the pieceMap
 		if(loc[0] < 0 || loc[0] >= ChessGameState.BOARD_HEIGHT)
 		{
 			return true;

@@ -1,5 +1,6 @@
 package edu.up.cs301.chess;
 
+import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import android.app.Activity;
@@ -58,7 +59,7 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		// if the guiHandler is available, set the new counter value
 		// in the counter-display widget, doing it in the Activity's
 		// thread.
-		if (guiHandler != null) {
+		/*if (guiHandler != null) {
 			guiHandler.post(
 					new Runnable() {
 						public void run() {
@@ -68,7 +69,10 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 							player2Score.setText(gameState.getPlayer2Points());
 						}
 					}});
-		}
+		}*/
+		board.setPieceMap(gameState.getPieceMap());
+		player1Score.setText(""+gameState.getPlayer1Points());
+		player2Score.setText(""+gameState.getPlayer2Points());
 	}
 	
 	/**
@@ -114,6 +118,12 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		
 		// if the state is non=null, update the display
 		if (gameState != null) {
+			ChooseColorAction action = new ChooseColorAction(this,isWhite);
+			if(game instanceof ChessLocalGame)
+			{
+				ChessLocalGame chessGame = (ChessLocalGame)game;
+				chessGame.makeMove(action);
+			}
 			updateDisplay();
 		}
 	}

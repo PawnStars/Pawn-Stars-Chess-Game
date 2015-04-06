@@ -1,7 +1,8 @@
 package edu.up.cs301.chess.engine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import android.util.Log;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
@@ -18,9 +19,10 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  * @version March 2015
  *
  */
-public class Evaluator {
+public class Evaluator
+{
 	
-	// Exact piece table values/material values from Stockfish AI
+	// Exact piece table values/material values from CuckooChess AI
 	private static final int pawnVal = 92;
 	private static final int rookVal = 593;
 	private static final int bishopVal = 385;
@@ -172,8 +174,8 @@ public class Evaluator {
 	private static final int[][] queenMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	private static final int[][] rookMidTbP2 = new int[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	
-	private static final int[][][] midGameTableP2 = new int[ChessPiece.NUM_TYPES][][];
-	private static final int[][][] endGameTableP2 = new int[ChessPiece.NUM_TYPES][][];
+	private static final int[][][] midGameTableP2 = new int[ChessPiece.NUM_TYPES][ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+	private static final int[][][] endGameTableP2 = new int[ChessPiece.NUM_TYPES][ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
 	
 	// make a reverse copy of these arrays for player 2
 	static
@@ -186,9 +188,9 @@ public class Evaluator {
 				{
 					int oppJ = ChessGameState.BOARD_HEIGHT-1-j;
 					int oppK = ChessGameState.BOARD_WIDTH-1-k;
-					midGameTableP2[i][j][j] = midGameTableP1[i][oppJ][oppK];
+					midGameTableP2[i][j][k] = midGameTableP1[i][oppJ][oppK];
 					
-					endGameTableP2[i][j][j] = endGameTableP1[i][oppJ][oppK];
+					endGameTableP2[i][j][k] = endGameTableP1[i][oppJ][oppK];
 					if(i == ChessPiece.PAWN)
 					{
 						pawnMidTbP2[j][k] = pawnMidTbP1[oppJ][oppK];
@@ -265,7 +267,7 @@ public class Evaluator {
 	/**
 	 * Evaluates a game state and assigns each player a score
 	 */
-	public static final int evalulate(ChessGameState state)
+	public static int evalulate(ChessGameState state)
 	{
 		int score = 0;
 		
@@ -293,7 +295,7 @@ public class Evaluator {
 	 */
 	private static int endGameEval(ChessGameState state, int score) {
 		// TODO Auto-generated method stub
-		return 0;
+		return score;
 	}
 
 	/**
@@ -305,7 +307,47 @@ public class Evaluator {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/**
+	 * Take pawn islands and formations into account
+	 * @param state
+	 * @return score
+	 */
+	private static int pawnBonus(ChessGameState state) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	/**
+	 * Add the reach of the rooks into the calculation
+	 * @param state
+	 * @param score
+	 * @return score
+	 */
+	private static int rookBonus(ChessGameState state) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
+    public static ChessPiece[] attackedBy(ChessGameState state,ChessPiece piece)
+    {
+    	//TODO finish
+    	ArrayList<ChessPiece> inDanger = new ArrayList<ChessPiece>();
+    	
+    	ChessMoveAction[] moves = MoveGenerator.getPieceMoves(state, piece, null, piece.isWhite(), true);
+    	for(ChessMoveAction move: moves)
+    	{
+    		ChessPiece takenPiece = move.getTakenPiece();
+    		if(takenPiece != null)
+    		{
+    			inDanger.add(takenPiece);
+    		}
+    	}
+    	
+    	ChessPiece[] rtnVal = inDanger.toArray(new ChessPiece[inDanger.size()]);
+		return rtnVal;
+    }
+    
 	/**
 	 * Add special consideration for bishops
 	 * @param state
@@ -377,7 +419,7 @@ public class Evaluator {
         }
 		
 		//Penalty for being equal. We want to win, not draw.
-		if(numP1Bishops == 1 && numP2Bishops == 1 )
+		if(numP1Bishops == 1 && numP2Bishops == 1)
 		{
 			int[] locP1Bishop = p1Bishops[0].getLocation();
 			int[] locP2Bishop = p2Bishops[0].getLocation();
@@ -402,10 +444,12 @@ public class Evaluator {
 		//special cases of having a trapped bishop
 		ChessPiece[][] board = state.getPieceMap();
 		
+		boolean bishopColor;
+		
 		//bishop at a7
-		boolean bishopColor = board[1][0].isWhite();
 		if(board[1][0] != null && board[1][0].getType() == ChessPiece.BISHOP)
 		{
+			bishopColor = board[1][0].isWhite();
 			//black pawn at b6
 			if(board[2][1].getType() == ChessPiece.PAWN && board[2][1].isWhite() != bishopColor)
 			{
@@ -425,9 +469,9 @@ public class Evaluator {
 		}
 		
 		//bishop at h7
-		bishopColor = board[1][7].isWhite();
 		if(board[1][7] != null && board[1][7].getType() == ChessPiece.BISHOP)
 		{
+			bishopColor = board[1][7].isWhite();
 			//enemy pawn at g6
 			if(board[2][6] != null && board[2][1].getType() == ChessPiece.PAWN &&
 					board[2][1].isWhite() != bishopColor)
@@ -447,10 +491,11 @@ public class Evaluator {
 				}
 			}
 		}
+		
 		//bishop at a2
-		bishopColor = board[6][0].isWhite();
 		if(board[6][0] != null && board[6][0].getType() == ChessPiece.BISHOP)
 		{
+			bishopColor = board[6][0].isWhite();
 			//black pawn at b3
 			if(board[5][1].getType() == ChessPiece.PAWN && board[5][1].isWhite() != bishopColor)
 			{
@@ -470,9 +515,9 @@ public class Evaluator {
 		}
 		
 		//bishop at h2
-		bishopColor = board[6][7].isWhite();
 		if(board[6][7] != null && board[6][7].getType() == ChessPiece.BISHOP)
 		{
+			bishopColor = board[6][7].isWhite();
 			//enemy pawn at g3
 			if(board[5][6] != null && board[2][1].getType() == ChessPiece.PAWN &&
 					board[5][6].isWhite() != bishopColor)
@@ -512,17 +557,6 @@ public class Evaluator {
 	}
 
 	/**
-	 * Add the reach of the rooks into the calculation
-	 * @param state
-	 * @param score
-	 * @return score
-	 */
-	private static int rookBonus(ChessGameState state) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	/**
 	 * Add the benefit of being able to castle into the calculation
 	 * @param state
 	 * @param score
@@ -558,7 +592,7 @@ public class Evaluator {
 	 * @return score
 	 */
 	private static int threatBonus(ChessGameState state) {
-		// TODO Auto-generated method stub
+		
 		int score = 0;
 		for(ChessPiece piece:state.getPlayer1Pieces())
 		{
@@ -633,16 +667,6 @@ public class Evaluator {
         pBonus += interpolate(x, 0, 30 * deltaScore / 100, maxSigMaterial, 0);
 
         return pBonus;
-	}
-
-	/**
-	 * Take pawn islands and formations into account
-	 * @param state
-	 * @return score
-	 */
-	private static int pawnBonus(ChessGameState state) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	/**
@@ -784,32 +808,19 @@ public class Evaluator {
      * Used to get a score from a piece table when
      * it is not clear if it is end game or mid game.
      */
-    static final int interpolate(int x, int x1, int y1, int x2, int y2) {
-        if (x > x2) {
+    private static int interpolate(int x, int x1, int y1, int x2, int y2)
+    {
+        if (x > x2)
+        {
             return y2;
-        } else if (x < x1) {
+        }
+        else if (x < x1)
+        {
             return y1;
-        } else {
+        }
+        else
+        {
             return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
         }
-    }
-    
-    static final ChessPiece[] attackedBy(ChessGameState state,ChessPiece piece)
-    {
-    	//TODO finish
-    	ArrayList<ChessPiece> inDanger = new ArrayList<ChessPiece>();
-    	
-    	ChessMoveAction[] moves = MoveGenerator.getPieceMoves(state, piece, null, piece.isWhite(), true);
-    	for(ChessMoveAction move: moves)
-    	{
-    		ChessPiece takenPiece = move.getTakenPiece();
-    		if(takenPiece != null)
-    		{
-    			inDanger.add(takenPiece);
-    		}
-    	}
-    	
-    	ChessPiece[] rtnVal = inDanger.toArray(new ChessPiece[inDanger.size()]);
-		return rtnVal;
     }
 }

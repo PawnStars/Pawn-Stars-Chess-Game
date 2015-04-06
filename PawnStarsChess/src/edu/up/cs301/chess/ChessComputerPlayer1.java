@@ -16,10 +16,12 @@ import edu.up.cs301.game.util.Tickable;
  * @author Derek Schumacher
  * @author Scott Rowland
  * @author Allison Liedtke
- * @version March 2015
+ * @version April 2015
  */
 public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPlayer, Tickable {
 	
+	public static final int RANDOM = 0;
+	public static final int TAKE_PIECES = 1; 
 	/*
 	 * The intelligence of the AI
 	 * A value of MAX_INTELLIGENCE corresponds to a deeper search
@@ -107,24 +109,21 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		}
 		ChessGameState newState = new ChessGameState(gameState);
 		ChessMoveAction chosenMove = null;
-		if(smart == 0)
+		if(smart == RANDOM || smart == TAKE_PIECES)
 		{
 			//Get all the possible moves
-			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this);
+			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite);
 			
-			//scramble the order of the moves
+			//scramble the order of the moves so it won't be predictible
 			for(int i=0;i<(possibleActions.length/2)-1;i++)
 			{
-				if(Math.random() > 0.25)
-				{
-					int randomIndex = (int) (Math.random()*(possibleActions.length));
-					ChessMoveAction temp = possibleActions[i];
-					
-					possibleActions[i] = possibleActions[randomIndex];
-					possibleActions[randomIndex] = temp;
-					
-				}
+				int randomIndex = (int) (Math.random()*(possibleActions.length));
+				ChessMoveAction temp = possibleActions[i];
+				
+				possibleActions[i] = possibleActions[randomIndex];
+				possibleActions[randomIndex] = temp;
 			}
+
 			//Check if the move generator found any possible moves
 			if(possibleActions != null && possibleActions.length > 0)
 			{
@@ -133,7 +132,19 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					chosenMove = new ChessMoveAction(this,possibleActions[i]);
 					if(chosenMove != null && chosenMove.isValid())
 					{
-						break;
+						if(smart == RANDOM)
+						{
+							//Apply any valid non-null move
+							break;
+						}
+						if(smart == TAKE_PIECES)
+						{
+							//Do any move that would result in taking a piece
+							if(chosenMove.getTakenPiece() != null)
+							{
+								break;
+							}
+						}
 					}
 					else
 					{
@@ -141,8 +152,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					}
 				}
 			}
+
 		}
-		else if(smart > 0)
+		else if(smart > 1)
 		{
 			ChessMoveAction bestMove = Search.findMove(this, newState, smart);
 			bestMove = new ChessMoveAction(this,bestMove);
