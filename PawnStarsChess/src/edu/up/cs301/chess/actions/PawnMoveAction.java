@@ -16,7 +16,7 @@ import edu.up.cs301.game.GamePlayer;
  * @version March 2015
  *
  */
-public class PawnMove extends ChessMoveAction {
+public class PawnMoveAction extends ChessMoveAction {
 
 	/**
 	 * instance variables
@@ -31,22 +31,15 @@ public class PawnMove extends ChessMoveAction {
 	
 	public final static int NUM_PAWN_ATTACKS_NORMAL = 2;
 	
-	// The type of this move
-	private int type;
+	// The type of this move Game state should determine this...
+	//private int type;
 	
 	/**
 	 * Default constructor
 	 */
-	public PawnMove(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece, int type) {
-		super(player, whichPiece, newPos, takenPiece);
-		this.type = type;
+	public PawnMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos) {
+		super(player, whichPiece, newPos);
+		//this.type = type;
 	}
 
-	/**
-	 * Returns this move's type
-	 * @return
-	 */
-	public int getType() {
-		return type;
-	}
 }

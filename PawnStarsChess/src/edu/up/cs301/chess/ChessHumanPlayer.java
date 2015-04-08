@@ -2,6 +2,7 @@ package edu.up.cs301.chess;
 
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.DrawAction;
+import edu.up.cs301.chess.actions.PawnMoveAction;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
@@ -210,6 +211,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 			}
 		};
 
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setMessage(colorQuestion);
 		builder.setTitle(pickColorTitle);
@@ -217,7 +219,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 		builder.setNegativeButton(blackLabel, negListener);
 		AlertDialog alert = builder.create();
 		alert.show();
-
+		 
 		// if we have a game state, "simulate" that we have just received
 		// the state from the game so that the GUI values are updated
 		if (state != null) {
@@ -272,9 +274,14 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 				if (this.lastPieceSelected != null) {
 					// Send a move action to the local game (will be ignored if
 					// invalid move):
-					ChessMoveAction move = new ChessMoveAction(this,
-							lastPieceSelected, selectedLoc);
-					game.sendAction(move);
+					if (this.lastPieceSelected.getType() == ChessPiece.PAWN) {
+						PawnMoveAction move = new PawnMoveAction(this, lastPieceSelected, selectedLoc);
+						game.sendAction(move);
+					} else {
+						ChessMoveAction move = new ChessMoveAction(this,
+								lastPieceSelected, selectedLoc);
+						game.sendAction(move);
+					}
 					this.lastPieceSelected = null;
 				}
 

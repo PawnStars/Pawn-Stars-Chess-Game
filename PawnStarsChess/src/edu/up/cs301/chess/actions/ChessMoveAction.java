@@ -26,17 +26,14 @@ public class ChessMoveAction extends GameAction {
 	//The piece moved by the player
 	private ChessPiece whichPiece;
 	
-	//The piece to be taken
-	private ChessPiece takenPiece;
+	//The piece to be taken This should not be in here. The gameState should determine this
+	//private ChessPiece takenPiece;
 	
 	//The new location of the selected piece
 	private int[] newPos;
 	
 	//Color of the mover
 	private boolean whichColor;
-	
-	//Whether or not the move is valid
-	private boolean valid;
 	
 	//TODO could make it possible to undo a turn with this info and the last position
 	
@@ -50,26 +47,10 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece) {
 		super(player);
-		valid = false;
-		if(player instanceof ChessPlayer)
-		{
-			if(takenPiece == null)
-			{
-				valid = true;
-			}
-			else
-			{
-				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor != takenPiece.isWhite())
-				{
-					valid = true;
-				}
-			}
-		}
 		
 		this.whichPiece = whichPiece;
 		this.newPos = newPos;
-		this.takenPiece = takenPiece;
+		//this.takenPiece = takenPiece;
 	}
 	
 	/**
@@ -84,23 +65,6 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos) {
 		super(player);
-		valid = false;
-		if(player instanceof ChessPlayer)
-		{
-			if(takenPiece == null)
-			{
-				valid = true;
-			}
-			else
-			{
-				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor != takenPiece.isWhite())
-				{
-					valid = true;
-				}
-			}
-		}
-		
 		this.whichPiece = whichPiece;
 		this.newPos = newPos;
 	}
@@ -112,26 +76,9 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction(GamePlayer player, ChessMoveAction action) {
 		super(player);
-		valid = false;
-		if(player instanceof ChessPlayer)
-		{
-			if(takenPiece == null)
-			{
-				valid = true;
-			}
-			else
-			{
-				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor != action.getTakenPiece().isWhite())
-				{
-					valid = true;
-				}
-			}
-		}
-		
 		this.whichPiece = action.getWhichPiece();
 		this.newPos = action.getNewPos();
-		this.takenPiece = action.getTakenPiece();
+		//this.takenPiece = action.getTakenPiece();
 	}
 
 	/**
@@ -146,10 +93,10 @@ public class ChessMoveAction extends GameAction {
 	/**
 	 * Gets the piece to be taken
 	 * @return ChessPiece the piece that will be captured
-	 */
+	 
 	public ChessPiece getTakenPiece() {
-		return takenPiece;
-	}
+		//return takenPiece;
+	}*/
 
 	/**
 	 * Gets the new location of the piece
@@ -159,14 +106,6 @@ public class ChessMoveAction extends GameAction {
 		return newPos;
 	}
 	
-	/**
-	 * Returns true if the move is a move that can be applied
-	 * @return true if valid
-	 */
-	public boolean isValid()
-	{
-		return valid;
-	}
 
 	/**
 	 * Convert the move into standard chess notation for debugging.

@@ -2,7 +2,7 @@ package edu.up.cs301.chess;
 
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.DrawAction;
-import edu.up.cs301.chess.actions.PawnMove;
+import edu.up.cs301.chess.actions.PawnMoveAction;
 import edu.up.cs301.chess.actions.ResignAction;
 import edu.up.cs301.chess.actions.RookMove;
 import edu.up.cs301.chess.actions.SelectUpgradeAction;
@@ -35,14 +35,16 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	@Override
 	public boolean canMove(int playerIdx) {
 		//TODO: implement turns
-		if(gameState.isWhoseTurn() && playerIdx == 1)
+		//ChessPlayer player = 
+		/*if(gameState.isWhoseTurn() == true && playerIdx == 0)
 		{
 			return true;
 		}
-		else
+		else 
 		{
-			return false;
-		}
+			return true;
+		}*/
+		return true;
 	}
 
 	/**
@@ -72,7 +74,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		if (action instanceof ChessMoveAction) {
 		
 			ChessMoveAction act = (ChessMoveAction)action;
-			if (act instanceof PawnMove) {
+			if (act instanceof PawnMoveAction) {
 				//TODO implement what each move does
 			}
 			if (act instanceof RookMove) {
@@ -102,6 +104,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		return true;
 	}//makeMove
 	
+		
 	/**
 	 * Gets the most recent ChessGameState
 	 * @param gameState the current state of the game

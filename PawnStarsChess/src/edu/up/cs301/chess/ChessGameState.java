@@ -321,19 +321,28 @@ public class ChessGameState extends GameState {
 	 *            the move to be applied to this game state
 	 * @return true if successful, false if not
 	 */
-	public boolean applyMove(GameAction act) {
-		if (act == null) {
+	public boolean applyMove(GameAction action) {
+		if (action == null) {
 			return false;
 		}
 		// See if user has requested a draw (tie)
-		if (act instanceof DrawAction) {
+		if (action instanceof DrawAction) {
 			// TODO implement
 			return true;
 		}
 
+		//Check to see if the move is valid:
+		
+		
+		//Update the game state:
+		
+		
+		//Return true if the move is successful, false otherwise:
+		
+		
 		// See if user has changed a piece
-		if (act instanceof ChessMoveAction) {
-			ChessMoveAction move = (ChessMoveAction) act;
+		if (action instanceof ChessMoveAction) {
+			ChessMoveAction move = (ChessMoveAction) action;
 
 			// Check for stalemate:
 			if (lastCapture > MAX_MOVES_SINCE_CAPTURE) {
@@ -347,11 +356,12 @@ public class ChessGameState extends GameState {
 			whoseTurn = !whoseTurn;
 
 			// Used for AI???
-			if (!move.isValid() && valid == true) {
-				valid = false;
-			}
+			//if (!move.isValid() && valid == true) {
+				//valid = false;
+			//}
 
 			// See if a piece has been taken
+			/*
 			ChessPiece takenPiece = move.getTakenPiece();
 			if (takenPiece != null) {
 				lastCapture = 0;
@@ -374,6 +384,7 @@ public class ChessGameState extends GameState {
 					}
 				}
 			}
+			*/
 			if (move.getWhichPiece() != null) {
 				// Move the piece
 				int[] newLoc = move.getNewPos();
