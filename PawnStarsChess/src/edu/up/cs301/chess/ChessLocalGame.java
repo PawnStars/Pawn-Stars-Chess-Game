@@ -80,7 +80,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 					ChessGameState newState = new ChessGameState(gameState);
 					newState.applyMove(act);
 					gameState = newState;
-					sendAllUpdatedState();
 				}
 			}
 			return true;
@@ -91,7 +90,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			ChessGameState newState = new ChessGameState(gameState);
 			newState.applyMove(act);
 			gameState = newState;
-			sendAllUpdatedState();
 			return true;
 		}
 		else if (action instanceof ResignAction) {
@@ -110,7 +108,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			}
 			
 			gameState = newState;
-			sendAllUpdatedState();
 			return true;
 		}
 		else if (action instanceof DrawAction) {
@@ -122,7 +119,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			//whoever sends the choose color action determines color
 			ChooseColorAction act = (ChooseColorAction)action;
 			gameState = new ChessGameState(act.isPlayer1IsWhite());
-			sendAllUpdatedState();
 			
 			//manually send the new states
 			for(int i=0;i<players.length;i++)

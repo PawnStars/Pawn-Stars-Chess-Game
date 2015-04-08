@@ -324,12 +324,12 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						//create and apply the move
 						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
 						
-						//game.sendAction(act);//idk if this is necessary
-						if(game instanceof ChessLocalGame)
+						game.sendAction(act);
+						/*if(game instanceof ChessLocalGame)
 						{
 							ChessLocalGame chessGame = (ChessLocalGame)game;
 							chessGame.makeMove(act);
-						}
+						}*/
 					}
 					/*
 					 * the user either tried to make an invalid move or made

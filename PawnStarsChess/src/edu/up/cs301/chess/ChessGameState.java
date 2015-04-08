@@ -318,6 +318,7 @@ public class ChessGameState extends GameState {
 		return true;
 	}
 	
+	
 	/**
 	 * Applies a move to the game state
 	 * @param move the move to be applied to this game state
@@ -347,20 +348,7 @@ public class ChessGameState extends GameState {
 		if(act instanceof SelectUpgradeAction)
 		{
 			SelectUpgradeAction action = (SelectUpgradeAction)act;
-			ChessPiece upgradePiece = action.getPiece();
-			for(int i=0;i<MAX_PLAYERS;i++)
-			{
-				for(int j=0;j<NUM_PIECES;j++)
-				{
-					ChessPiece p = pieces[i][j];
-					if(p.equals(upgradePiece))
-					{
-						p.setType(action.getType());
-						return true;
-					}
-				}
-			}
-			return false;//didn't find the piece
+			return applySelectUpgradeAction(action);
 		}
 		if(act instanceof ChessMoveAction)
 		{
@@ -483,6 +471,24 @@ public class ChessGameState extends GameState {
 		}
 	}
 	
+	private boolean applySelectUpgradeAction(SelectUpgradeAction action)
+	{
+		ChessPiece upgradePiece = action.getPiece();
+		for(int i=0;i<MAX_PLAYERS;i++)
+		{
+			for(int j=0;j<NUM_PIECES;j++)
+			{
+				ChessPiece p = pieces[i][j];
+				if(p.equals(upgradePiece))
+				{
+					p.setType(action.getType());
+					return true;
+				}
+			}
+		}
+		return false;//didn't find the piece
+	}
+
 	/**
 	 * Convert the game state into a readable chess board
 	 */

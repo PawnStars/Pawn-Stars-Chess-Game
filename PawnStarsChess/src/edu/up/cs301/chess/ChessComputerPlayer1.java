@@ -165,16 +165,13 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		if(chosenMove != null)
 		{
 			Log.d("computer player", "Sending this move: "+chosenMove);
-			if(game instanceof ChessLocalGame)
+			game.sendAction(chosenMove);
+			/*if(game instanceof ChessLocalGame)
 			{
 				ChessLocalGame chessGame = (ChessLocalGame)game;
 				return chessGame.makeMove(chosenMove);
-			}
-			else
-			{
-				Log.d("computer player", "Did not receive a chess local game.");
-				return false;
-			}
+			}*/
+			return true;
 		}
 		else
 		{
