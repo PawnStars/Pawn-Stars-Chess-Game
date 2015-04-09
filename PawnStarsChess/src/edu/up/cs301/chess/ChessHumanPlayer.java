@@ -105,9 +105,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 		// if we are not yet connected to a game, ignore
 		if (game == null)
 			return;
-
+		
 		// Construct the action and send it to the game
 		GameAction action = null;
+		
 		if (button.getId() == R.id.resignButton) {
 			// make the activity think it received a back button
 			KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN,
@@ -142,6 +143,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 		if (!(info instanceof ChessGameState)) {
 			return;
 		}
+		System.out.println("Human Player received info...");
 		ChessGameState newState = (ChessGameState) info;
 
 		if (newState == null || newState.equals(state)) {
@@ -199,15 +201,21 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 				R.string.dialog_black_label);
 		String pickColorTitle = activity.getResources().getString(
 				R.string.dialog_title);
-
+		
 		android.content.DialogInterface.OnClickListener posListener = new android.content.DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				setWhite(true);
+				// if we have a game state, "simulate" that we have just received
+				// the state from the game so that the GUI values are updated
+				updateState();
 			}
 		};
 		android.content.DialogInterface.OnClickListener negListener = new android.content.DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				setWhite(false);
+				// if we have a game state, "simulate" that we have just received
+				// the state from the game so that the GUI values are updated
+				updateState();
 			}
 		};
 
@@ -219,17 +227,18 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 		builder.setNegativeButton(blackLabel, negListener);
 		AlertDialog alert = builder.create();
 		alert.show();
-		 
-		// if we have a game state, "simulate" that we have just received
-		// the state from the game so that the GUI values are updated
+	}
+
+	private void updateState() {
 		if (state != null) {
 			state.setPlayer1IsWhite(isPlayer1 == isWhite);
 			sentPlayerID = state.setPlayerInfo(this);
 			receiveInfo(state);
-
+		}else {
+			System.out.println("Uh oh...no state available...");
 		}
 	}
-
+	
 	/**
 	 * Returns true if it is white
 	 * 
@@ -242,6 +251,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 	public boolean onTouch(View v, MotionEvent event) {
 		v.onTouchEvent(event);
 
+		//TODO: this is a hack. fix later...
+		this.receiveInfo(state);
+				
 		// Respond only to a full tap (tap down then tap up):
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			down = true;
@@ -282,7 +294,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer,
 								lastPieceSelected, selectedLoc);
 						game.sendAction(move);
 					}
+					board.setSelectedTiles(new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT]);
+					board.setSelectedLoc(lastPieceSelected.getLocation()[0], lastPieceSelected.getLocation()[1]);
 					this.lastPieceSelected = null;
+					return true;
 				}
 
 				// Get the selected piece from the game state:

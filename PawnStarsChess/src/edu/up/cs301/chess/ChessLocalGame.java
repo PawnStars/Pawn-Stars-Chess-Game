@@ -59,6 +59,11 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		 * */
 	}
 
+	//TODO: This method is a hack...fix later:
+	public void updateGameState() {
+			this.sendAllUpdatedState();
+			this.sendUpdatedStateTo(this.players[0]);
+	}
 	/**
 	 * The actions that should be sent are ChessMoveAction,
 	 * SelectPieceAction, SelectUpgradeAction, ResignAction,
@@ -69,17 +74,20 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	public boolean makeMove(GameAction action) {
 		Log.i("action", action.getClass().toString());
 		
+		
 		//TODO deselect the pieces on the board, update board, etc.
 		//TODO implement what each move does
 		if (action instanceof ChessMoveAction) {
 		
 			ChessMoveAction act = (ChessMoveAction)action;
-			if (act instanceof PawnMoveAction) {
+			//if (act instanceof PawnMoveAction) {
+				if (this.gameState.movePiece(act)) {
+					this.sendAllUpdatedState();
+				}
+			//}
+			//if (act instanceof RookMove) {
 				//TODO implement what each move does
-			}
-			if (act instanceof RookMove) {
-				//TODO implement what each move does
-			}
+			//}
 			else {
 				//ChessGameState newState = new ChessGameState(gameState);
 				//newState.applyMove(act);
@@ -152,7 +160,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		}
 		else
 		{
-			return "";
+			return null;
 		}
 	}
 
