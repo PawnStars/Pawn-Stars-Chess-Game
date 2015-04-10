@@ -389,5 +389,12 @@ public class ChessPiece {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * @param piece
+	 * @return true if the pieces are different colors
+	 */
+	public boolean differentColor(ChessPiece piece) {
+		return (!(this.isWhite && piece.isWhite));
+	}
 }

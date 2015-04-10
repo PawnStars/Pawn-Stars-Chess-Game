@@ -303,7 +303,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 								validLocs[newPos[0]][newPos[1]] = true;
 							}
 						}
-						board.setSelectedTiles(validLocs.clone());
+					//validLocs = state.getPossibleMoves(pieceSelected);
+					board.setSelectedTiles(validLocs.clone());
+					
 					}
 					lastPieceSelected = pieceSelected;
 				}

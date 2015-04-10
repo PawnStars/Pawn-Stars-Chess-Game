@@ -262,7 +262,7 @@ public class ChessBoard extends SurfaceView
 	{
 		//various colors
 		boardColor.setColor(0xFF510700);//yellowish
-		tileColor.setColor(0xFFEFD284);//brownish
+		tileColor.setColor(0xFFF3D688);//brownish
 		textColor.setColor(Color.RED);//red
 		whitePieceColor.setColor(0xFFFFFFFF);//white
 		blackPieceColor.setColor(0xFF000000);//black
