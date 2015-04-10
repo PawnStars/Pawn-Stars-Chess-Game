@@ -56,13 +56,25 @@ public class ChessMainActivity extends GameMainActivity {
 				return new ChessComputerPlayer2(name,0);
 			}});
 		
-		playerTypes.add(new GamePlayerType("Computer Player (smart)") {
+		playerTypes.add(new GamePlayerType("Computer Player (smarter)") {
+			public GamePlayer createPlayer(String name) {
+				//1 means it is smart
+				return new ChessComputerPlayer1(name,1);
+			}});
+		
+		playerTypes.add(new GamePlayerType("Computer Player (smarter GUI)") {
+			public GamePlayer createPlayer(String name) {
+				return new ChessComputerPlayer2(name,1);
+			}});
+		
+		
+		playerTypes.add(new GamePlayerType("Computer Player (smartest)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
 				return new ChessComputerPlayer1(name,10);
 			}});
 		
-		playerTypes.add(new GamePlayerType("Computer Player (smart GUI)") {
+		playerTypes.add(new GamePlayerType("Computer Player (smartest GUI)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
 				return new ChessComputerPlayer1(name,10);
@@ -82,6 +94,8 @@ public class ChessMainActivity extends GameMainActivity {
 		defaultConfig.addPlayer("Computer", 2); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 3); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 4); // player 2: a computer player
+		defaultConfig.addPlayer("Computer", 5); // player 2: a computer player
+		defaultConfig.addPlayer("Computer", 6); // player 2: a computer player
 		
 		// Set the default remote-player setup:
 		// - player name: "Remote Player"
