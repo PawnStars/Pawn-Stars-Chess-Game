@@ -208,7 +208,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		}
 		else
 		{
-			return "";
+			return null;
 		}
 	}
 

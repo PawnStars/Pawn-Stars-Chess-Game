@@ -173,6 +173,86 @@ public class MoveGenerator {
 	}
 	
 	/**
+	 * Returns true if the king can be taken in the next move
+	 * @param state
+	 * @param player
+	 * @return
+	 */
+	public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
+	{
+		ChessPiece[] moveablePieces;
+		boolean moveColor;
+		if(state.isWhoseTurn() && isPlayer1)//player 1's turn
+		{
+			moveablePieces = state.getPlayer1Pieces().clone();
+			moveColor = state.isPlayer1IsWhite();
+		}
+		else if(!state.isWhoseTurn() && !isPlayer1)//player 2's turn
+		{
+			moveablePieces = state.getPlayer2Pieces().clone();
+			moveColor = !state.isPlayer1IsWhite();
+		}
+		else
+		{
+			return false;
+		}
+		ArrayList<ChessPiece> dangerousPieces = new ArrayList<ChessPiece>();
+		if(moveablePieces != null)
+		{
+			for(ChessPiece p: moveablePieces)
+			{
+				ChessPiece copyOfP = new ChessPiece(p);
+				ChessMoveAction[] moves = getPieceMoves(state,copyOfP,null,!moveColor,false);
+				if(moves != null)
+				{
+					for(ChessMoveAction move: moves)
+					{
+						if(move != null && move.getTakenPiece() != null)
+						{
+							//TODO test if this works
+							ChessPiece piece = move.getTakenPiece();
+							if(piece.getType() == ChessPiece.KING)
+							{
+								dangerousPieces.add(move.getWhichPiece());
+							}
+						}
+					}
+				}
+			}
+			
+			//TODO find bug here
+			for(ChessPiece p: moveablePieces)
+			{
+				ChessPiece copyOfP = new ChessPiece(p);
+				ChessMoveAction[] moves = getPieceMoves(state,copyOfP,null,!moveColor,false);
+				if(moves != null)
+				{
+					for(ChessMoveAction move: moves)
+					{
+						if(move != null && move.getTakenPiece() != null)
+						{
+							ChessPiece piece = move.getTakenPiece();
+							for(ChessPiece dangerousPiece: dangerousPieces)
+							{
+								if(piece.equals(dangerousPiece))
+								{
+									//do the move that kills a dangerous piece
+									//and check if another piece can take the king
+									ChessGameState newState = new ChessGameState(state);
+									newState.applyMove(move);
+									return canTakeKing(newState,isPlayer1);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Returns an array of ChessMoveActions that a given piece can make
 	 * @param state
 	 * @param piece

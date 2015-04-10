@@ -428,27 +428,23 @@ public class ChessGameState extends GameState {
 					boolean p1CanTakeKing = MoveGenerator.canTakeKing(this, true);
 					boolean p2CanTakeKing = MoveGenerator.canTakeKing(this, false);
 					
-					//Someone is in check or checkmate.
-					if(p1CanTakeKing || p2CanTakeKing)
+					player1Won = MoveGenerator.willTakeKing(this, true);
+					player2Won = MoveGenerator.willTakeKing(this, false);
+					
+					//Someone is in check
+					if(p1CanTakeKing && !whoseTurn)
 					{
-						if(p1CanTakeKing && whoseTurn)
-						{
-							isGameOver = true;
-							player1Won = true;
-						}
-						if(p2CanTakeKing && !whoseTurn)
-						{
-							isGameOver = true;
-							player2Won = true;
-						}
-						if(p1CanTakeKing && !whoseTurn)
-						{
-							player2InCheck = true;
-						}
-						if(p2CanTakeKing && whoseTurn)
-						{
-							player1InCheck = true;
-						}
+						player2InCheck = true;
+					}
+					if(p2CanTakeKing && whoseTurn)
+					{
+						player1InCheck = true;
+					}
+					
+					//Someone is in checkmate
+					if(player1Won || player2Won)
+					{
+						isGameOver = true;
 					}
 					
 					whoseTurn = !whoseTurn;

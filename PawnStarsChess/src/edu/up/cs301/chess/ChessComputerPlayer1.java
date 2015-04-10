@@ -129,9 +129,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			{
 				for(int i=0;i<possibleActions.length;i++)
 				{
-					chosenMove = new ChessMoveAction(this,possibleActions[i]);
-					if(chosenMove != null && chosenMove.isValid())
+					
+					ChessMoveAction tempMove = new ChessMoveAction(this,possibleActions[i]);
+					if(tempMove != null && tempMove.isValid())
 					{
+						chosenMove = tempMove;
 						if(smart == RANDOM)
 						{
 							//Apply any valid non-null move
@@ -139,8 +141,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 						}
 						if(smart == TAKE_PIECES)
 						{
-							//Do any move that would result in taking a piece
-							if(chosenMove.getTakenPiece() != null)
+							//Do any move that would result in taking a piece if it exists
+							if(tempMove.getTakenPiece() != null)
 							{
 								break;
 							}
@@ -152,6 +154,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					}
 				}
 			}
+			
+			//Make sure the player is included as a reference
+			chosenMove = new ChessMoveAction(this,chosenMove);
 
 		}
 		else if(smart > 1)
