@@ -1028,14 +1028,14 @@ public class ChessGameState extends GameState {
 		int j = yLocation - 1;
 
 		while (i >= 0 && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 			j--;
 		}
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1044,14 +1044,14 @@ public class ChessGameState extends GameState {
 		i = xLocation + 1;
 		j = yLocation - 1;
 		while (i < BOARD_WIDTH && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 			j--;
 		}
 		if (i < BOARD_WIDTH && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1060,14 +1060,14 @@ public class ChessGameState extends GameState {
 		i = xLocation - 1;
 		j = yLocation + 1;
 		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 			j++;
 		}
 		if (i >= 0 && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1077,14 +1077,14 @@ public class ChessGameState extends GameState {
 		j = yLocation + 1;
 		while (i < BOARD_WIDTH && j < BOARD_HEIGHT
 				&& this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 			j++;
 		}
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1114,13 +1114,13 @@ public class ChessGameState extends GameState {
 		// check to the EAST
 		while (i < BOARD_WIDTH && j < BOARD_WIDTH
 				&& this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 		}
 		if (i < BOARD_WIDTH && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1129,13 +1129,13 @@ public class ChessGameState extends GameState {
 		j = yLocation;
 
 		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 		}
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1146,13 +1146,13 @@ public class ChessGameState extends GameState {
 		j = yLocation + 1;
 
 		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			j++;
 		}
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1162,13 +1162,13 @@ public class ChessGameState extends GameState {
 		j = yLocation - 1;
 
 		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			j--;
 		}
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1178,7 +1178,7 @@ public class ChessGameState extends GameState {
 		j = yLocation - 1;
 
 		while (i >= 0 && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 			j--;
 
@@ -1186,7 +1186,7 @@ public class ChessGameState extends GameState {
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1195,14 +1195,14 @@ public class ChessGameState extends GameState {
 		i = xLocation + 1;
 		j = yLocation - 1;
 		while (i < BOARD_WIDTH && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 			j--;
 		}
 		if (i < BOARD_WIDTH && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1211,14 +1211,14 @@ public class ChessGameState extends GameState {
 		i = xLocation - 1;
 		j = yLocation + 1;
 		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 			j++;
 		}
 		if (i >= 0 && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1228,14 +1228,14 @@ public class ChessGameState extends GameState {
 		j = yLocation + 1;
 		while (i < BOARD_WIDTH && j < BOARD_HEIGHT
 				&& this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 			j++;
 		}
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1264,13 +1264,13 @@ public class ChessGameState extends GameState {
 		// check to the EAST
 		while (i < BOARD_WIDTH && j < BOARD_WIDTH
 				&& this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i++;
 		}
 		if (i < BOARD_WIDTH && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1279,13 +1279,13 @@ public class ChessGameState extends GameState {
 		j = yLocation;
 
 		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			i--;
 		}
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1296,13 +1296,13 @@ public class ChessGameState extends GameState {
 		j = yLocation + 1;
 
 		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			j++;
 		}
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1312,13 +1312,13 @@ public class ChessGameState extends GameState {
 		j = yLocation - 1;
 
 		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[i][j] = true;
+			moves[j][i] = true;
 			j--;
 		}
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[i][j] = true;
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -1346,7 +1346,7 @@ public class ChessGameState extends GameState {
 		if (i < BOARD_WIDTH) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1356,7 +1356,7 @@ public class ChessGameState extends GameState {
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1366,7 +1366,7 @@ public class ChessGameState extends GameState {
 		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1377,7 +1377,7 @@ public class ChessGameState extends GameState {
 		if (i >= 0 && j < BOARD_HEIGHT) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1387,7 +1387,7 @@ public class ChessGameState extends GameState {
 		if (i >= 0) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1397,7 +1397,7 @@ public class ChessGameState extends GameState {
 		if (i >= 0 && j >= 0) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1407,7 +1407,7 @@ public class ChessGameState extends GameState {
 		if (j >= 0) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 
@@ -1417,7 +1417,7 @@ public class ChessGameState extends GameState {
 		if (i < BOARD_WIDTH && j >= 0) {
 			if (this.pieceMap[j][i] == null
 					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[i][j] = true;
+				moves[j][i] = true;
 			}
 		}
 		return moves;
