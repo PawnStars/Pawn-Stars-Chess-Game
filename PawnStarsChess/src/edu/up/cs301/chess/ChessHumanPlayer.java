@@ -34,6 +34,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 	/* instance variables */
 	
+	public static final int[] types = {
+		ChessPiece.QUEEN,
+		ChessPiece.KNIGHT,
+		ChessPiece.ROOK,
+		ChessPiece.BISHOP
+	};
+	
 	// The TextView the displays the current counter value
 	private TextView player1Score;
 	private TextView player2Score;
@@ -61,9 +68,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	
 	//the last piece the player touched
 	protected ChessPiece lastPieceSelected;
-	
-	//true if this player is player 1 in the game state
-	//private boolean isPlayer1;
 	
 	//the valid locations for a move using the lastPieceSelected
 	private boolean[][] validLocs;
@@ -139,9 +143,17 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		{
 			return;
 		}
+		ChessGameState newState = (ChessGameState)info;
+		
+		if(newState.equals(state))
+		{
+			Log.d("human player", "equal game state");
+			return;
+		}
 		
 		// update our state; then update the display
-		state = (ChessGameState)info;
+		state = newState;
+		Log.d("human player",state.toString());
 		updateDisplay();
 		//Log.d("human player", "state updated:"+state);
 	}
@@ -226,6 +238,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 	public boolean onTouch(View v, MotionEvent event) {
 		v.onTouchEvent(event);
+		//only handle touches when it is your turn
 		if(event.getAction() == MotionEvent.ACTION_DOWN)
 		{
 			down = true;
@@ -238,10 +251,30 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			{
 				//TODO sound feedback/vibration
 				
+				//check if it is your turn
+				if(state.isWhoseTurn() != isPlayer1())
+				{
+					return false;
+				}
+				
 				float[] tileSize = board.getTileSize();
-				int tileX = (int) (event.getX()/tileSize[0]);
-				int tileY = (int) (event.getY()/tileSize[1]);
-				int[] selectedLoc = new int[]{tileY,tileX};
+				int tileX;
+				int tileY;
+				int[] selectedLoc;
+				if(board.isFlipped())
+				{
+					tileX = (int) (event.getX()/tileSize[0]);
+					tileY = ChessGameState.BOARD_WIDTH-1-(int) (event.getY()/tileSize[1]);
+					selectedLoc = new int[]{tileY,tileX};
+				}
+				else
+				{
+					tileX = (int) (event.getX()/tileSize[0]);
+					tileY = (int) (event.getY()/tileSize[1]);
+					selectedLoc = new int[]{tileY,tileX};
+				}
+				
+				ChessPiece pieceSelected = null;
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -254,14 +287,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				}
 				
 				down = false;
-				ChessPiece pieceSelected;
+				
 				if(state.getPieceMap()[tileY][tileX] != null)
 				{
 					pieceSelected = new ChessPiece(state.getPieceMap()[tileY][tileX]);
-				}
-				else
-				{
-					pieceSelected = null;
 				}
 				
 				//clear the selected locations first
@@ -281,31 +310,18 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				if(pieceSelected != null && pieceSelected.isWhite() == isWhite() && !pieceSelected.equals(lastPieceSelected))
 				{
 					//reset the valid locations
-					validLocs = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-					
+
 					//pass selected tile to ChessBoard
 					board.setSelectedLoc(tileY,tileX);
 					
-					//make a new state to ensure the current state is not modified
-					ChessGameState newState = new ChessGameState(state);
+					// Highlight valid moves for the player:
+					validLocs = state.getPossibleMoves(pieceSelected);
 					
-					//get valid moves for that piece
-					ChessMoveAction[] validMoves = MoveGenerator.getPieceMoves(newState, pieceSelected, this,isWhite(), true);
+					//TODO check for illegal moves
+					board.setSelectedTiles(validLocs);
 					
-					if(validMoves != null && validMoves.length > 0)
-					{
-						//add the valid moves into a bitboard(8x8 array of booleans)
-						for(int i=0;i<validMoves.length;i++)
-						{
-							if(validMoves[i] != null && validMoves[i].isValid())
-							{
-								int[] newPos = validMoves[i].getNewPos();
-								validLocs[newPos[0]][newPos[1]] = true;
-							}
-						}
-						board.setSelectedTiles(validLocs.clone());
-					}
 					lastPieceSelected = pieceSelected;
+					return true;
 				}
 				
 				/*
@@ -318,24 +334,39 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					if(validLocs != null && validLocs[tileY][tileX] == true)
 					{
 						//make a copy of the state before trying to apply the move
-						ChessGameState newState = new ChessGameState(state);
-						ChessPiece takenPiece = newState.getPieceMap()[tileY][tileX];
+						//ChessGameState newState = new ChessGameState(state);
+						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
 						
 						//create and apply the move
-						ChessMoveAction act = new ChessMoveAction(this, lastPieceSelected, selectedLoc, takenPiece);
+						ChessMoveAction move = null;
 						
-						game.sendAction(act);
-						/*if(game instanceof ChessLocalGame)
+						if(lastPieceSelected.getType() == ChessPiece.PAWN)
 						{
-							ChessLocalGame chessGame = (ChessLocalGame)game;
-							chessGame.makeMove(act);
-						}*/
+							//TODO implement special moves
+							move = new PawnMove(this, lastPieceSelected, selectedLoc,
+									takenPiece,PawnMove.NONE);
+						}
+						else if(lastPieceSelected.getType() == ChessPiece.ROOK)
+						{
+							//TODO implement special moves
+							move = new RookMove(this, lastPieceSelected, selectedLoc,
+									takenPiece,RookMove.NONE);
+						}
+						else
+						{
+							move = new ChessMoveAction(this,
+									lastPieceSelected, selectedLoc,takenPiece);
+						}
+						state.applyMove(move);//TODO not sure if necessary
+						game.sendAction(move);
 					}
+					
 					/*
 					 * the user either tried to make an invalid move or made
 					 * a move, so clear piece selections.
 					 */
 					lastPieceSelected = null;
+					return true;
 				}
 			}
 		}
@@ -357,14 +388,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	public void setWhite(boolean isWhite) {
 		this.isWhite = isWhite;
 	}
-
-	/**
-	 * Sets this player as player 1 or player 2
-	 * in the game state.
-	 */
-	/*public void setPlayer1(boolean isPlayer1) {
-		this.isPlayer1 = isPlayer1;
-	}*/
 
 	/**
 	 * Returns this player's unique ID number.
@@ -389,36 +412,30 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		}
 	}
 
-	public int selectUpgrade() {
+	public void selectUpgrade() {
 		CharSequence upgradeChoices[] = new CharSequence[] {"Queen", "Knight", "Rook", "Bishop"};
-		//int[] types = new int[]{ChessPiece.QUEEN,ChessPiece.KNIGHT,ChessPiece.ROOK,ChessPiece.BISHOP};
-
+		
 		//TODO fix
-		/*AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle("Pick a new piece.");
 		
 		android.content.DialogInterface.OnClickListener pieceListener =
 				new android.content.DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which) {
-				//ChessLocalGame chessGame = (ChessLocalGame)game;
-	    		int[] types = new int[]{ChessPiece.QUEEN,ChessPiece.KNIGHT,ChessPiece.ROOK,ChessPiece.BISHOP};
-				SelectUpgradeAction newAct = new SelectUpgradeAction(super, lastPieceSelected, types[which]);
-				//chessGame.makeMove(act);
+				doSelectAction(which);
 			}
 		};
 		
-		builder.setItems(upgradeChoices, new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int which) {
-		    	if(game instanceof ChessLocalGame)
-				{
-					
-				}
-		        //return types[which];
-		    }
-		});
-		builder.show();*/
-		return 0;
+		builder.setItems(upgradeChoices, pieceListener);
+		builder.show();
+	}
+	
+	public SelectUpgradeAction doSelectAction(int type)
+	{
+		SelectUpgradeAction newAct = new SelectUpgradeAction(this, this.lastPieceSelected, types[type]);
+		game.sendAction(newAct);
+		return null;
 	}
 }// class CounterHumanPlayer
 

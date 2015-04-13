@@ -92,7 +92,7 @@ public class MoveGenerator {
 			}
 		}
 		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
-		
+		Log.d("move generator","moves possible:"+moves.length);
 		//TODO scramble the order of the moves??
 		//remove the moves that would get the king captured
 		return moves;
@@ -180,6 +180,7 @@ public class MoveGenerator {
 	 */
 	public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
 	{
+		//TODO make this methods work
 		ChessPiece[] nonMoveablePieces;
 		ChessPiece[] moveablePieces;
 		boolean moveColor;
@@ -308,245 +309,18 @@ public class MoveGenerator {
 		{
 			return null;
 		}
+		boolean[][] possibleLocs = state.getPossibleMoves(piece);
 		
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
 		
-		if(type == ChessPiece.PAWN)
+		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 		{
-			//add the horizontal moves
-			int numVertMoves;
-			if(piece.getHasMoved() == false)
+			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
-				numVertMoves = 2;
-			}
-			else
-			{
-				numVertMoves = 1;
-			}
-			for(int i=1;i<=numVertMoves;i++)
-			{
-				
-				int[] newLoc = loc.clone();
-				if(piece.isWhite())
+				if(possibleLocs[i][j])
 				{
-					newLoc[0] -= i;
-				}
-				else
-				{
-					newLoc[0] += i;
-				}
-				
-				if(!ChessGameState.outOfBounds(newLoc))
-				{
-					ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-					
-					//can't take a piece vertically
-					if(taken == null)
-					{
-						moveList.add(new ChessMoveAction(currPlayer, piece, newLoc, taken));
-					}
-					else
-					{
-						i=100;
-						//break out of the loop somehow
-						//dont want to move to the place behind a piece
-					}
-				}
-			}
-			
-			/*
-			 * Initialize to an invalid location so it does not get turned into a move 
-			 * unless player 1 or player 2 can make the move.
-			 * 
-			 * */
-			int[][] attackLoc = new int[][]{ChessPiece.INVALID_LOCATION,ChessPiece.INVALID_LOCATION};
-			if(piece.isWhite() && state.isPlayer1IsWhite())//player 1
-			{
-				attackLoc = new int[][]{
-						{loc[0]-1,loc[1]-1},
-						{loc[0]-1,loc[1]+1}
-				};
-			}
-			else if(!piece.isWhite() && !state.isPlayer1IsWhite())//player 2
-			{
-				attackLoc = new int[][]{
-						{loc[0]+1,loc[1]-1},
-						{loc[0]+1,loc[1]+1}
-				};
-			}
-			
-			//add the left and right capture moves
-			for(int i=0;i<PawnMove.NUM_PAWN_ATTACKS_NORMAL;i++)
-			{
-				if(!ChessGameState.outOfBounds(attackLoc[i]))
-				{
-					ChessPiece taken = state.getPieceMap()[attackLoc[i][0]][attackLoc[i][1]];
-					
-					//it can take a piece of a different color
-					if(taken != null && taken.isWhite() != color)
-					{
-						moveList.add(new ChessMoveAction(currPlayer, piece, attackLoc[i], taken));
-					}
-				}
-			}
-		}
-		else if(type == ChessPiece.ROOK || type == ChessPiece.QUEEN)
-		{
-			
-			//horizontal to the right
-			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
-			{
-				int[] newLoc = new int[2];
-				newLoc[0] = i;
-				newLoc[1] = loc[1];
-				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done)
-				{
-					break;
-				}
-			}
-			
-			//horizontal to the left
-			for(int i=loc[0]-1;i>=0;i--)
-			{
-				int[] newLoc = new int[2];
-				newLoc[0] = i;
-				newLoc[1] = loc[1];
-				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done)
-				{
-					break;
-				}
-			}
-			
-			//vertical going up
-			for(int i=loc[0]+1;i<ChessGameState.BOARD_HEIGHT;i++)
-			{
-				int[] newLoc = new int[2];
-				newLoc[0] = loc[0];
-				newLoc[1] = i;
-				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done)
-				{
-					break;
-				}
-			}
-			
-			//vertical going down
-			for(int i=loc[0]-1;i>=0;i--)
-			{
-				int[] newLoc = new int[2];
-				newLoc[0] = loc[0];
-				newLoc[1] = i;
-				
-				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done)
-				{
-					break;
-				}
-			}
-		}
-		else if(type == ChessPiece.KNIGHT)
-		{
-			int[][] newLoc = {
-					{loc[0]+1,loc[1]+2},//top-mid right
-					{loc[0]+2,loc[1]+1},//top right
-					
-					{loc[0]+1,loc[1]-2},//bottom-mid right
-					{loc[0]+2,loc[1]-1},//bottom right
-					
-					{loc[0]-1,loc[1]+2},//top-mid left
-					{loc[0]-2,loc[1]+1},//top left
-					
-					{loc[0]-1,loc[1]-2},//bottom-mid left
-					{loc[0]-2,loc[1]-1}//bottom left
-			};
-			
-			//iterate through each possible knight move
-			for(int i=0;i<newLoc.length;i++)
-			{
-				if(!ChessGameState.outOfBounds(newLoc[i]))
-				{
-					ChessPiece taken = state.getPieceMap()[newLoc[i][0]][newLoc[i][1]];
-					
-					//space is occupied
-					if(taken != null)
-					{
-						if(taken.isWhite() != color)
-						{
-							//add a move only if the tile is empty or 
-							moveList.add(new ChessMoveAction(currPlayer, piece, newLoc[i], taken));
-						}
-					}
-					else //unoccupied
-					{
-						moveList.add(new ChessMoveAction(currPlayer, piece, newLoc[i], taken));
-					}
-				}
-			}
-		}
-		else if(type == ChessPiece.BISHOP || type == ChessPiece.QUEEN)
-		{
-			int[] newLoc = new int[2];
-			
-			//top right
-			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]++)
-			{
-				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
-				if(done == true)
-				{
-					break;
-				}
-			}
-			
-			//top left
-			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]+1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]++)
-			{
-				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
-				if(done == true)
-				{
-					break;
-				}
-			}
-			
-			//bottom right
-			for(newLoc[0]=loc[0]+1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]++,newLoc[1]--)
-			{
-				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
-				if(done == true)
-				{
-					break;
-				}
-			}
-			
-			//bottom left
-			for(newLoc[0]=loc[0]-1,newLoc[1]=loc[1]-1;!ChessGameState.outOfBounds(newLoc);newLoc[0]--,newLoc[1]--)
-			{
-				int[] newPieceLoc = newLoc.clone();
-				boolean done = addMove(state,piece,moveList,newPieceLoc,currPlayer,color);
-				if(done == true)
-				{
-					break;
-				}
-			}
-		}
-		else if(type == ChessPiece.KING)
-		{
-			//iterate through the locations surrounding the king
-			for(int i=loc[0]-1;i<=loc[0]+1;i++)
-			{
-				for(int j=loc[1]-1;j<=loc[1]+1;j++)
-				{
-					if(i != loc[0] && j != loc[1])
-					{
-						addMove(state,piece,moveList,new int[]{i,j},currPlayer,color);
-					}
+					int[] newLoc = new int[]{i,j};
+					addMove(state,piece,moveList,newLoc,currPlayer,color);
 				}
 			}
 		}
@@ -608,7 +382,6 @@ public class MoveGenerator {
 			return false;
 		}
 		
-		int[] newPieceLoc = newLoc.clone();
 		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 		
 		//space is occupied
@@ -617,13 +390,13 @@ public class MoveGenerator {
 			if(taken.isWhite() != color)
 			{
 				//add a move if it can take a piece
-				moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
+				moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
 			}
 			return true;
 		}
 		else //unoccupied
 		{
-			moveList.add(new ChessMoveAction(player, piece, newPieceLoc, taken));
+			moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
 			return false;
 		}
 	}

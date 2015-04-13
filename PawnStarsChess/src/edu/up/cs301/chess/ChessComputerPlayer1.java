@@ -3,6 +3,7 @@ package edu.up.cs301.chess;
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.ChooseColorAction;
+import edu.up.cs301.chess.actions.SelectUpgradeAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
 import edu.up.cs301.game.GameComputerPlayer;
@@ -37,8 +38,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     //true if this player is white, false if not
     protected boolean isWhite;
     
-    //true if this player is player1 in the game state, false if not
-    protected boolean isPlayer1;
     
 	/**
      * Constructor for objects of class CounterComputerPlayer1
@@ -89,8 +88,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			else
 			{
 				//TODO look for bugs here
-				gameState = (ChessGameState)info;
-				
+				gameState = newState;
+				Log.d("computer player",gameState.toString());
 				makeMove();
 			}
 		}
@@ -102,10 +101,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public boolean makeMove()
 	{
+		Log.d("computer player", "trying to make a move");
+		
 		//TODO check if it can make a move
-		if(gameState == null)
+		if(gameState == null || gameState.isWhoseTurn() != isPlayer1())
 		{
-			return false;
+			return true;
 		}
 		ChessGameState newState = new ChessGameState(gameState);
 		ChessMoveAction chosenMove = null;
@@ -114,22 +115,22 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite);
 			
-			//scramble the order of the moves so it won't be predictable
-			for(int i=0;i<(possibleActions.length/2)-1;i++)
-			{
-				int randomIndex = (int) (Math.random()*(possibleActions.length));
-				ChessMoveAction temp = possibleActions[i];
-				
-				possibleActions[i] = possibleActions[randomIndex];
-				possibleActions[randomIndex] = temp;
-			}
-
 			//Check if the move generator found any possible moves
 			if(possibleActions != null && possibleActions.length > 0)
 			{
+				//scramble the order of the moves so it won't be predictable
 				for(int i=0;i<possibleActions.length;i++)
 				{
+					int randomIndex = (int) (Math.random()*(possibleActions.length));
+					ChessMoveAction temp = possibleActions[i];
 					
+					possibleActions[i] = possibleActions[randomIndex];
+					possibleActions[randomIndex] = temp;
+				}
+				
+				for(int i=0;i<possibleActions.length;i++)
+				{
+					System.out.print(possibleActions[i].toString()+", ");
 					ChessMoveAction tempMove = new ChessMoveAction(this,possibleActions[i]);
 					if(tempMove != null && tempMove.isValid())
 					{
@@ -147,10 +148,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 								break;
 							}
 						}
-					}
-					else
-					{
-						chosenMove = null;
 					}
 				}
 			}
@@ -170,6 +167,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		if(chosenMove != null)
 		{
 			Log.d("computer player", "Sending this move: "+chosenMove);
+			gameState.applyMove(chosenMove);
 			game.sendAction(chosenMove);
 
 			return true;
@@ -214,14 +212,38 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		return playerNum;
 	}
 
-	public int selectUpgrade() {
-		if(smart == 0)
+	public void selectUpgrade() {
+		ChessPiece[] pieces = null;
+		if(isPlayer1())
 		{
-			return ChessPiece.KNIGHT;
+			pieces = gameState.getPlayer1Pieces();
 		}
 		else
 		{
-			return ChessPiece.QUEEN;
+			pieces = gameState.getPlayer2Pieces();
+		}
+		for(ChessPiece piece:pieces)
+		{
+			if(piece.getLocation()[0] == 0 
+					|| piece.getLocation()[0] == ChessGameState.BOARD_HEIGHT-1)
+			{
+				if(piece.getType() == ChessPiece.PAWN)
+				{
+					int type = ChessPiece.INVALID;
+					if(smart == 0)
+					{
+						type = ChessPiece.KNIGHT;
+					}
+					else
+					{
+						type = ChessPiece.QUEEN;
+					}
+					
+					SelectUpgradeAction newAct = new SelectUpgradeAction(this, piece, type);
+					game.sendAction(newAct);
+					return;
+				}
+			}
 		}
 	}
 	

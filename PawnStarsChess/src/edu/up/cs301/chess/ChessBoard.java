@@ -51,7 +51,7 @@ public class ChessBoard extends SurfaceView
 	// false if not
 	private boolean flipped = false;
 	
-	private float[] tileSize = new float[2];
+	private float[] tileSize = new float[]{0,0};
 	
 	/**
 	 * constructor
@@ -122,135 +122,89 @@ public class ChessBoard extends SurfaceView
 		canvas.drawRect(0, 0, dimensions, dimensions, boardColor);
 		
 		//TODO not sure the board is flipped correctly
-		if(!flipped)
+		
+		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 		{
-			for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
-			{
-				for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
-				{
-					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j)
-					{
-						// Draw the selected tile
-						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], selectColor);
-					}
-					else if(selectedTiles != null && selectedTiles[j][i] == true)
-					{
-						// Draw the highlighted tiles
-						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], highlightColor);
-					}
-					else if((i%2) == (j%2))
-					{
-						// Draw tiles
-						canvas.drawRect(i*tileSize[0], j*tileSize[1], (i+1)*tileSize[0], (j+1)*tileSize[1], tileColor);
-					}
-				}
-				
-				// Draw the chess notation text vertically
-				canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
-			}
-			
-			// Draw the chess notation text horizontally
 			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
-				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
-				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}
-			
-			// Draw each piece in its respective color
-			if(pieceMap != null)
-			{
-				for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
+				float left = j*tileSize[0];
+				float top = i*tileSize[1];
+				float right = (j+1)*tileSize[0];
+				float bottom = (i+1)*tileSize[1];
+				if(flipped)
 				{
-					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
-					{
-						ChessPiece piece = pieceMap[i][j];
-						if(piece != null && piece.isAlive())
-						{
-							float x = j*tileSize[0];
-							float y = (int)((i+0.80)*tileSize[1]);
-							int type = piece.getType();
-							if(type >= 0 && type < whitePieceStrs.length)
-							{
-								if(piece.isWhite())
-								{
-									canvas.drawText(whitePieceStrs[piece.getType()], x, y, whitePieceColor);
-								}
-								else
-								{
-									canvas.drawText(blackPieceStrs[piece.getType()], x, y, blackPieceColor);
-								}
-							}
-							
-						}
-					}
+					int newI = ChessGameState.BOARD_WIDTH-1-i;
+					top = newI*tileSize[1];
+					bottom = (newI+1)*tileSize[1];//TODO check if this is right
+				}
+				
+				Paint currentColor = null;
+				if(selectedLoc != null && selectedLoc[1] == i && selectedLoc[0] == j)
+				{
+					// Draw the selected tile
+					currentColor = selectColor;
+				}
+				else if(selectedTiles != null && selectedTiles[i][j] == true)
+				{
+					// Draw the highlighted tiles
+					currentColor =  highlightColor;
+					//canvas.drawRect(right,bottom,left,top, currentColor);
+				}
+				else if((i%2) == (j%2))
+				{
+					// Draw tiles
+					currentColor = tileColor;
+				}
+				if(currentColor != null)
+				{
+					canvas.drawRect(left, top, right, bottom, currentColor);
 				}
 			}
+			
+			// Draw the chess notation text vertically
+			canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
 		}
-		else
+		
+		// Draw the chess notation text horizontally
+		for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 		{
+			// uses arithmetic to turn 0,1,...,8 to A,B,...,H
+			canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
+		}
+		if(pieceMap != null)
+		{
+			// Draw each piece in its respective color
 			for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
 				for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 				{
-					int newJ = ChessGameState.BOARD_WIDTH-j;
-					float left = i*tileSize[0];
-					float top = newJ*tileSize[1];
-					float right = (i+1)*tileSize[0];
-					float bottom = (newJ+1)*tileSize[1];
-					if(selectedLoc != null && selectedLoc[0] == i && selectedLoc[1] == j 
-							&& !ChessGameState.outOfBounds(selectedLoc))
+					ChessPiece piece = pieceMap[i][j];
+					if(piece != null && piece.isAlive())
 					{
-						// Draw the selected tile
-						canvas.drawRect(left, top, right, bottom, selectColor);
-					}
-					else if(selectedTiles != null && selectedTiles[i][j] == true 
-							&& !ChessGameState.outOfBounds(selectedLoc))
-					{
-						// Draw the highlighted tiles
-						canvas.drawRect(left, top, right, bottom, highlightColor);
-					}
-					else if((i%2) == (j%2))
-					{
-						// Draw tiles
-						canvas.drawRect(left, top, right, bottom, tileColor);
-					}
-				}
-				
-				// Draw the chess notation text vertically
-				canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
-			}
-			
-			// Draw the chess notation text horizontally
-			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
-			{
-				// uses arithmetic to turn 0,1,...,8 to A,B,...,H
-				canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-			}
-			
-			// Draw each piece in its respective color
-			if(pieceMap != null)
-			{
-				for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
-				{
-					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
-					{
-						int newI = ChessGameState.BOARD_WIDTH-i;
-						ChessPiece piece = pieceMap[i][j];
-						if(piece != null)
+						float x = j*tileSize[0];
+						float y = (int)((i+0.80)*tileSize[1]);
+						if(flipped)
 						{
-							float x = j*tileSize[0];
-							float y = (float) ((newI+0.8)*tileSize[1]);
+							int newI = ChessGameState.BOARD_WIDTH-1-i;
+							y = (int)((newI+0.80)*tileSize[1]);
+						}
+						int type = piece.getType();
+						String typeStr = whitePieceStrs[piece.getType()];
+						if(type >= 0 && type < whitePieceStrs.length)
+						{
 							if(piece.isWhite())
 							{
-								canvas.drawText(whitePieceStrs[piece.getType()], x, y, whitePieceColor);
+								canvas.drawText(typeStr, x, y, whitePieceColor);
 							}
 							else
 							{
-								canvas.drawText(blackPieceStrs[piece.getType()], x, y, blackPieceColor);
+								canvas.drawText(typeStr, x, y, blackPieceColor);
 							}
 						}
+						
 					}
 				}
+			
 			}
 		}
 	}
@@ -302,12 +256,28 @@ public class ChessBoard extends SurfaceView
 		}
 		else if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
 		{
-			//this is an error
+			//error
 			return;
 		}
 		else
 		{
-			this.selectedTiles = selectedTiles;
+			/*if(flipped)
+			{
+				boolean[][] newSelectedTiles = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
+				for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
+				{
+					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+					{
+						int newI = ChessGameState.BOARD_HEIGHT-1-i;
+						newSelectedTiles[newI][j] = selectedTiles[i][j];
+					}
+				}
+				this.selectedTiles = newSelectedTiles;
+			}
+			else
+			{*/
+				this.selectedTiles = selectedTiles;
+			//}
 			invalidate();
 		}
 	}
@@ -319,8 +289,16 @@ public class ChessBoard extends SurfaceView
 	 */
 	public void setSelectedLoc(int i,int j) {
 		int[] newSelectedLoc = new int[2];
-		newSelectedLoc[1] = i;
 		newSelectedLoc[0] = j;
+		/*if(flipped)
+		{
+			newSelectedLoc[1] = ChessGameState.BOARD_HEIGHT-1-i;
+		}
+		else
+		{*/
+			newSelectedLoc[1] = i;
+		//}
+		
 		selectedLoc = newSelectedLoc;
 		invalidate();
 	}
@@ -334,6 +312,12 @@ public class ChessBoard extends SurfaceView
 		invalidate();
 	}
 	
+	
+	
+	public boolean isFlipped() {
+		return flipped;
+	}
+
 	/**
 	 * Returns an array of size 2 containing the size of each tile on the board
 	 * @return

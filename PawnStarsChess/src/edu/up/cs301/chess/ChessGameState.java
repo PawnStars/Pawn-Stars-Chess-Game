@@ -2,12 +2,8 @@ package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Iterator;
-
-import android.util.Log;
 
 import edu.up.cs301.chess.actions.*;
-import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
 
@@ -44,12 +40,8 @@ public class ChessGameState extends GameState {
 	private ChessPiece[][] pieceMap;
 
 	// Arrays to keep track of which pieces are alive/dead:
-	private ChessPiece[][] pieces;
-	
-	//The array of pieces for each player
 	private ChessPiece[] player1Pieces;
 	private ChessPiece[] player2Pieces;
-	
 
 	// Keep track of current score as the game progresses:
 	private int player1Points;
@@ -90,24 +82,37 @@ public class ChessGameState extends GameState {
 	 */
 	private boolean player1IsWhite; 
 	
+	/*
+	 * The index of the two players.
+	 * Player 1 is at element 0 and player 2 is at element 1.
+	 */
+	private int[] playerIdx = new int[2];
+	
+	//the index to start on when players give their index to the state
+	private int numConnected = 0;
+	
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
+	
+	// Keep track of whether or not this state represents a valid state of the board
+	private boolean valid;
 	
 	/*
 	 * The number of moves since the last capture.
 	 * Can be used to indicate a stalemate.
 	 */
 	private int lastCapture;
+	//TODO implement stalemate
 	
+
 	/**
 	 * constructor, initializing the ChessGameState to its initial state
 	 * 
 	 */
 	public ChessGameState(boolean player1White) {
 		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
-		pieces = new ChessPiece[MAX_PLAYERS][NUM_PIECES];
-		player1Pieces = pieces[0];
-		player2Pieces = pieces[1];
+		player1Pieces = new ChessPiece[NUM_PIECES];
+		player2Pieces = new ChessPiece[NUM_PIECES];
 	
 		whoseTurn = player1White;
 		player1IsWhite = player1White;
@@ -117,6 +122,7 @@ public class ChessGameState extends GameState {
 		player1Points = 0;
 		player2Points = 0;
 		lastCapture = 0;
+		valid = true;
 		moveList = new ArrayDeque<ChessMoveAction>();
 		
 		// Give each player a pawn of the appropriate color:
@@ -133,9 +139,9 @@ public class ChessGameState extends GameState {
 			}
 			//add the pieces to the player's list
 			player1Pieces[i] = new ChessPiece(ChessPiece.PAWN, player1IsWhite);
-			player1Pieces[i].setLocation(loc1.clone());
+			player1Pieces[i].setLocation(loc1);
 			player2Pieces[i] = new ChessPiece(ChessPiece.PAWN, !player1IsWhite);
-			player2Pieces[i].setLocation(loc2.clone());
+			player2Pieces[i].setLocation(loc2);
 			
 			//add to the piece map
 			pieceMap[loc1[0]][loc1[1]] = player1Pieces[i];
@@ -153,6 +159,8 @@ public class ChessGameState extends GameState {
 				ChessPiece.KNIGHT,
 				ChessPiece.ROOK
 		};
+		
+		//Puts non-pawn pieces into the piecemap
 		for (int i = 0; i < BOARD_WIDTH; i++) {
 			int[] loc1 = {BOARD_HEIGHT-1,i};
 			int[] loc2 = {0,i};
@@ -193,42 +201,34 @@ public class ChessGameState extends GameState {
 	 * @param orig
 	 *            original game state being copied
 	 */
-public ChessGameState(ChessGameState orig) {
+	public ChessGameState(ChessGameState orig) {
 		
 		//Sets all variables equal to the original ChessGameState
 		
 		//Creates copies of the pieces and puts them in the board
 		pieceMap = new ChessPiece[BOARD_WIDTH][BOARD_HEIGHT];
-		
-		
 		player1Pieces = ChessPiece.copyPieceList(orig.getPlayer1Pieces());
 		player2Pieces = ChessPiece.copyPieceList(orig.getPlayer2Pieces());
 		
-		pieces = new ChessPiece[MAX_PLAYERS][NUM_PIECES];
-		pieces[0] = player1Pieces;
-		pieces[1] = player2Pieces;
-		
-		for(int i=0;i<MAX_PLAYERS;i++)
+		for(ChessPiece piece:player1Pieces)
 		{
-			for(int j=0;j<NUM_PIECES;j++)
+			int[] loc = piece.getLocation();
+			if(!outOfBounds(loc))
 			{
-				int[] loc = pieces[i][j].getLocation();
-				if(!outOfBounds(loc))
-				{
-					pieceMap[loc[0]][loc[1]] = pieces[i][j];
-				}
+				pieceMap[loc[0]][loc[1]] = piece;
 			}
 		}
 		
-		//copy each move
-		moveList = new ArrayDeque<ChessMoveAction>();
-		Iterator<ChessMoveAction> it = orig.getMoveList().iterator();
-		while(it.hasNext())
+		for(ChessPiece piece:player2Pieces)
 		{
-			ChessMoveAction move = it.next();
-			ChessMoveAction newMove = new ChessMoveAction(move.getPlayer(),move);
-			moveList.add(newMove);
+			int[] loc = piece.getLocation();
+			if(!outOfBounds(loc))
+			{
+				pieceMap[loc[0]][loc[1]] = piece;
+			}
 		}
+		
+		moveList = orig.getMoveList().clone();//TODO clone the elements
 		
 		//Primitive values do not need to be copied
 		player1Points = orig.getPlayer1Points();
@@ -253,13 +253,13 @@ public ChessGameState(ChessGameState orig) {
 		player1Points = orig.getPlayer1Points();
 		player2Points = orig.getPlayer2Points();
 		
+		valid = orig.isValid();
+		
 		player1Material = orig.getPlayer1Material();
 		player2Material = orig.getPlayer2Material();
 		
 		player1PawnMaterial = orig.getPlayer1PawnMaterial();
 		player2PawnMaterial = orig.getPlayer2PawnMaterial();
-		
-		lastCapture = orig.getLastCapture();
 	}
 
 	/**
@@ -292,9 +292,9 @@ public ChessGameState(ChessGameState orig) {
 			return false;
 		
 		// Check if the player's piece arrays are equal
-		if(!Arrays.deepEquals(player1Pieces, comp.getPlayer1Pieces()))
+		if(!ChessPiece.pieceArrayEquals(player1Pieces, comp.getPlayer1Pieces()))
 			return false;
-		if(!Arrays.deepEquals(player2Pieces, comp.getPlayer2Pieces()))
+		if(!ChessPiece.pieceArrayEquals(player2Pieces, comp.getPlayer2Pieces()))
 			return false;
 		
 		// Check if all primitive instance variables are equals
@@ -309,15 +309,12 @@ public ChessGameState(ChessGameState orig) {
 
 		if(isGameOver != comp.isGameOver()) return false;
 
-		if(canCastle != comp.getCanCastle()) return false;//TODO fix this
+		if(canCastle != comp.getCanCastle()) return false;
 
 		if(player1IsWhite != comp.getPlayer1Color()) return false;
 		
-		//TODO Check if moveList is equal
-		
 		return true;
 	}
-	
 	
 	/**
 	 * Applies a move to the game state
@@ -327,183 +324,86 @@ public ChessGameState(ChessGameState orig) {
 	 */
 	public boolean applyMove(GameAction act)
 	{
-		//Do not apply the move if the game is over or there is no move.
-		if(act == null || isGameOver)
+		if(act == null)
 		{
 			return false;
 		}
+		//See if user has requested a draw (tie)
 		if(act instanceof DrawAction)
 		{
-			isGameOver = true;
-			player1Won = true;
-			player2Won = true;
+			//TODO implement
 			return true;
 		}
-		if(act instanceof ChooseColorAction)
-		{
-			ChooseColorAction action = (ChooseColorAction)act;
-			player1IsWhite = action.isWhichColor();
-			return true;
-		}
-		if(act instanceof SelectUpgradeAction)
-		{
-			SelectUpgradeAction action = (SelectUpgradeAction)act;
-			return applySelectUpgradeAction(action);
-		}
+		
+		//See if user has changed a piece
 		if(act instanceof ChessMoveAction)
 		{
 			ChessMoveAction move = (ChessMoveAction)act;
-			ChessPlayer player = ((ChessPlayer)act.getPlayer());
-			ChessPiece takenPiece = move.getTakenPiece();
-			ChessPiece whichPiece = move.getWhichPiece();
-			boolean foundTaken = false;
-			boolean foundWhich = false;
 			
-			//check if it is this player's turn
-			if(player != null && player.isPlayer1() == whoseTurn)
+			//Check for stalemate:
+			if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
 			{
-				//Statemate
-				if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
-				{
-					isGameOver = true;
-					player1Won = false;
-					player2Won = false;
-					return true;
-				}
-				
-				for(int i=0;i<MAX_PLAYERS;i++)
-				{
-					for(int j=0;j<NUM_PIECES;j++)
-					{
-						ChessPiece p = pieces[i][j];
-						if(p.equals(takenPiece))
-						{
-							//remove the piece from the board
-							takenPiece = p;
-							foundTaken = true;
-						}
-						//find the piece to be moved
-						if(p.equals(whichPiece))
-						{
-							whichPiece = p;
-							foundWhich = true;
-						}
-					}
-				}
-				
-				if(takenPiece == null)
-				{
-					lastCapture++;
-				}
-				
-				if(foundWhich && whichPiece != null)
-				{
-					//Move the piece
-					int[] oldLoc = whichPiece.getLocation().clone();
-					int[] newLoc = move.getNewPos().clone();
-					
-					//If a piece was taken, kill it and remove its reference
-					if(foundTaken && takenPiece != null)
-					{
-						int[] takenLoc = takenPiece.getLocation();
-						if(!outOfBounds(takenLoc))
-						{
-							takenPiece.kill();
-							pieceMap[takenLoc[0]][takenLoc[1]] = null;
-							lastCapture = 0;
-						}
-					}
-					
-					//If the new position is a valid position, make the move.
-					if(!outOfBounds(newLoc) && !outOfBounds(oldLoc))
-					{
-						whichPiece.move(newLoc);
-						ChessPiece movedPiece = new ChessPiece(whichPiece);
-						pieceMap[newLoc[0]][newLoc[1]] = movedPiece;
-						pieceMap[oldLoc[0]][oldLoc[1]] = null;
-						moveList.add(move);
-					}
-					
-					//Check if the game is over or if a player is in check.
-					boolean p1CanTakeKing = MoveGenerator.canTakeKing(this, true);
-					boolean p2CanTakeKing = MoveGenerator.canTakeKing(this, false);
-					
-					for(int i=0;i<MAX_PLAYERS;i++)
-					{
-						for(int j=0;j<NUM_PIECES;j++)
-						{
-							ChessPiece p = pieces[i][j];
-							if(p.getType() == ChessPiece.KING)
-							{
-								if(!p.isAlive())
-								{
-									if(p.isWhite() && player1IsWhite)
-									{
-										player1Won = true;
-									}
-									else
-									{
-										player2Won = true;
-									}
-								}
-							}
-						}
-					}
-					
-					//Someone is in check
-					if(p1CanTakeKing && !whoseTurn)
-					{
-						player2InCheck = true;
-					}
-					if(p2CanTakeKing && whoseTurn)
-					{
-						player1InCheck = true;
-					}
-					
-					//Someone is in checkmate
-					if(player1Won || player2Won)
-					{
-						isGameOver = true;
-					}
-					
-					whoseTurn = !whoseTurn;
-					
-					return true;
-				}
-				else//Could not find the piece to move
-				{
-					return false;
-				}
-			}
-			else//Could not find player or not the player's turn
-			{
+				isGameOver = true;
+				player1Won = false;
+				player2Won = false;
 				return false;
 			}
+			
+			//Update player turn:
+			//whoseTurn = !whoseTurn;
+			
+			//Used for AI???
+			if(!move.isValid() && valid == true)
+			{
+				valid = false;
+			}
+			
+			return movePiece(move);
+			//See if a piece has been taken
+			/*ChessPiece takenPiece = move.getTakenPiece();
+			if(takenPiece != null)
+			{
+				lastCapture = 0;
+				
+				//Search for the taken piece from players' array:
+				for(ChessPiece p:player1Pieces)
+				{
+					if(p.equals(takenPiece))
+					{
+						//kill piece and remove from board
+						p.kill();
+						int[] loc = p.getLocation();
+						pieceMap[loc[0]][loc[1]] = null;
+					}
+				}
+				for(ChessPiece p:player2Pieces)
+				{
+					if(p.equals(takenPiece))
+					{
+						//kill piece and remove from board
+						p.kill();
+						int[] loc = p.getLocation();
+						pieceMap[loc[0]][loc[1]] = null;
+					}
+				}
+			}
+			if(move.getWhichPiece() != null)
+			{
+				//Move the piece
+				int[] newLoc = move.getNewPos();
+				move.getWhichPiece().move(newLoc);
+				pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
+				lastCapture++;
+				return true;
+			}*/
+			
 		}
-		else//Cannot handle whatever move was given.
+		else
 		{
 			return false;
 		}
 	}
 	
-	private boolean applySelectUpgradeAction(SelectUpgradeAction action)
-	{
-		ChessPiece upgradePiece = action.getPiece();
-		for(int i=0;i<MAX_PLAYERS;i++)
-		{
-			for(int j=0;j<NUM_PIECES;j++)
-			{
-				ChessPiece p = pieces[i][j];
-				if(p.equals(upgradePiece))
-				{
-					p.setType(action.getType());
-					return true;
-				}
-			}
-		}
-		return false;//didn't find the piece
-	}
-
 	/**
 	 * Convert the game state into a readable chess board
 	 */
@@ -522,31 +422,35 @@ public ChessGameState(ChessGameState orig) {
 			turn = "Black";
 		}
 		
-		rtnVal+="Turn: "+turn+"\n";
-		rtnVal+="Score: "+player1Points+"\n";
+		String validStr = "";
+		if(valid)
+		{
+			validStr = "Valid";
+		}
+		if(!valid)
+		{
+			validStr = "Invalid";
+		}
+		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
 		
-		//List the moves made so far
 		rtnVal += "Moves: ";
 		for(ChessMoveAction move:moveList)
 		{
-			rtnVal+=move.toString()+",";
+			rtnVal+=move.toString()+", ";
 		}
 		
-		//Print the board
-		rtnVal +="\nState\n";
+		rtnVal +="State\n";
 		for(int i=0;i<BOARD_HEIGHT;i++)
 		{
 			for(int j=0;j<BOARD_WIDTH;j++)
 			{
 				if(pieceMap[i][j] != null)
 				{
-					//print the character corresponding to the chess piece
-					rtnVal+="["+pieceMap[i][j].toCharacter()+"]";
+					rtnVal+=pieceMap[i][j].toString();
 				}
 				else
 				{
-					//empty tiles on the board
-					rtnVal+="[_]";
+					rtnVal+="[ ]";
 				}
 			}
 			rtnVal+="\n";
@@ -562,7 +466,6 @@ public ChessGameState(ChessGameState orig) {
 	 */
 	public static boolean outOfBounds(int[] loc)
 	{
-		//Check for null
 		if(loc == null)
 		{
 			return true;
@@ -571,8 +474,6 @@ public ChessGameState(ChessGameState orig) {
 		{
 			return true;
 		}
-		
-		//Check for coordinates outside the pieceMap
 		if(loc[0] < 0 || loc[0] >= ChessGameState.BOARD_HEIGHT)
 		{
 			return true;
@@ -879,6 +780,14 @@ public ChessGameState(ChessGameState orig) {
 		this.player2PawnMaterial = player2PawnMaterial;
 	}
 	
+	/**
+	 * Returns true if this state can be sent to the other player
+	 * @return true if valid
+	 */
+	public boolean isValid() {
+		return valid;
+	}
+	
 	public boolean isPlayer1Won() {
 		return player1Won;
 	}
@@ -894,8 +803,683 @@ public ChessGameState(ChessGameState orig) {
 	public void setPlayer2Won(boolean player2Won) {
 		this.player2Won = player2Won;
 	}
+	/**
+	 * @return the player1Idx
+	 */
+	public int getPlayer1Idx() {
+		return playerIdx[1];
+	}
 
-	public int getLastCapture() {
-		return lastCapture;
+	/**
+	 * @return the player2Idx
+	 */
+	public int getPlayer2Idx() {
+		return playerIdx[1];
+	}
+	
+	/**
+	 * 
+	 * @param piece
+	 * @return
+	 */
+	public boolean[][] getPossibleMoves(ChessPiece piece) {
+		boolean[][] moves = null;// = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+
+		if (piece == null)
+			return null;// something bad happened
+
+		// Get coordinates of the piece in the piecemap:
+		int[] location = piece.getLocation();
+		int xLocation = location[1];
+		int yLocation = location[0];
+
+		switch (piece.getType()) {
+		case ChessPiece.PAWN:
+			moves = getPawnMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.KNIGHT:
+			moves = getKnightMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.BISHOP:
+			moves = getBishopMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.QUEEN:
+			moves = getQueenMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.KING:
+			moves = getKingMoves(xLocation, yLocation, piece);
+			break;
+		case ChessPiece.ROOK:
+			moves = getRookMoves(xLocation, yLocation, piece);
+			break;
+		}
+		
+		return moves;
+
+	}
+
+
+	/**
+	 * Checks the possible spots a pawn can move to
+	 * 
+	 * @param xLocation
+	 *            x-coordinate of selected piece
+	 * @param yLocation
+	 *            y-coordinate of selected piece
+	 * @param piece
+	 *            currently selected piece
+	 * @return a 2-D array representing the spaces the given pawn can move. True
+	 *         means the piece can move there, false means it can not move
+	 *         there.
+	 */
+	public boolean[][] getPawnMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		if (piece.isWhite()) {
+			if (yLocation - 1 >= 0) {
+				if (this.pieceMap[yLocation - 1][xLocation] == null) {
+					moves[yLocation - 1][xLocation] = true;
+				}
+			}
+			// See if the squares in front are taken:
+			if (piece.getHasMoved() == false) {
+				if (yLocation - 2 >= 0) {
+					if (this.pieceMap[yLocation - 2][xLocation] == null) {
+						moves[yLocation - 2][xLocation] = true;
+					}
+				}
+			}
+
+			// See if the pawn can attack from its current location:
+			if (xLocation - 1 >= 0 && yLocation - 1 >= 0) {
+				if (this.pieceMap[yLocation - 1][xLocation - 1] != null
+						&& this.pieceMap[yLocation - 1][xLocation - 1].isWhite() != piece.isWhite()) {
+					moves[yLocation - 1][xLocation - 1] = true;
+				}
+			}
+
+			if (xLocation + 1 < BOARD_WIDTH && yLocation - 1 >= 0) {
+				if (this.pieceMap[yLocation - 1][xLocation + 1] != null
+						&& this.pieceMap[yLocation - 1][xLocation + 1].isWhite() != piece.isWhite()) {
+					moves[yLocation - 1][xLocation + 1] = true;
+				}
+			}
+		} 
+		else
+		{
+			if (yLocation + 1 < BOARD_HEIGHT) {
+				if (this.pieceMap[yLocation + 1][xLocation] == null) {
+					moves[yLocation + 1][xLocation] = true;
+				}
+			}
+			// See if the squares in front are taken:
+			if (piece.getHasMoved() == false) {
+				if (yLocation + 2 >= 0) {
+					if (this.pieceMap[yLocation + 2][xLocation] == null) {
+						moves[yLocation + 2][xLocation] = true;
+					}
+				}
+			}
+
+			// See if the pawn can attack from its current location:
+			if (xLocation - 1 >= 0 && yLocation + 1 < BOARD_HEIGHT) {
+				if (this.pieceMap[yLocation + 1][xLocation - 1] != null
+						&& this.pieceMap[yLocation + 1][xLocation - 1].isWhite() != piece.isWhite()) {
+					moves[yLocation + 1][xLocation - 1] = true;
+				}
+			}
+
+			if (xLocation + 1 < BOARD_WIDTH && yLocation + 1 < BOARD_HEIGHT) {
+				if (this.pieceMap[yLocation + 1][xLocation + 1] != null
+						&&  this.pieceMap[yLocation + 1][xLocation + 1].isWhite() != piece.isWhite()) {
+					moves[yLocation + 1][xLocation + 1] = true;
+				}
+			}
+		}
+		return moves;
+	}
+	/**
+	 * Checks the possible spots a knight can move to
+	 * 
+	 * @param xLocation
+	 *            x-coordinate of selected piece
+	 * @param yLocation
+	 *            y-coordinate of selected piece
+	 * @param piece
+	 *            currently selected piece
+	 * @return 2D array representing the board. True means the piece can move
+	 *         there false means it can not move there
+	 */
+	public boolean[][] getKnightMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		// Pass by reference into checkKnightSpot...
+
+		// Check up two right one (or right one up two)
+		checkKnightSpot(piece, xLocation + 1, yLocation - 2, moves);
+
+		// Check down two right one (or right one two down):
+		checkKnightSpot(piece, xLocation + 1, yLocation + 2, moves);
+
+		// Check up two left one (or left one up two)
+		checkKnightSpot(piece, xLocation - 1, yLocation - 2, moves);
+
+		// Check down two left one (or left one two down):
+		checkKnightSpot(piece, xLocation - 1, yLocation + 2, moves);
+
+		// Check left two one up (or one up two left):
+		checkKnightSpot(piece, xLocation - 2, yLocation - 1, moves);
+
+		// Check left two one down (or one down two left):
+		checkKnightSpot(piece, xLocation - 2, yLocation + 1, moves);
+
+		// Check right two one down:
+		checkKnightSpot(piece, xLocation + 2, yLocation - 1, moves);
+
+		// Check right two one up:
+		checkKnightSpot(piece, xLocation + 2, yLocation + 1, moves);
+
+		return moves;
+	}
+
+	/**
+	 * Alters moves array to determine which location knight can move to
+	 * 
+	 * @param xLocation
+	 *            x-coordinate to be checked
+	 * @param yLocation
+	 *            y-coordinate to be checked
+	 * @param moves
+	 *            array to be modified
+	 */
+	private void checkKnightSpot(ChessPiece piece, int xLocation,
+			int yLocation, boolean[][] moves) {
+		if (yLocation >= 0 && yLocation < BOARD_HEIGHT && xLocation >= 0
+				&& xLocation < BOARD_WIDTH) {
+			// See if the spot is taken:
+			if (this.pieceMap[yLocation][xLocation] == null) {
+				moves[yLocation][xLocation] = true;
+			} else if (this.pieceMap[yLocation][xLocation].isWhite() != piece.isWhite()) {
+				// If the pieces are different colors, the knight can move to
+				// that spot (and take the piece)
+				moves[yLocation][xLocation] = true;
+			}
+		}
+	}
+
+	/**
+	 * Determines the position a bishop can move to.
+	 * 
+	 * @param xLocation
+	 *            of the current piece
+	 * @param yLocation
+	 *            of the current piece
+	 * @param piece
+	 *            of interest
+	 * @return 2-D array, true means the piece can move there
+	 */
+	private boolean[][] getBishopMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+
+		// TODO think about how to do this more succinctly...
+		// Check northwest direction:
+		int i = xLocation - 1;
+		int j = yLocation - 1;
+
+		while (i >= 0 && j >= 0 && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+			j--;
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check northeast direction:
+		i = xLocation + 1;
+		j = yLocation - 1;
+		while (i < BOARD_WIDTH && j >= 0 && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+			j--;
+		}
+		if (i < BOARD_WIDTH && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check southwest direction:
+		i = xLocation - 1;
+		j = yLocation + 1;
+		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+			j++;
+		}
+		if (i >= 0 && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check southeast direction:
+		i = xLocation + 1;
+		j = yLocation + 1;
+		while (i < BOARD_WIDTH && j < BOARD_HEIGHT
+				&& this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+			j++;
+		}
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		return moves;
+	}
+
+	
+	/**
+	 * Determines the postition the queen can move to.
+	 * 
+	 * @param xLocation
+	 *            of the current piece
+	 * @param yLocation
+	 *            of the current piece
+	 * @param piece
+	 *            of interest
+	 * @return 2-D array, true means the piece can move there
+	 */
+	private boolean[][] getKingMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		// TODO think about how to do this more succinctly...
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		int i = xLocation + 1;
+		int j = yLocation;
+
+		// check to the EAST
+		while (i < BOARD_WIDTH && j < BOARD_WIDTH
+				&& this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+		}
+		if (i < BOARD_WIDTH && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+		// check to the west
+		i = xLocation - 1;
+		j = yLocation;
+
+		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// check south
+
+		i = xLocation;
+		j = yLocation + 1;
+
+		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			j++;
+		}
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+		// check to the NORTH
+
+		i = xLocation;
+		j = yLocation - 1;
+
+		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			j--;
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// northWest
+		i = xLocation - 1;
+		j = yLocation - 1;
+
+		while (i >= 0 && j >= 0 && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+			j--;
+
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check northeast direction:
+		i = xLocation + 1;
+		j = yLocation - 1;
+		while (i < BOARD_WIDTH && j >= 0 && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+			j--;
+		}
+		if (i < BOARD_WIDTH && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check southwest direction:
+		i = xLocation - 1;
+		j = yLocation + 1;
+		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+			j++;
+		}
+		if (i >= 0 && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// Check southeast direction:
+		i = xLocation + 1;
+		j = yLocation + 1;
+		while (i < BOARD_WIDTH && j < BOARD_HEIGHT
+				&& this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+			j++;
+		}
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		return moves;
+	}
+
+	/**
+	 * Determines the postition the Rook can move to.
+	 * 
+	 * @param xLocation
+	 *            of the current piece
+	 * @param yLocation
+	 *            of the current piece
+	 * @param piece
+	 *            of interest
+	 * @return 2-D array, true means the piece can move there
+	 */
+	private boolean[][] getRookMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		// TODO think about how to do this more succinctly...
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		int i = xLocation + 1;
+		int j = yLocation;
+
+		// check to the EAST
+		while (i < BOARD_WIDTH && j < BOARD_WIDTH
+				&& this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i++;
+		}
+		if (i < BOARD_WIDTH && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+		// check to the west
+		i = xLocation - 1;
+		j = yLocation;
+
+		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			i--;
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+
+		// check south
+
+		i = xLocation;
+		j = yLocation + 1;
+
+		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			j++;
+		}
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+		// check to the NORTH
+
+		i = xLocation;
+		j = yLocation - 1;
+
+		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+			moves[i][j] = true;
+			j--;
+		}
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] != null) {
+				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[i][j] = true;
+				}
+			}
+		}
+		return moves;
+	}
+
+	/**
+	 * Determines the postition the Rook can move to.
+	 * 
+	 * @param xLocation
+	 *            of the current piece
+	 * @param yLocation
+	 *            of the current piece
+	 * @param piece
+	 *            of interest
+	 * @return 2-D array, true means the piece can move there
+	 */
+	private boolean[][] getQueenMoves(int xLocation, int yLocation,
+			ChessPiece piece) {
+		// TODO think about how to do this more succinctly...
+		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		// check to the east
+		int i = xLocation + 1;
+		int j = yLocation;
+		if (i < BOARD_WIDTH) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check southeast
+		i = xLocation + 1;
+		j = yLocation + 1;
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check south
+		i = xLocation;
+		j = yLocation + 1;
+		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check southwest
+
+		i = xLocation - 1;
+		j = yLocation + 1;
+		if (i >= 0 && j < BOARD_HEIGHT) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check west
+		i = xLocation - 1;
+		j = yLocation;
+		if (i >= 0) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check northWest
+		i = xLocation - 1;
+		j = yLocation - 1;
+		if (i >= 0 && j >= 0) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check north
+		i = xLocation;
+		j = yLocation - 1;
+		if (j >= 0) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+
+		// check northEast
+		i = xLocation + 1;
+		j = yLocation - 1;
+		if (i < BOARD_WIDTH && j >= 0) {
+			if (this.pieceMap[j][i] == null
+					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				moves[i][j] = true;
+			}
+		}
+		return moves;
+	}
+	/**
+	 * Attempts to move a piece.
+	 * 
+	 * @param act
+	 *            game action
+	 * @return true if the move was valid, false otherwise
+	 */
+	public boolean movePiece(ChessMoveAction act) {
+		// make sure the new location the piece is moving to is valid:
+		int[] position = act.getNewPos();
+		int newYPos = position[0];
+		int newXPos = position[1];
+
+		ChessPiece piece = act.getWhichPiece();
+		int oldYPos = piece.getLocation()[0];
+		int oldXPos = piece.getLocation()[1];
+		
+		//Get the version of the piece in this state
+		for(ChessPiece p:player1Pieces)
+		{
+			if(p.equals(piece))
+			{
+				piece = p;
+				break;
+			}
+		}
+		
+		for(ChessPiece p:player2Pieces)
+		{
+			if(p.equals(piece))
+			{
+				piece = p;
+				break;
+			}
+		}
+
+		boolean[][] validMoves = this.getPossibleMoves(piece);
+
+		if(pieceMap[newYPos][newXPos] != null)
+		{
+			pieceMap[newYPos][newXPos].kill();
+			lastCapture = 0;
+		}
+		else
+		{
+			lastCapture++;
+		}
+		// If the move is valid, apply the move and return true
+		if (validMoves[newYPos][newXPos])
+		{
+			pieceMap[newXPos][newYPos] = piece;
+			pieceMap[oldXPos][oldYPos] = null;
+			
+			piece.move(position);
+			whoseTurn = !whoseTurn;
+			return true;
+		} else { // do nothing and return false
+			return false;
+		}
 	}
 }

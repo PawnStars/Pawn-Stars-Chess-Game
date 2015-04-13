@@ -24,10 +24,10 @@ public class PawnMove extends ChessMoveAction {
 	private static final long serialVersionUID = -1949275900587108452L;
 	
 	//The types of special moves for pawns
-	public final int EN_PASSANT = 0;
-	public final int PROMOTION = 1;
-	public final int FIRST_MOVE = 2;
-	public final int NONE = 3;
+	public static final int EN_PASSANT = 0;
+	public static final int PROMOTION = 1;
+	public static final int FIRST_MOVE = 2;
+	public static final int NONE = 3;
 	
 	public final static int NUM_PAWN_ATTACKS_NORMAL = 2;
 	

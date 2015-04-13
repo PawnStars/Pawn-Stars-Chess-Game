@@ -30,18 +30,9 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	@Override
 	public boolean canMove(int playerIdx)
 	{
-		if(gameState.isWhoseTurn() && playerIdx == 0)
-		{
-			return true;
-		}
-		else if(!gameState.isWhoseTurn() && playerIdx == 1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		//isWhoseTurn is true if it is player 1's turn
+		//player 1 has an idx of 0
+		return (gameState.isWhoseTurn() == (playerIdx == 0));
 	}
 
 	/**
@@ -62,26 +53,16 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 	public boolean makeMove(GameAction action) {
 		Log.i("action", action.getClass().toString());
 		
-		//TODO deselect the pieces on the board, update board, etc.
-		//TODO implement what each move does
 		if (action instanceof ChessMoveAction) {
 		
 			ChessMoveAction act = (ChessMoveAction)action;
-			if (act instanceof PawnMove) {
-				//TODO implement what each move does
-			}
-			if (act instanceof RookMove) {
-				//TODO implement what each move does
-			}
-			else
-			{
-				if(canMove(getPlayerIdx(act.getPlayer())))
-				{
-					ChessGameState newState = new ChessGameState(gameState);
-					newState.applyMove(act);
-					gameState = newState;
-				}
-			}
+
+			//if(canMove(getPlayerIdx(act.getPlayer())))
+			//{
+				ChessGameState newState = new ChessGameState(gameState);
+				newState.applyMove(act);
+				gameState = newState;
+			//}
 			return true;
 		}
 		else if (action instanceof SelectUpgradeAction) {
