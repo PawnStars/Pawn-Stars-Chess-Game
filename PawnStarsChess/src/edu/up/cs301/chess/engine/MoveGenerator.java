@@ -295,7 +295,7 @@ public class MoveGenerator {
 			{
 				
 				int[] newLoc = loc.clone();
-				if(piece.isWhite())//TODO make sure this works
+				if(piece.isWhite())
 				{
 					newLoc[0] -= i;
 				}
@@ -348,7 +348,6 @@ public class MoveGenerator {
 			{
 				if(!ChessGameState.outOfBounds(attackLoc[i]))
 				{
-					//TODO not sure if this part is right
 					ChessPiece taken = state.getPieceMap()[attackLoc[i][0]][attackLoc[i][1]];
 					
 					//it can take a piece of a different color
