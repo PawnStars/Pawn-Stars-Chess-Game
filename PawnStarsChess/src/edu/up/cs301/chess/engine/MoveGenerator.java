@@ -178,17 +178,22 @@ public class MoveGenerator {
 	 * @param player
 	 * @return
 	 */
-	public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
+	/*public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
 	{
+		
+		boolean checkmate = false;
+		ChessPiece[] nonMoveablePieces;
 		ChessPiece[] moveablePieces;
 		boolean moveColor;
 		if(state.isWhoseTurn() && isPlayer1)//player 1's turn
 		{
 			moveablePieces = state.getPlayer1Pieces().clone();
+			nonMoveablePieces = state.getPlayer2Pieces().clone();
 			moveColor = state.isPlayer1IsWhite();
 		}
 		else if(!state.isWhoseTurn() && !isPlayer1)//player 2's turn
 		{
+			nonMoveablePieces = state.getPlayer1Pieces().clone();
 			moveablePieces = state.getPlayer2Pieces().clone();
 			moveColor = !state.isPlayer1IsWhite();
 		}
@@ -196,6 +201,22 @@ public class MoveGenerator {
 		{
 			return false;
 		}
+		ChessPiece king = null;
+		for(ChessPiece piece: nonMoveablePieces)
+		{
+			if(piece.getType() == ChessPiece.KING)
+			{
+				king = piece;
+				break;
+			}
+		}
+		int[] kingLoc = ChessPiece.INVALID_LOCATION;
+		if(king != null && king.getLocation() != null)
+		{
+			kingLoc = king.getLocation();
+		}
+		
+		
 		ArrayList<ChessPiece> dangerousPieces = new ArrayList<ChessPiece>();
 		if(moveablePieces != null)
 		{
@@ -210,17 +231,31 @@ public class MoveGenerator {
 						if(move != null && move.getTakenPiece() != null)
 						{
 							//TODO test if this works
+							
 							ChessPiece piece = move.getTakenPiece();
+							int[] loc = move.getNewPos();
+							
+							//Add pieces that can take the king
 							if(piece.getType() == ChessPiece.KING)
 							{
 								dangerousPieces.add(move.getWhichPiece());
+							}
+							else if(Math.abs(loc[0] - kingLoc[0]) <= 1)
+							{
+								if(Math.abs(loc[1] - kingLoc[1]) <= 1)
+								{
+									//Add pieces that can move near the king
+									dangerousPieces.add(move.getWhichPiece());
+								}
 							}
 						}
 					}
 				}
 			}
+			//ChessMoveAction[] kingMoves = getPieceMoves(state, king, null, moveColor, true);
 			
 			//TODO find bug here
+			int numGoodMoves = 0;
 			for(ChessPiece p: moveablePieces)
 			{
 				ChessPiece copyOfP = new ChessPiece(p);
@@ -240,17 +275,24 @@ public class MoveGenerator {
 									//and check if another piece can take the king
 									ChessGameState newState = new ChessGameState(state);
 									newState.applyMove(move);
-									return canTakeKing(newState,isPlayer1);
+									if(!canTakeKing(newState,isPlayer1))
+									{
+										numGoodMoves++;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+			if(numGoodMoves == 0)
+			{
+				return true;
+			}
 		}
 		
 		return false;
-	}
+	}*/
 	
 	/**
 	 * Returns an array of ChessMoveActions that a given piece can make

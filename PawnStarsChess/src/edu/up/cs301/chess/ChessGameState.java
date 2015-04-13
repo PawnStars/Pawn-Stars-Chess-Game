@@ -193,7 +193,7 @@ public class ChessGameState extends GameState {
 	 * @param orig
 	 *            original game state being copied
 	 */
-	public ChessGameState(ChessGameState orig) {
+public ChessGameState(ChessGameState orig) {
 		
 		//Sets all variables equal to the original ChessGameState
 		
@@ -428,8 +428,27 @@ public class ChessGameState extends GameState {
 					boolean p1CanTakeKing = MoveGenerator.canTakeKing(this, true);
 					boolean p2CanTakeKing = MoveGenerator.canTakeKing(this, false);
 					
-					player1Won = MoveGenerator.willTakeKing(this, true);
-					player2Won = MoveGenerator.willTakeKing(this, false);
+					for(int i=0;i<MAX_PLAYERS;i++)
+					{
+						for(int j=0;j<NUM_PIECES;j++)
+						{
+							ChessPiece p = pieces[i][j];
+							if(p.getType() == ChessPiece.KING)
+							{
+								if(!p.isAlive())
+								{
+									if(p.isWhite() && player1IsWhite)
+									{
+										player1Won = true;
+									}
+									else
+									{
+										player2Won = true;
+									}
+								}
+							}
+						}
+					}
 					
 					//Someone is in check
 					if(p1CanTakeKing && !whoseTurn)
