@@ -178,10 +178,8 @@ public class MoveGenerator {
 	 * @param player
 	 * @return
 	 */
-	/*public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
+	public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
 	{
-		
-		boolean checkmate = false;
 		ChessPiece[] nonMoveablePieces;
 		ChessPiece[] moveablePieces;
 		boolean moveColor;
@@ -252,10 +250,13 @@ public class MoveGenerator {
 					}
 				}
 			}
-			//ChessMoveAction[] kingMoves = getPieceMoves(state, king, null, moveColor, true);
+			if(dangerousPieces.size() == 0)
+			{
+				//The king cannot be taken if an enemy cannot get near it
+				return false;
+			}
 			
 			//TODO find bug here
-			int numGoodMoves = 0;
 			for(ChessPiece p: moveablePieces)
 			{
 				ChessPiece copyOfP = new ChessPiece(p);
@@ -264,35 +265,24 @@ public class MoveGenerator {
 				{
 					for(ChessMoveAction move: moves)
 					{
-						if(move != null && move.getTakenPiece() != null)
+						if(move != null)
 						{
-							ChessPiece piece = move.getTakenPiece();
-							for(ChessPiece dangerousPiece: dangerousPieces)
+							//apply every possible move
+							ChessGameState newState = new ChessGameState(state);
+							newState.applyMove(move);
+							if(!canTakeKing(newState,isPlayer1))
 							{
-								if(piece.equals(dangerousPiece))
-								{
-									//do the move that kills a dangerous piece
-									//and check if another piece can take the king
-									ChessGameState newState = new ChessGameState(state);
-									newState.applyMove(move);
-									if(!canTakeKing(newState,isPlayer1))
-									{
-										numGoodMoves++;
-									}
-								}
+								//there is a move that prevents the king from being taken
+								return false;
 							}
 						}
 					}
 				}
 			}
-			if(numGoodMoves == 0)
-			{
-				return true;
-			}
 		}
 		
-		return false;
-	}*/
+		return true;
+	}
 	
 	/**
 	 * Returns an array of ChessMoveActions that a given piece can make
@@ -411,7 +401,7 @@ public class MoveGenerator {
 				newLoc[1] = loc[1];
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done == true)
+				if(done)
 				{
 					break;
 				}
@@ -425,7 +415,7 @@ public class MoveGenerator {
 				newLoc[1] = loc[1];
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done == true)
+				if(done)
 				{
 					break;
 				}
@@ -439,7 +429,7 @@ public class MoveGenerator {
 				newLoc[1] = i;
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done == true)
+				if(done)
 				{
 					break;
 				}
@@ -453,7 +443,7 @@ public class MoveGenerator {
 				newLoc[1] = i;
 				
 				boolean done = addMove(state,piece,moveList,newLoc,currPlayer,color);
-				if(done == true)
+				if(done)
 				{
 					break;
 				}

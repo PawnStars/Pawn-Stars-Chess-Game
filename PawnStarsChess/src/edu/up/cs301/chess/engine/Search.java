@@ -23,7 +23,7 @@ import edu.up.cs301.chess.actions.ChessMoveAction;
  */
 public class Search {
 	//the depth of the recursive search
-	private static int maxDepth = 2;
+	private static int maxDepth = 1;
 	
 	//The maximum amount of time to take for a search.
 	private static long maxTime = 30000;//30 seconds
@@ -50,7 +50,7 @@ public class Search {
 		//dynamic depth so the calculation does not take as long for weak AIs
 		int depth = (intelligence*maxDepth/MAX_INTELLIGENCE);
 		
-		ChessMoveAction[] sortedMoves = negaScout(depth, state, player.isWhite());//iterativeDeepening(state,depth);
+		ChessMoveAction[] sortedMoves = iterativeDeepening(state,depth,player.isWhite());
 		
 		if(sortedMoves.length == 0 || sortedMoves == null)
 		{

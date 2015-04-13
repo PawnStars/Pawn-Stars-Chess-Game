@@ -114,7 +114,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite);
 			
-			//scramble the order of the moves so it won't be predictible
+			//scramble the order of the moves so it won't be predictable
 			for(int i=0;i<(possibleActions.length/2)-1;i++)
 			{
 				int randomIndex = (int) (Math.random()*(possibleActions.length));
@@ -171,11 +171,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		{
 			Log.d("computer player", "Sending this move: "+chosenMove);
 			game.sendAction(chosenMove);
-			/*if(game instanceof ChessLocalGame)
-			{
-				ChessLocalGame chessGame = (ChessLocalGame)game;
-				return chessGame.makeMove(chosenMove);
-			}*/
+
 			return true;
 		}
 		else
