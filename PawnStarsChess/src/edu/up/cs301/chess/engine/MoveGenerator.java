@@ -37,7 +37,8 @@ public class MoveGenerator {
 		{
 			return null;
 		}
-		//going to contain each array of moves in a 2d array
+		
+		//Contain each array of moves in a 2d array
 		ChessMoveAction[][] moveList2d = new ChessMoveAction[ChessGameState.NUM_PIECES][];
 		
 		//get the pieces that can move
@@ -91,10 +92,10 @@ public class MoveGenerator {
 				}
 			}
 		}
-		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
-		Log.d("move generator","moves possible:"+moves.length);
-		//TODO scramble the order of the moves??
+		
 		//remove the moves that would get the king captured
+		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
+		
 		return moves;
 	}
 	
@@ -180,109 +181,11 @@ public class MoveGenerator {
 	 */
 	public static boolean willTakeKing(ChessGameState state, boolean isPlayer1)
 	{
-		//TODO make this methods work
-		ChessPiece[] nonMoveablePieces;
-		ChessPiece[] moveablePieces;
-		boolean moveColor;
-		if(state.isWhoseTurn() && isPlayer1)//player 1's turn
-		{
-			moveablePieces = state.getPlayer1Pieces().clone();
-			nonMoveablePieces = state.getPlayer2Pieces().clone();
-			moveColor = state.isPlayer1IsWhite();
-		}
-		else if(!state.isWhoseTurn() && !isPlayer1)//player 2's turn
-		{
-			nonMoveablePieces = state.getPlayer1Pieces().clone();
-			moveablePieces = state.getPlayer2Pieces().clone();
-			moveColor = !state.isPlayer1IsWhite();
-		}
-		else
-		{
-			return false;
-		}
-		ChessPiece king = null;
-		for(ChessPiece piece: nonMoveablePieces)
-		{
-			if(piece.getType() == ChessPiece.KING)
-			{
-				king = piece;
-				break;
-			}
-		}
-		int[] kingLoc = ChessPiece.INVALID_LOCATION;
-		if(king != null && king.getLocation() != null)
-		{
-			kingLoc = king.getLocation();
-		}
-		
-		
-		ArrayList<ChessPiece> dangerousPieces = new ArrayList<ChessPiece>();
-		if(moveablePieces != null)
-		{
-			for(ChessPiece p: moveablePieces)
-			{
-				ChessPiece copyOfP = new ChessPiece(p);
-				ChessMoveAction[] moves = getPieceMoves(state,copyOfP,null,!moveColor,false);
-				if(moves != null)
-				{
-					for(ChessMoveAction move: moves)
-					{
-						if(move != null && move.getTakenPiece() != null)
-						{
-							//TODO test if this works
-							
-							ChessPiece piece = move.getTakenPiece();
-							int[] loc = move.getNewPos();
-							
-							//Add pieces that can take the king
-							if(piece.getType() == ChessPiece.KING)
-							{
-								dangerousPieces.add(move.getWhichPiece());
-							}
-							else if(Math.abs(loc[0] - kingLoc[0]) <= 1)
-							{
-								if(Math.abs(loc[1] - kingLoc[1]) <= 1)
-								{
-									//Add pieces that can move near the king
-									dangerousPieces.add(move.getWhichPiece());
-								}
-							}
-						}
-					}
-				}
-			}
-			if(dangerousPieces.size() == 0)
-			{
-				//The king cannot be taken if an enemy cannot get near it
-				return false;
-			}
-			
-			//TODO find bug here
-			for(ChessPiece p: moveablePieces)
-			{
-				ChessPiece copyOfP = new ChessPiece(p);
-				ChessMoveAction[] moves = getPieceMoves(state,copyOfP,null,!moveColor,false);
-				if(moves != null)
-				{
-					for(ChessMoveAction move: moves)
-					{
-						if(move != null)
-						{
-							//apply every possible move
-							ChessGameState newState = new ChessGameState(state);
-							newState.applyMove(move);
-							if(!canTakeKing(newState,isPlayer1))
-							{
-								//there is a move that prevents the king from being taken
-								return false;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		return true;
+		//Get all the moves that won't get the king captured
+		ChessMoveAction[] possibleMoves = getPossibleMoves(state,null,true);
+
+		//If there are none, you lose
+		return possibleMoves.length == 0;
 	}
 	
 	/**
@@ -295,9 +198,9 @@ public class MoveGenerator {
 	 * @return an array of moves
 	 */
 	public static ChessMoveAction[] getPieceMoves(ChessGameState state,
-			ChessPiece piece, ChessPlayer currPlayer, boolean color, boolean legal)
+			ChessPiece piece, ChessPlayer player, boolean color, boolean legal)
 	{
-		//check for null pointers
+		//Check for null pointers
 		if(state == null || piece == null)
 		{
 			return null;
@@ -309,10 +212,12 @@ public class MoveGenerator {
 		{
 			return null;
 		}
+		
+		//Get the locations the piece can move to
 		boolean[][] possibleLocs = state.getPossibleMoves(piece);
 		
+		//Add a move for each location it can more to
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
-		
 		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 		{
 			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
@@ -320,12 +225,15 @@ public class MoveGenerator {
 				if(possibleLocs[i][j])
 				{
 					int[] newLoc = new int[]{i,j};
-					addMove(state,piece,moveList,newLoc,currPlayer,color);
+					//addMove(state,piece,moveList,newLoc,player,color);
+					ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
 				}
 			}
 		}
-		ChessMoveAction[] rtnVal = moveList.toArray(new ChessMoveAction[moveList.size()]);
 		
+		//Convert to an array
+		ChessMoveAction[] rtnVal = moveList.toArray(new ChessMoveAction[moveList.size()]);
 		if(legal)
 		{
 			rtnVal =  removeIllegalMoves(state, rtnVal,color);
@@ -350,7 +258,7 @@ public class MoveGenerator {
 	 * @param player
 	 * @return true if this move takes a piece
 	 */
-	private static boolean addMove(ChessGameState state,
+	/*private static boolean addMove(ChessGameState state,
 			ChessPiece piece, ArrayList<ChessMoveAction> moveList,
 			int[] newLoc, ChessPlayer player, boolean color)
 	{
@@ -399,7 +307,7 @@ public class MoveGenerator {
 			moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
 			return false;
 		}
-	}
+	}*/
 
 	/**
 	 * You must defend yourself from check threats, so this function removes

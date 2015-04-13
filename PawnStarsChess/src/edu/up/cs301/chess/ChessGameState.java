@@ -88,21 +88,14 @@ public class ChessGameState extends GameState {
 	 */
 	private int[] playerIdx = new int[2];
 	
-	//the index to start on when players give their index to the state
-	private int numConnected = 0;
-	
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
-	
-	// Keep track of whether or not this state represents a valid state of the board
-	private boolean valid;
 	
 	/*
 	 * The number of moves since the last capture.
 	 * Can be used to indicate a stalemate.
 	 */
 	private int lastCapture;
-	//TODO implement stalemate
 	
 
 	/**
@@ -122,7 +115,6 @@ public class ChessGameState extends GameState {
 		player1Points = 0;
 		player2Points = 0;
 		lastCapture = 0;
-		valid = true;
 		moveList = new ArrayDeque<ChessMoveAction>();
 		
 		// Give each player a pawn of the appropriate color:
@@ -253,7 +245,7 @@ public class ChessGameState extends GameState {
 		player1Points = orig.getPlayer1Points();
 		player2Points = orig.getPlayer2Points();
 		
-		valid = orig.isValid();
+		//valid = orig.isValid();
 		
 		player1Material = orig.getPlayer1Material();
 		player2Material = orig.getPlayer2Material();
@@ -348,55 +340,9 @@ public class ChessGameState extends GameState {
 				player2Won = false;
 				return false;
 			}
-			
-			//Update player turn:
-			//whoseTurn = !whoseTurn;
-			
-			//Used for AI???
-			if(!move.isValid() && valid == true)
-			{
-				valid = false;
-			}
+			moveList.add(move);
 			
 			return movePiece(move);
-			//See if a piece has been taken
-			/*ChessPiece takenPiece = move.getTakenPiece();
-			if(takenPiece != null)
-			{
-				lastCapture = 0;
-				
-				//Search for the taken piece from players' array:
-				for(ChessPiece p:player1Pieces)
-				{
-					if(p.equals(takenPiece))
-					{
-						//kill piece and remove from board
-						p.kill();
-						int[] loc = p.getLocation();
-						pieceMap[loc[0]][loc[1]] = null;
-					}
-				}
-				for(ChessPiece p:player2Pieces)
-				{
-					if(p.equals(takenPiece))
-					{
-						//kill piece and remove from board
-						p.kill();
-						int[] loc = p.getLocation();
-						pieceMap[loc[0]][loc[1]] = null;
-					}
-				}
-			}
-			if(move.getWhichPiece() != null)
-			{
-				//Move the piece
-				int[] newLoc = move.getNewPos();
-				move.getWhichPiece().move(newLoc);
-				pieceMap[newLoc[0]][newLoc[1]] = move.getWhichPiece();
-				lastCapture++;
-				return true;
-			}*/
-			
 		}
 		else
 		{
@@ -422,16 +368,7 @@ public class ChessGameState extends GameState {
 			turn = "Black";
 		}
 		
-		String validStr = "";
-		if(valid)
-		{
-			validStr = "Valid";
-		}
-		if(!valid)
-		{
-			validStr = "Invalid";
-		}
-		rtnVal+="Turn: "+turn+"\t Valid: "+validStr+"\n";
+		rtnVal+="Turn: "+turn+"\n";
 		
 		rtnVal += "Moves: ";
 		for(ChessMoveAction move:moveList)
@@ -780,14 +717,6 @@ public class ChessGameState extends GameState {
 		this.player2PawnMaterial = player2PawnMaterial;
 	}
 	
-	/**
-	 * Returns true if this state can be sent to the other player
-	 * @return true if valid
-	 */
-	public boolean isValid() {
-		return valid;
-	}
-	
 	public boolean isPlayer1Won() {
 		return player1Won;
 	}
@@ -828,6 +757,7 @@ public class ChessGameState extends GameState {
 		if (piece == null)
 			return null;// something bad happened
 
+		//TODO check for illegal moves
 		// Get coordinates of the piece in the piecemap:
 		int[] location = piece.getLocation();
 		int xLocation = location[1];
@@ -1094,7 +1024,7 @@ public class ChessGameState extends GameState {
 
 	
 	/**
-	 * Determines the postition the queen can move to.
+	 * Determines the position the queen can move to.
 	 * 
 	 * @param xLocation
 	 *            of the current piece
@@ -1106,135 +1036,15 @@ public class ChessGameState extends GameState {
 	 */
 	private boolean[][] getKingMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
-		// TODO think about how to do this more succinctly...
+		
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
-		int i = xLocation + 1;
-		int j = yLocation;
 
-		// check to the EAST
-		while (i < BOARD_WIDTH && j < BOARD_WIDTH
-				&& this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i++;
-		}
-		if (i < BOARD_WIDTH && j >= 0) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-		// check to the west
-		i = xLocation - 1;
-		j = yLocation;
-
-		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i--;
-		}
-		if (i >= 0 && j >= 0) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-
-		// check south
-
-		i = xLocation;
-		j = yLocation + 1;
-
-		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			j++;
-		}
-		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-		// check to the NORTH
-
-		i = xLocation;
-		j = yLocation - 1;
-
-		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			j--;
-		}
-		if (i >= 0 && j >= 0) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-
-		// northWest
-		i = xLocation - 1;
-		j = yLocation - 1;
-
-		while (i >= 0 && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i--;
-			j--;
-
-		}
-		if (i >= 0 && j >= 0) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-
-		// Check northeast direction:
-		i = xLocation + 1;
-		j = yLocation - 1;
-		while (i < BOARD_WIDTH && j >= 0 && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i++;
-			j--;
-		}
-		if (i < BOARD_WIDTH && j >= 0) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-
-		// Check southwest direction:
-		i = xLocation - 1;
-		j = yLocation + 1;
-		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i--;
-			j++;
-		}
-		if (i >= 0 && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-					moves[j][i] = true;
-				}
-			}
-		}
-
-		// Check southeast direction:
-		i = xLocation + 1;
-		j = yLocation + 1;
-		while (i < BOARD_WIDTH && j < BOARD_HEIGHT
-				&& this.pieceMap[j][i] == null) {
-			moves[j][i] = true;
-			i++;
-			j++;
-		}
-		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] != null) {
-				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+		for(int i = xLocation-1;i<=xLocation+1;i++)
+		{
+			for(int j = yLocation-1;i<=yLocation+1;i++)
+			{
+				if(i != xLocation && j != yLocation)
+				{
 					moves[j][i] = true;
 				}
 			}
@@ -1469,16 +1279,28 @@ public class ChessGameState extends GameState {
 		{
 			lastCapture++;
 		}
-		// If the move is valid, apply the move and return true
-		if (validMoves[newYPos][newXPos])
+		
+		if(act instanceof PawnMove)
 		{
+			/*PawnMove pawnAct = (PawnMove) act;
+			if(pawnAct.getType() == PawnMove.PROMOTION)
+			{
+				//TODO 
+			}*/
+		}
+		if (validMoves[newYPos][newXPos] == true)
+		{
+			// If the move is valid, apply the move and return true
 			pieceMap[newXPos][newYPos] = piece;
 			pieceMap[oldXPos][oldYPos] = null;
 			
 			piece.move(position);
 			whoseTurn = !whoseTurn;
 			return true;
-		} else { // do nothing and return false
+		}
+		else
+		{
+			// do nothing and return false
 			return false;
 		}
 	}

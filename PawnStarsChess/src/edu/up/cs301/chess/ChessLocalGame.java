@@ -57,12 +57,12 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		
 			ChessMoveAction act = (ChessMoveAction)action;
 
-			//if(canMove(getPlayerIdx(act.getPlayer())))
-			//{
+			if(canMove(getPlayerIdx(act.getPlayer())))
+			{
 				ChessGameState newState = new ChessGameState(gameState);
 				newState.applyMove(act);
 				gameState = newState;
-			//}
+			}
 			return true;
 		}
 		else if (action instanceof SelectUpgradeAction) {

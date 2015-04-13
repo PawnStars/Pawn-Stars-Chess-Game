@@ -9,7 +9,9 @@ import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.MessageBox;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -71,6 +73,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	
 	//the valid locations for a move using the lastPieceSelected
 	private boolean[][] validLocs;
+	
+	private Vibrator vibrator;
 	
 	/**
 	 * constructor
@@ -194,6 +198,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		board.setOnTouchListener(this);
 		
+		vibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
+		
 		//Ask which color the player wants to be.
 		String colorQuestion =
 				activity.getResources().getString(R.string.dialog_color_question);
@@ -236,6 +242,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		return isWhite;
 	}
 
+	/**
+	 * Handles touches for the ChessBoard
+	 */
 	public boolean onTouch(View v, MotionEvent event) {
 		v.onTouchEvent(event);
 		//only handle touches when it is your turn
@@ -261,6 +270,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				int tileX;
 				int tileY;
 				int[] selectedLoc;
+				
+				//translate the points if the board is flipped
 				if(board.isFlipped())
 				{
 					tileX = (int) (event.getX()/tileSize[0]);
@@ -330,16 +341,12 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				 */
 				if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
 				{
-					//is a valid location to move the piece to
+					//Is a valid location to move the piece to
 					if(validLocs != null && validLocs[tileY][tileX] == true)
 					{
-						//make a copy of the state before trying to apply the move
-						//ChessGameState newState = new ChessGameState(state);
-						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
-						
-						//create and apply the move
+						//Create and apply the move
 						ChessMoveAction move = null;
-						
+						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
 						if(lastPieceSelected.getType() == ChessPiece.PAWN)
 						{
 							//TODO implement special moves
@@ -362,11 +369,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					}
 					
 					/*
-					 * the user either tried to make an invalid move or made
+					 * The user either tried to make an invalid move or made
 					 * a move, so clear piece selections.
 					 */
 					lastPieceSelected = null;
-					return true;
 				}
 			}
 		}
@@ -436,6 +442,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		SelectUpgradeAction newAct = new SelectUpgradeAction(this, this.lastPieceSelected, types[type]);
 		game.sendAction(newAct);
 		return null;
+	}
+	
+	public void vibrate(int time)
+	{
+		vibrator.vibrate(time);
 	}
 }// class CounterHumanPlayer
 
