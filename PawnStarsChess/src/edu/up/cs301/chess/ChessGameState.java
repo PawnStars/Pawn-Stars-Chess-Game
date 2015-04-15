@@ -842,64 +842,84 @@ public class ChessGameState extends GameState {
 	public boolean[][] getPawnMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+		
+		// See if the squares in front are taken:
+		int j = 0;
+		int i = 0;
 		if (piece.isWhite()) {
+			j = yLocation - 1;
+			i = xLocation;
 			if (yLocation - 1 >= 0) {
-				if (this.pieceMap[yLocation - 1][xLocation] == null) {
-					moves[yLocation - 1][xLocation] = true;
-				}
-			}
-			// See if the squares in front are taken:
-			if (piece.getHasMoved() == false) {
-				if (yLocation - 2 >= 0) {
-					if (this.pieceMap[yLocation - 2][xLocation] == null) {
-						moves[yLocation - 2][xLocation] = true;
+				if (this.pieceMap[j][i] == null) {
+					moves[j][i] = true;
+					
+					if (piece.getHasMoved() == false) {
+						j--;
+						if (!outOfBounds(i,j)) {
+							if (this.pieceMap[j][i] == null) {
+								moves[j][i] = true;
+							}
+						}
 					}
 				}
 			}
+			
 
 			// See if the pawn can attack from its current location:
-			if (xLocation - 1 >= 0 && yLocation - 1 >= 0) {
-				if (this.pieceMap[yLocation - 1][xLocation - 1] != null
-						&& this.pieceMap[yLocation - 1][xLocation - 1].isWhite() != piece.isWhite()) {
-					moves[yLocation - 1][xLocation - 1] = true;
+			j = yLocation - 1;
+			i = xLocation - 1;
+			if (!outOfBounds(i,j)) {
+				if (this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[j][i] = true;
 				}
 			}
 
-			if (xLocation + 1 < BOARD_WIDTH && yLocation - 1 >= 0) {
-				if (this.pieceMap[yLocation - 1][xLocation + 1] != null
-						&& this.pieceMap[yLocation - 1][xLocation + 1].isWhite() != piece.isWhite()) {
-					moves[yLocation - 1][xLocation + 1] = true;
+			j = yLocation - 1;
+			i = xLocation + 1;
+			if (!outOfBounds(i,j)) {
+				if (this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[j][i] = true;
 				}
 			}
 		} 
 		else
 		{
-			if (yLocation + 1 < BOARD_HEIGHT) {
-				if (this.pieceMap[yLocation + 1][xLocation] == null) {
-					moves[yLocation + 1][xLocation] = true;
-				}
-			}
-			// See if the squares in front are taken:
-			if (piece.getHasMoved() == false) {
-				if (yLocation + 2 >= 0) {
-					if (this.pieceMap[yLocation + 2][xLocation] == null) {
-						moves[yLocation + 2][xLocation] = true;
+			j = yLocation + 1;
+			i = xLocation;
+			if (!outOfBounds(i,j)) {
+				if (this.pieceMap[j][i] == null) {
+					moves[j][i] = true;
+					j++;
+					// See if the squares in front are taken:
+					if (piece.getHasMoved() == false) {
+						if (!outOfBounds(i,j)) {
+							if (this.pieceMap[j][i] == null) {
+								moves[j][i] = true;
+							}
+						}
 					}
 				}
 			}
+			
 
 			// See if the pawn can attack from its current location:
-			if (xLocation - 1 >= 0 && yLocation + 1 < BOARD_HEIGHT) {
-				if (this.pieceMap[yLocation + 1][xLocation - 1] != null
-						&& this.pieceMap[yLocation + 1][xLocation - 1].isWhite() != piece.isWhite()) {
-					moves[yLocation + 1][xLocation - 1] = true;
+			j = yLocation + 1;
+			i = xLocation - 1;
+			if (!outOfBounds(i,j)) {
+				if (this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[j][i] = true;
 				}
 			}
 
-			if (xLocation + 1 < BOARD_WIDTH && yLocation + 1 < BOARD_HEIGHT) {
-				if (this.pieceMap[yLocation + 1][xLocation + 1] != null
-						&&  this.pieceMap[yLocation + 1][xLocation + 1].isWhite() != piece.isWhite()) {
-					moves[yLocation + 1][xLocation + 1] = true;
+			j = yLocation + 1;
+			i = xLocation + 1;
+			if (!outOfBounds(i,j)) {
+				if (this.pieceMap[j][i] != null
+						&&  this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+					moves[j][i] = true;
 				}
 			}
 		}
@@ -959,10 +979,9 @@ public class ChessGameState extends GameState {
 	 * @param moves
 	 *            array to be modified
 	 */
-	private void checkKnightSpot(ChessPiece piece, int xLocation,
+	public void checkKnightSpot(ChessPiece piece, int xLocation,
 			int yLocation, boolean[][] moves) {
-		if (yLocation >= 0 && yLocation < BOARD_HEIGHT && xLocation >= 0
-				&& xLocation < BOARD_WIDTH) {
+		if (!outOfBounds(xLocation,yLocation)) {
 			// See if the spot is taken:
 			if (this.pieceMap[yLocation][xLocation] == null) {
 				moves[yLocation][xLocation] = true;
@@ -985,7 +1004,7 @@ public class ChessGameState extends GameState {
 	 *            of interest
 	 * @return 2-D array, true means the piece can move there
 	 */
-	private boolean[][] getBishopMoves(int xLocation, int yLocation,
+	public boolean[][] getBishopMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
 
@@ -1026,7 +1045,7 @@ public class ChessGameState extends GameState {
 		// Check southwest direction:
 		i = xLocation - 1;
 		j = yLocation + 1;
-		while (i > 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
+		while (i >= 0 && j < BOARD_HEIGHT && this.pieceMap[j][i] == null) {
 			moves[j][i] = true;
 			i--;
 			j++;
@@ -1071,7 +1090,7 @@ public class ChessGameState extends GameState {
 	 *            of interest
 	 * @return 2-D array, true means the piece can move there
 	 */
-	private boolean[][] getKingMoves(int xLocation, int yLocation,
+	public boolean[][] getKingMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
 		
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
@@ -1080,7 +1099,7 @@ public class ChessGameState extends GameState {
 		{
 			for(int j = yLocation-1;j<=yLocation+1;j++)
 			{
-				if(i != xLocation && j != yLocation && !outOfBounds(i,j))
+				if((i != xLocation || j != yLocation) && outOfBounds(i,j) == false)
 				{
 					if(pieceMap[j][i] == null || pieceMap[j][i].isWhite() != piece.isWhite())
 					{
@@ -1104,7 +1123,7 @@ public class ChessGameState extends GameState {
 	 *            of interest
 	 * @return 2-D array, true means the piece can move there
 	 */
-	private boolean[][] getRookMoves(int xLocation, int yLocation,
+	public boolean[][] getRookMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
 		// TODO think about how to do this more succinctly...
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
@@ -1112,12 +1131,11 @@ public class ChessGameState extends GameState {
 		int j = yLocation;
 
 		// check to the EAST
-		while (i < BOARD_WIDTH && j < BOARD_WIDTH
-				&& this.pieceMap[j][i] == null) {
+		while (!outOfBounds(i,j) && this.pieceMap[j][i] == null) {
 			moves[j][i] = true;
 			i++;
 		}
-		if (i < BOARD_WIDTH && j >= 0) {
+		if (!outOfBounds(i,j)) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
 					moves[j][i] = true;
@@ -1128,11 +1146,11 @@ public class ChessGameState extends GameState {
 		i = xLocation - 1;
 		j = yLocation;
 
-		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+		while (!outOfBounds(i,j) && this.pieceMap[j][i] == null) {
 			moves[j][i] = true;
 			i--;
 		}
-		if (i >= 0 && j >= 0) {
+		if (!outOfBounds(i,j)) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
 					moves[j][i] = true;
@@ -1145,11 +1163,11 @@ public class ChessGameState extends GameState {
 		i = xLocation;
 		j = yLocation + 1;
 
-		while (i >= 0 && j < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+		while (!outOfBounds(i,j) && this.pieceMap[j][i] == null) {
 			moves[j][i] = true;
 			j++;
 		}
-		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
+		if (!outOfBounds(i,j)) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
 					moves[j][i] = true;
@@ -1161,11 +1179,11 @@ public class ChessGameState extends GameState {
 		i = xLocation;
 		j = yLocation - 1;
 
-		while (j >= 0 && i < BOARD_WIDTH && this.pieceMap[j][i] == null) {
+		while (!outOfBounds(i,j) && this.pieceMap[j][i] == null) {
 			moves[j][i] = true;
 			j--;
 		}
-		if (i >= 0 && j >= 0) {
+		if (!outOfBounds(i,j)) {
 			if (this.pieceMap[j][i] != null) {
 				if (this.pieceMap[j][i].isWhite() != piece.isWhite()) {
 					moves[j][i] = true;
@@ -1186,7 +1204,7 @@ public class ChessGameState extends GameState {
 	 *            of interest
 	 * @return 2-D array, true means the piece can move there
 	 */
-	private boolean[][] getQueenMoves(int xLocation, int yLocation,
+	public boolean[][] getQueenMoves(int xLocation, int yLocation,
 			ChessPiece piece) {
 		// TODO think about how to do this more succinctly...
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];

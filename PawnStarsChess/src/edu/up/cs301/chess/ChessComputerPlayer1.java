@@ -88,10 +88,13 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			else
 			{
-				//TODO look for bugs here
 				gameState = newState;
 				Log.d("computer player",gameState.toString());
-				makeMove();
+				
+				ChessMoveAction move = makeMove();
+				Log.d("computer player", "Sending this move: "+move);
+				gameState.applyMove(move);
+				game.sendAction(move);
 			}
 		}
 	}
@@ -100,14 +103,14 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * Generates a move according to the AI's intelligence
 	 * level.
 	 */
-	public boolean makeMove()
+	public ChessMoveAction makeMove()
 	{
 		Log.d("computer player", "trying to make a move");
 		
 		//TODO check if it can make a move
 		if(gameState == null || gameState.isWhoseTurn() != isPlayer1())
 		{
-			return true;
+			return null;
 		}
 		ChessGameState newState = new ChessGameState(gameState);
 		ChessMoveAction chosenMove = null;
@@ -167,16 +170,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		//send the new game state if it worked
 		if(chosenMove != null)
 		{
-			Log.d("computer player", "Sending this move: "+chosenMove);
-			gameState.applyMove(chosenMove);
-			game.sendAction(chosenMove);
-
-			return true;
+			return chosenMove;
 		}
 		else
 		{
 			Log.d("computer player", "Failed to make a move.");
-			return false;
+			return null;
 		}
 	}
 
