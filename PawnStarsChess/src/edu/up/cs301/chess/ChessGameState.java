@@ -1190,86 +1190,17 @@ public class ChessGameState extends GameState {
 			ChessPiece piece) {
 		// TODO think about how to do this more succinctly...
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
-		// check to the east
-		int i = xLocation + 1;
-		int j = yLocation;
-		if (i < BOARD_WIDTH) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
+		
+		boolean[][] rookMoves = getRookMoves(xLocation, yLocation, piece);
+		boolean[][] bishopMoves = getBishopMoves(xLocation, yLocation, piece);
+		for(int i=0;i<BOARD_HEIGHT;i++)
+		{
+			for(int j=0;j<BOARD_WIDTH;j++)
+			{
+				moves[i][j] = rookMoves[i][j] || bishopMoves[i][j];
 			}
 		}
-
-		// check southeast
-		i = xLocation + 1;
-		j = yLocation + 1;
-		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check south
-		i = xLocation;
-		j = yLocation + 1;
-		if (i < BOARD_WIDTH && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check southwest
-
-		i = xLocation - 1;
-		j = yLocation + 1;
-		if (i >= 0 && j < BOARD_HEIGHT) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check west
-		i = xLocation - 1;
-		j = yLocation;
-		if (i >= 0) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check northWest
-		i = xLocation - 1;
-		j = yLocation - 1;
-		if (i >= 0 && j >= 0) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check north
-		i = xLocation;
-		j = yLocation - 1;
-		if (j >= 0) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
-
-		// check northEast
-		i = xLocation + 1;
-		j = yLocation - 1;
-		if (i < BOARD_WIDTH && j >= 0) {
-			if (this.pieceMap[j][i] == null
-					|| this.pieceMap[j][i].isWhite() != piece.isWhite()) {
-				moves[j][i] = true;
-			}
-		}
+		
 		return moves;
 	}
 	/**
@@ -1286,6 +1217,7 @@ public class ChessGameState extends GameState {
 		int newXPos = position[1];
 
 		ChessPiece piece = act.getWhichPiece();
+		ChessPiece takenPiece = act.getTakenPiece();
 		int oldYPos = piece.getLocation()[0];
 		int oldXPos = piece.getLocation()[1];
 		
@@ -1297,6 +1229,11 @@ public class ChessGameState extends GameState {
 				piece = p;
 				break;
 			}
+			if(p.equals(takenPiece))
+			{
+				p.kill();
+				lastCapture = 0;
+			}
 		}
 		
 		for(ChessPiece p:player2Pieces)
@@ -1306,6 +1243,11 @@ public class ChessGameState extends GameState {
 				piece = p;
 				break;
 			}
+			if(p.equals(takenPiece))
+			{
+				p.kill();
+				lastCapture = 0;
+			}
 		}
 
 		boolean[][] validMoves = this.getPossibleMoves(piece);
@@ -1313,6 +1255,19 @@ public class ChessGameState extends GameState {
 		if(pieceMap[newYPos][newXPos] != null)
 		{
 			pieceMap[newYPos][newXPos].kill();
+			
+			if(pieceMap[newYPos][newXPos].getType() == ChessPiece.KING)
+			{
+				isGameOver = true;
+				if(pieceMap[newYPos][newXPos].isWhite() && player1IsWhite)
+				{
+					player2Won = true;
+				}
+				else
+				{
+					player1Won = true;
+				}
+			}
 			lastCapture = 0;
 		}
 		else
@@ -1331,8 +1286,9 @@ public class ChessGameState extends GameState {
 		if (validMoves[newYPos][newXPos] == true)
 		{
 			// If the move is valid, apply the move and return true
-			pieceMap[newXPos][newYPos] = piece;
-			pieceMap[oldXPos][oldYPos] = null;
+			
+			pieceMap[newYPos][newXPos] = piece;
+			pieceMap[oldYPos][oldXPos] = null;
 			
 			piece.move(position);
 			whoseTurn = !whoseTurn;

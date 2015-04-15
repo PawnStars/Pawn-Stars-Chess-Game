@@ -55,13 +55,7 @@
             android:text="@string/randomNumber"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <Button
-            android:id="@+id/confirmButton"
-            android:layout_width="173dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.5"
-            android:text="@string/undo"
-            style="?android:attr/borderlessButtonStyle" />
+        
 
         <Button
             android:id="@+id/drawButton"

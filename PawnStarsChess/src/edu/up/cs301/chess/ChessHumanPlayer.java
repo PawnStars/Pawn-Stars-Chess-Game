@@ -49,7 +49,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	private Button quitButton;
 	private Button flipButton;
 	private Button drawButton;
-	private Button confirmButton;
+	
 	
 	//The board that draws each piece
 	private ChessBoard board;
@@ -178,8 +178,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// Set listeners for each button
 		drawButton = (Button)activity.findViewById(R.id.drawButton);
 		drawButton.setOnClickListener(this);
-		confirmButton = (Button)activity.findViewById(R.id.confirmButton);
-		confirmButton.setOnClickListener(this);
+		
 		flipButton = (Button)activity.findViewById(R.id.flipBoardButton);
 		flipButton.setOnClickListener(this);
 		quitButton = (Button)activity.findViewById(R.id.resignButton);
@@ -345,25 +344,28 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						//Create and apply the move
 						ChessMoveAction move = null;
 						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
-						if(lastPieceSelected.getType() == ChessPiece.PAWN)
+						if(lastPieceSelected != null)
 						{
-							//TODO implement special moves
-							move = new PawnMove(this, lastPieceSelected, selectedLoc,
-									takenPiece,PawnMove.NONE);
+							if(lastPieceSelected.getType() == ChessPiece.PAWN)
+							{
+								//TODO implement special moves
+								move = new PawnMove(this, lastPieceSelected, selectedLoc,
+										takenPiece,PawnMove.NONE);
+							}
+							else if(lastPieceSelected.getType() == ChessPiece.ROOK)
+							{
+								//TODO implement special moves
+								move = new RookMove(this, lastPieceSelected, selectedLoc,
+										takenPiece,RookMove.NONE);
+							}
+							else
+							{
+								move = new ChessMoveAction(this,
+										lastPieceSelected, selectedLoc,takenPiece);
+							}
+							state.applyMove(move);
+							game.sendAction(move);
 						}
-						else if(lastPieceSelected.getType() == ChessPiece.ROOK)
-						{
-							//TODO implement special moves
-							move = new RookMove(this, lastPieceSelected, selectedLoc,
-									takenPiece,RookMove.NONE);
-						}
-						else
-						{
-							move = new ChessMoveAction(this,
-									lastPieceSelected, selectedLoc,takenPiece);
-						}
-						state.applyMove(move);
-						game.sendAction(move);
 					}
 					
 					/*
