@@ -24,7 +24,7 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 	private ChessMainActivity act;
 	
 	// The buttons at the side of the screen
-	private Button confirmButton;
+	//private Button confirmButton;
 	private Button quitButton;
 	private Button flipButton;
 	private Button drawButton;
@@ -59,7 +59,6 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		layout = (View)act.findViewById(R.id.top_gui_layout);
 		
 		drawButton = (Button)act.findViewById(R.id.drawButton);
-		confirmButton = (Button)act.findViewById(R.id.confirmButton);
 		flipButton = (Button)act.findViewById(R.id.flipBoardButton);
 		quitButton = (Button)act.findViewById(R.id.resignButton);
 		
@@ -69,6 +68,9 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		
 		width = layout.getWidth();
 		height = layout.getHeight();
+		
+		//Remove focus from the popup
+		TouchUtils.clickView(this, drawButton);
 	}
 	
 	public void testDrawButton() {
@@ -86,32 +88,8 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		assertTrue("Checking button 1 y-bounds: ",
 				layoutLocation[1] + height > buttonLocation[1] + btnHeight);
 		
-		drawButton.performClick();
+		TouchUtils.clickView(this, drawButton);
 		//TODO check if the draw button does what it is supposed to do
-	}
-	
-	/**
-	 * Tests that the undo button is visible on the screen
-	 * for any given screen size
-	 */
-	public void testConfirmButton()
-	{
-		// Get the size of the button
-		float btnWidth = confirmButton.getWidth();
-		float btnHeight = confirmButton.getHeight();
-		
-		// Find the button's coords
-		int buttonLocation[] = { 0, 0 };
-		confirmButton.getLocationOnScreen(buttonLocation);
-		
-		// Check if it is all in the screen
-		assertTrue("Checking button 1 x-bounds: ",
-				layoutLocation[0] + width > buttonLocation[0] + btnWidth);
-		assertTrue("Checking button 1 y-bounds: ",
-				layoutLocation[1] + height > buttonLocation[1] + btnHeight);
-		
-		confirmButton.performClick();
-		//TODO check if the confirm button does what it is supposed to do
 	}
 	
 	/**
@@ -133,7 +111,7 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		assertTrue("Checking button 1 y-bounds: ",
 				layoutLocation[1] + height > buttonLocation[1] + btnHeight);
 		
-		quitButton.performClick();
+		TouchUtils.clickView(this, quitButton);
 		//TODO check if quit really does end the game
 	}
 	/**
@@ -155,21 +133,12 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		assertTrue("Checking button 1 y-bounds: ",
 				layoutLocation[1] + height > buttonLocation[1] + btnHeight);
 		
-		flipButton.performClick();
+		boolean wasFlipped = board.isFlipped();
+		TouchUtils.clickView(this, flipButton);
+		boolean isFlipped = board.isFlipped();
 		
-		int boardRotation = 180;
-		float diffRotation = Math.abs(board.getRotation() - boardRotation);
-		assertTrue("Flipping the board and checking the board's rotation: ",
-				diffRotation < 5);
+		assertTrue("The board did not flip", wasFlipped!=isFlipped);
+		//TODO check if flipping the board works
 	}
 	
-	/**
-	 * Tests that the board's size is relatively square
-	 */
-	public void testSquareBoard()
-	{
-		assertTrue(Math.abs(board.getWidth() - board.getHeight()) < 10);
-	}
-	
-
 }

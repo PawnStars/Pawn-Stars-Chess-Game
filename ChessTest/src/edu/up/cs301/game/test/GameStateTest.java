@@ -1,6 +1,8 @@
 package edu.up.cs301.game.test;
 
 import edu.up.cs301.chess.*;
+import edu.up.cs301.chess.actions.ChessMoveAction;
+import edu.up.cs301.chess.engine.MoveGenerator;
 //import edu.up.cs301.pawnStarsChess.ChessPiece;
 import junit.framework.Assert;
 import android.test.AndroidTestCase;
@@ -53,25 +55,29 @@ public class GameStateTest extends AndroidTestCase {
 				ChessPiece.KNIGHT, ChessPiece.ROOK };
 		for(int i=0;i<ChessGameState.BOARD_WIDTH;i++)
 		{
-			if(layout[ChessGameState.BOARD_HEIGHT-3][i] != null)
-			{
-				Assert.assertTrue(layout[ChessGameState.BOARD_HEIGHT-3][i].getType() == ChessPiece.PAWN);
-				Assert.assertTrue(layout[ChessGameState.BOARD_HEIGHT-3][i].isWhite() == true);
-			}
 			if(layout[ChessGameState.BOARD_HEIGHT-2][i] != null)
 			{
-				Assert.assertTrue(layout[ChessGameState.BOARD_HEIGHT-2][i].getType() == pieces[i]);
-				Assert.assertTrue(layout[ChessGameState.BOARD_HEIGHT-2][i].isWhite() == true);
+				String pieceMsg = "Testing: "+layout[ChessGameState.BOARD_HEIGHT-2][i].toString();
+				Assert.assertTrue(pieceMsg,layout[ChessGameState.BOARD_HEIGHT-2][i].getType() == ChessPiece.PAWN);
+				Assert.assertTrue(pieceMsg,layout[ChessGameState.BOARD_HEIGHT-2][i].isWhite() == true);
+			}
+			if(layout[ChessGameState.BOARD_HEIGHT-1][i] != null)
+			{
+				String pieceMsg = "Testing: "+layout[ChessGameState.BOARD_HEIGHT-1][i].toString();
+				Assert.assertTrue(pieceMsg,layout[ChessGameState.BOARD_HEIGHT-1][i].getType() == pieces[i]);
+				Assert.assertTrue(pieceMsg,layout[ChessGameState.BOARD_HEIGHT-1][i].isWhite() == true);
 			}
 			if(layout[0][i] != null)
 			{
-				Assert.assertTrue(layout[0][i].isWhite() == false);
-				Assert.assertTrue(layout[0][i].getType() == pieces[i]);
+				String pieceMsg = "Testing: "+layout[0][i].toString();
+				Assert.assertTrue(pieceMsg,layout[0][i].isWhite() == false);
+				Assert.assertTrue(pieceMsg,layout[0][i].getType() == pieces[i]);
 			}
 			if(layout[1][i] != null)
 			{
-				Assert.assertTrue(layout[1][i].isWhite() == false);
-				Assert.assertTrue(layout[1][i].getType() == ChessPiece.PAWN);
+				String pieceMsg = "Testing: "+layout[1][i].toString();
+				Assert.assertTrue(pieceMsg,layout[1][i].isWhite() == false);
+				Assert.assertTrue(pieceMsg,layout[1][i].getType() == ChessPiece.PAWN);
 			}
 			
 		}
@@ -88,10 +94,32 @@ public class GameStateTest extends AndroidTestCase {
 		Assert.assertTrue(layout[0].length == ChessGameState.BOARD_WIDTH);
 	}
 	
+	/**
+	 * Moves a piece and tests if it is applied
+	 * 
+	 * @throws Throwable
+	 */
 	public void testMovePiece() throws Throwable {
 		ChessGameState initState = new ChessGameState(true);
-		//initState.setBoardFlipped(true);
-		//Assert.assertTrue(initState.isBoardFlipped());
+		
+		//Get one of the possible moves
+		ChessMoveAction[] actions = MoveGenerator.getPossibleMoves(initState, null, true);
+		
+		int randIndex = (int)(Math.random()*actions.length);
+		ChessMoveAction act = actions[randIndex];
+		initState.applyMove(act);
+		
+		//Check that the piece was moved
+		for(ChessPiece p:initState.getPlayer1Pieces())
+		{
+			if(p.equals(act.getWhichPiece()))
+			{
+				Assert.assertTrue(p.getLocation()[0] == act.getNewPos()[0]);
+				Assert.assertTrue(p.getLocation()[1] == act.getNewPos()[1]);
+				return;
+			}
+		}
+		
 	}
 	
 }
