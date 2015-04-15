@@ -56,44 +56,71 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 		if (action instanceof ChessMoveAction) {
 		
 			ChessMoveAction act = (ChessMoveAction)action;
-
+			
 			if(canMove(getPlayerIdx(act.getPlayer())))
 			{
-				ChessGameState newState = new ChessGameState(gameState);
-				newState.applyMove(act);
-				gameState = newState;
+				if(act instanceof PawnMove)
+				{
+					//Prompt for user input when there is a promotion
+					PawnMove pawnAct = (PawnMove)act;
+					if(pawnAct.getType() == PawnMove.PROMOTION)
+					{
+						((ChessPlayer)(act.getPlayer())).selectUpgrade();
+					}
+				}
+				gameState.applyMove(act);
 			}
 			return true;
 		}
 		else if (action instanceof SelectUpgradeAction) {
 			//TODO implement what each move does
-			SelectUpgradeAction act = (SelectUpgradeAction)action;
-			ChessGameState newState = new ChessGameState(gameState);
-			newState.applyMove(act);
-			gameState = newState;
+			gameState.applyMove(action);
 			return true;
 		}
 		else if (action instanceof ResignAction) {
-			//TODO implement what each move does
-			ResignAction act = (ResignAction)action;
-			int losingPlayer = getPlayerIdx(act.getPlayer());
-			ChessGameState newState = new ChessGameState(gameState);
 			
+			ResignAction act = (ResignAction)action;
+			
+			//Set which player won and make the game over
+			int losingPlayer = getPlayerIdx(act.getPlayer());
 			if(losingPlayer == 0)
 			{
-				newState.setPlayer2Won(true);
+				gameState.setPlayer1Won(true);
 			}
 			else
 			{
-				newState.setPlayer2Won(true);
+				gameState.setPlayer2Won(true);
 			}
+			gameState.setGameOver(true);
 			
-			gameState = newState;
 			return true;
 		}
-		else if (action instanceof DrawAction) {
-			//TODO implement what each move does
-			return false;
+		else if (action instanceof DrawAction)
+		{
+			DrawAction drawAct = (DrawAction)action;
+			
+			/*
+			 * Ask the other player if the draw was not
+			 * confirmed by both players
+			 * 
+			 */
+			if(!drawAct.isAccepted())
+			{
+				for(GamePlayer p: players)
+				{
+					if(!p.equals(action.getPlayer()))
+					{
+						ChessPlayer player = (ChessPlayer)p;
+						player.askDraw(drawAct.getMsg());
+					}
+				}
+			}
+			else
+			{
+				gameState.applyMove(action);
+			}
+			
+			return true;
 		}
 		else if(action instanceof ChooseColorAction)
 		{

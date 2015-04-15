@@ -134,22 +134,25 @@ public class MoveGenerator {
 	{
 		ChessPiece[] moveablePieces;
 		boolean moveColor;
+		
 		if(state.isWhoseTurn() && isPlayer1)//player 1's turn
 		{
-			moveablePieces = state.getPlayer1Pieces().clone();
+			moveablePieces = state.getPlayer1Pieces();
 			moveColor = state.isPlayer1IsWhite();
 		}
 		else if(!state.isWhoseTurn() && !isPlayer1)//player 2's turn
 		{
-			moveablePieces = state.getPlayer2Pieces().clone();
+			moveablePieces = state.getPlayer2Pieces();
 			moveColor = !state.isPlayer1IsWhite();
 		}
 		else
 		{
 			return false;
 		}
+		
 		if(moveablePieces != null)
 		{
+			//See what moves each piece can make
 			for(ChessPiece p: moveablePieces)
 			{
 				ChessPiece copyOfP = new ChessPiece(p);
@@ -161,6 +164,8 @@ public class MoveGenerator {
 						if(move != null && move.getTakenPiece() != null)
 						{
 							ChessPiece piece = move.getTakenPiece();
+							
+							//If there is a move that results in the king being taken
 							if(piece.getType() == ChessPiece.KING)
 							{
 								return true;
@@ -225,7 +230,6 @@ public class MoveGenerator {
 				if(possibleLocs[i][j])
 				{
 					int[] newLoc = new int[]{i,j};
-					//addMove(state,piece,moveList,newLoc,player,color);
 					ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
 					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
 				}
@@ -247,67 +251,6 @@ public class MoveGenerator {
 		Log.d("Move Generator", debugMsg);*/
 		return rtnVal;
 	}
-	
-	/**
-	 * Add a move to an ArrayList given a piece to move, its location,
-	 * and the color of the player
-	 * @param state
-	 * @param piece
-	 * @param moveList
-	 * @param newLoc
-	 * @param player
-	 * @return true if this move takes a piece
-	 */
-	/*private static boolean addMove(ChessGameState state,
-			ChessPiece piece, ArrayList<ChessMoveAction> moveList,
-			int[] newLoc, ChessPlayer player, boolean color)
-	{
-		//null checks
-		if(newLoc == null || newLoc.length != 2)
-		{
-			return false;
-		}
-		if(state == null || state.getPieceMap() == null)
-		{
-			return false;
-		}
-		if(moveList == null)
-		{
-			return false;
-		}
-		if(piece == null)
-		{
-			return false;
-		}
-		//check for out of bounds
-		if(ChessGameState.outOfBounds(newLoc))
-		{
-			return false;
-		}
-		//check for a move to the same square
-		if(Arrays.equals(newLoc,piece.getLocation()))
-		{
-			return false;
-		}
-		
-		ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-		
-		//space is occupied
-		if(taken != null)
-		{
-			if(taken.isWhite() != color)
-			{
-				//add a move if it can take a piece
-				moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-			}
-			return true;
-		}
-		else //unoccupied
-		{
-			moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
-			return false;
-		}
-	}*/
 
 	/**
 	 * You must defend yourself from check threats, so this function removes

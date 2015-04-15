@@ -323,8 +323,40 @@ public class ChessGameState extends GameState {
 		//See if user has requested a draw (tie)
 		if(act instanceof DrawAction)
 		{
+			DrawAction drawAct = (DrawAction)act;
+			if(drawAct.getPlayer1().isPlayer1())
+			{
+				player2Won = true;
+				player1Won = true;
+			}
+			
 			//TODO implement
 			return true;
+		}
+		
+		if(act instanceof SelectUpgradeAction)
+		{
+			SelectUpgradeAction selectAct = (SelectUpgradeAction) act;
+			ChessPiece piece = selectAct.getPiece();
+			for(ChessPiece p:player1Pieces)
+			{
+				if(p.equals(piece))
+				{
+					piece = p;
+					break;
+				}
+			}
+			
+			for(ChessPiece p:player2Pieces)
+			{
+				if(p.equals(piece))
+				{
+					piece = p;
+					break;
+				}
+			}
+			
+			piece.setType(selectAct.getType());
 		}
 		
 		//See if user has changed a piece
@@ -411,11 +443,16 @@ public class ChessGameState extends GameState {
 		{
 			return true;
 		}
-		if(loc[0] < 0 || loc[0] >= ChessGameState.BOARD_HEIGHT)
+		return outOfBounds(loc[1],loc[0]);
+	}
+	
+	public static boolean outOfBounds(int x, int y)
+	{
+		if(y < 0 || y >= ChessGameState.BOARD_HEIGHT)
 		{
 			return true;
 		}
-		if(loc[1] < 0 || loc[1] >= ChessGameState.BOARD_WIDTH)
+		if(x < 0 || x >= ChessGameState.BOARD_WIDTH)
 		{
 			return true;
 		}
@@ -1041,11 +1078,14 @@ public class ChessGameState extends GameState {
 
 		for(int i = xLocation-1;i<=xLocation+1;i++)
 		{
-			for(int j = yLocation-1;i<=yLocation+1;i++)
+			for(int j = yLocation-1;j<=yLocation+1;j++)
 			{
-				if(i != xLocation && j != yLocation)
+				if(i != xLocation && j != yLocation && !outOfBounds(i,j))
 				{
-					moves[j][i] = true;
+					if(pieceMap[j][i] == null || pieceMap[j][i].isWhite() != piece.isWhite())
+					{
+						moves[j][i] = true;
+					}
 				}
 			}
 		}

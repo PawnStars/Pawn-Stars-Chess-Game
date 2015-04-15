@@ -31,16 +31,20 @@ public class DrawAction extends GameAction {
 	//the message player2 will receive
 	private String msg;
 	
+	private boolean accepted;
+	
 	/**
 	 * Default constructor. It sets the player instance variable
 	 */
-	public DrawAction(GamePlayer player1, boolean player1IsWhite) {
+	public DrawAction(GamePlayer player1, boolean player1IsWhite, boolean accepted) {
 		super(player1);
 		if(player1 instanceof ChessPlayer)
 		{
 			this.player1 = (ChessPlayer)player1;
 			//TODO get the name of who lost somehow
 		}
+		
+		this.accepted = accepted;
 	}
 
 	/**
@@ -66,6 +70,16 @@ public class DrawAction extends GameAction {
 	public ChessPlayer getPlayer1() {
 		return player1;
 	}
+
+	public boolean isAccepted() {
+		return accepted;
+	}
+
+	public void setAccepted(boolean accepted) {
+		this.accepted = accepted;
+	}
+	
+	
 
 
 	

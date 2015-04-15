@@ -1,13 +1,11 @@
 package edu.up.cs301.chess;
 
 import edu.up.cs301.chess.actions.*;
-import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.MessageBox;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -121,7 +119,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			activity.onKeyDown(KeyEvent.KEYCODE_BACK,event);
 		}
 		else if (button.getId() == R.id.drawButton) {
-			DrawAction act = new DrawAction(this,isWhite());
+			DrawAction act = new DrawAction(this,isWhite(),false);
 			
 			game.sendAction(act);
 		}
@@ -364,7 +362,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 							move = new ChessMoveAction(this,
 									lastPieceSelected, selectedLoc,takenPiece);
 						}
-						state.applyMove(move);//TODO not sure if necessary
+						state.applyMove(move);
 						game.sendAction(move);
 					}
 					
@@ -447,6 +445,32 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	public void vibrate(int time)
 	{
 		vibrator.vibrate(time);
+	}
+
+	public void askDraw(String msg) {
+		
+		//The accept and decline button text
+		String acceptLabel =
+				activity.getResources().getString(R.string.accept);
+		String declineLabel =
+				activity.getResources().getString(R.string.decline);
+		
+		android.content.DialogInterface.OnClickListener acceptListener =
+				new android.content.DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int which) {
+				doDraw();
+			}
+		};
+		
+		//make a dialog to ask which color the human wants to be
+		MessageBox.popUpChoice(msg, acceptLabel, declineLabel, acceptListener, null, activity);
+	}
+	
+	public void doDraw()
+	{
+		DrawAction act = new DrawAction(this,isWhite,true);
+		game.sendAction(act);
 	}
 }// class CounterHumanPlayer
 

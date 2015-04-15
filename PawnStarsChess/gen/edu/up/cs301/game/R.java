@@ -84,10 +84,12 @@ public final class R {
         public static final int game_main=0x7f080000;
     }
     public static final class string {
+        public static final int accept=0x7f060021;
         public static final int action_settings=0x7f060014;
         public static final int add_player=0x7f060009;
         public static final int app_name=0x7f060000;
         public static final int begin_game=0x7f060005;
+        public static final int decline=0x7f060022;
         public static final int dialog_black_label=0x7f06001f;
         public static final int dialog_color_question=0x7f06001d;
         public static final int dialog_continue_label=0x7f06000f;

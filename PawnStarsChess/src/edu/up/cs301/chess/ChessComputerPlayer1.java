@@ -3,6 +3,7 @@ package edu.up.cs301.chess;
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.ChooseColorAction;
+import edu.up.cs301.chess.actions.DrawAction;
 import edu.up.cs301.chess.actions.SelectUpgradeAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
@@ -245,6 +246,20 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				}
 			}
 		}
+	}
+
+	/**
+	 * How to respond when a player asks for a draw
+	 */
+	public void askDraw(String msg)
+	{
+		if(smart == 0)
+		{
+			DrawAction act = new DrawAction(this,isWhite,true);
+			game.sendAction(act);
+		}
+		//Do not accept if the computer is smart
+		
 	}
 	
 	

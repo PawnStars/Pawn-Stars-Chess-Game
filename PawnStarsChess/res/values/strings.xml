@@ -33,4 +33,6 @@
     <string name="dialog_white_label">White</string>
     <string name="dialog_black_label">Black</string>
     <string name="dialog_title">Pick a color</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
 </resources>
