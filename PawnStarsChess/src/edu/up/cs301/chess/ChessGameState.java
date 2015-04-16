@@ -1309,6 +1309,7 @@ public class ChessGameState extends GameState {
 			pieceMap[oldYPos][oldXPos] = null;
 			
 			piece.move(position);
+			updateScores(act);
 			whoseTurn = !whoseTurn;
 			return true;
 		}
@@ -1316,6 +1317,82 @@ public class ChessGameState extends GameState {
 		{
 			// do nothing and return false
 			return false;
+		}
+	}
+	
+	
+	/**
+	 * updates each of the scores for the gui to set
+	 * @param act
+	 * 				the action that was preformed
+	 */
+	private void updateScores(ChessMoveAction act)
+	{
+		//check for a piece
+		if (act.getTakenPiece() != null) {
+			int tP = act.getTakenPiece().getType();
+			//add points based on type
+			if (tP == ChessPiece.KING && whoseTurn) {
+				this.player1Points += 10;
+				// player1Score.setText(player1Points + "");
+
+			}
+			if (tP == ChessPiece.QUEEN && whoseTurn) {
+				this.player1Points += 9;
+				// player1Score.setText(player1Points + "");
+
+			}
+			if (tP == ChessPiece.BISHOP && whoseTurn) {
+				this.player1Points += 3;
+				// player1Score.setText(player1Points + "");
+
+			}
+			if (tP == ChessPiece.ROOK && whoseTurn) {
+				this.player1Points += 5;
+				// player1Score.setText(player1Points + "");
+
+			}
+			if (tP == ChessPiece.KNIGHT && whoseTurn) {
+				this.player1Points += 3;
+				// player1Score.setText(player1Points + "");
+
+			}
+			if (tP == ChessPiece.PAWN && whoseTurn) {
+				this.player1Points += 1;
+				// player1Score.setText(player1Points + "");
+
+			} else {
+				if (tP == ChessPiece.KING && !whoseTurn) {
+					this.player2Points += 10;
+				}
+				// player1Score.setText(player1Points + "");
+
+				if (tP == ChessPiece.QUEEN && !whoseTurn) {
+					this.player2Points += 9;
+					// player1Score.setText(player1Points + "");
+
+				}
+				if (tP == ChessPiece.BISHOP && !whoseTurn) {
+					this.player2Points += 3;
+					// player1Score.setText(player1Points + "");
+
+				}
+				if (tP == ChessPiece.ROOK && !whoseTurn) {
+					this.player2Points += 5;
+					// player1Score.setText(player1Points + "");
+
+				}
+				if (tP == ChessPiece.KNIGHT && !whoseTurn) {
+					this.player2Points += 3;
+					// player1Score.setText(player1Points + "");
+
+				}
+				if (tP == ChessPiece.PAWN && !whoseTurn) {
+					this.player2Points += 1;
+					// player1Score.setText(player1Points + "");
+
+				}
+			}
 		}
 	}
 }

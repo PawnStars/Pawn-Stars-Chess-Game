@@ -155,6 +155,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		// update our state; then update the display
 		state = newState;
+		if(state!=null && !state.isGameOver())
+		{
+			this.player1Score.setText(state.getPlayer1Points()+ "");
+			this.player2Score.setText(state.getPlayer2Points() + "");
+		}
 		Log.d("human player",state.toString());
 		updateDisplay();
 		//Log.d("human player", "state updated:"+state);
