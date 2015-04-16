@@ -1,9 +1,11 @@
 package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import edu.up.cs301.chess.actions.*;
+import edu.up.cs301.chess.engine.Evaluator;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
 
@@ -883,6 +885,27 @@ public class ChessGameState extends GameState {
 					moves[j][i] = true;
 				}
 			}
+			
+			if(moveList.getLast() instanceof PawnMove)
+			{
+				PawnMove lastMove = (PawnMove)moveList.getLast();
+				if(lastMove.getType() == PawnMove.FIRST_MOVE && lastMove.getWhichPiece().isWhite() != player1IsWhite)
+				{
+					//TODO make sure this works for player 1 and 2 and white and black
+					int[] pos = lastMove.getNewPos();
+					if(pos[0] == yLocation)
+					{
+						if(pos[1] == xLocation+1)
+						{
+							moves[yLocation-1][xLocation+1] = true;
+						}
+						if(pos[1] == xLocation-1)
+						{
+							moves[yLocation-1][xLocation-1] = true;
+						}
+					}
+				}
+			}
 		} 
 		else
 		{
@@ -920,6 +943,27 @@ public class ChessGameState extends GameState {
 				if (this.pieceMap[j][i] != null
 						&&  this.pieceMap[j][i].isWhite() != piece.isWhite()) {
 					moves[j][i] = true;
+				}
+			}
+			
+			if(moveList.getLast() instanceof PawnMove)
+			{
+				PawnMove lastMove = (PawnMove)moveList.getLast();
+				if(lastMove.getType() == PawnMove.FIRST_MOVE && lastMove.getWhichPiece().isWhite() != player1IsWhite)
+				{
+					//TODO make sure this works for player 1 and 2 and white and black
+					int[] pos = lastMove.getNewPos();
+					if(pos[0] == yLocation)
+					{
+						if(pos[1] == xLocation+1)
+						{
+							moves[yLocation+1][xLocation+1] = true;
+						}
+						if(pos[1] == xLocation-1)
+						{
+							moves[yLocation+1][xLocation-1] = true;
+						}
+					}
 				}
 			}
 		}
@@ -1190,6 +1234,46 @@ public class ChessGameState extends GameState {
 				}
 			}
 		}
+		
+		//Castling
+		if(yLocation == 0)
+		{
+			ChessPiece king = findPiece(ChessPiece.KING,false)[0];
+			int[] kingLoc = king.getLocation();
+			if(xLocation == 0)
+			{
+				if(canCastle[0][0])
+				{
+					moves[kingLoc[0]][kingLoc[1]] = true;
+				}
+			}
+			if(xLocation == BOARD_WIDTH-1)
+			{
+				if(canCastle[0][1])
+				{
+					moves[kingLoc[0]][kingLoc[1]] = true;
+				}
+			}
+		}
+		if(yLocation == BOARD_HEIGHT-1)
+		{
+			ChessPiece king = findPiece(ChessPiece.KING,true)[0];
+			int[] kingLoc = king.getLocation();
+			if(xLocation == 0)
+			{
+				if(canCastle[1][0])
+				{
+					moves[kingLoc[0]][kingLoc[1]] = true;
+				}
+			}
+			if(xLocation == BOARD_WIDTH-1)
+			{
+				if(canCastle[1][1])
+				{
+					moves[kingLoc[0]][kingLoc[1]] = true;
+				}
+			}
+		}
 		return moves;
 	}
 
@@ -1238,6 +1322,7 @@ public class ChessGameState extends GameState {
 		ChessPiece takenPiece = act.getTakenPiece();
 		int oldYPos = piece.getLocation()[0];
 		int oldXPos = piece.getLocation()[1];
+		
 		
 		//Get the version of the piece in this state
 		for(ChessPiece p:player1Pieces)
@@ -1295,13 +1380,92 @@ public class ChessGameState extends GameState {
 		
 		if(act instanceof PawnMove)
 		{
-			/*PawnMove pawnAct = (PawnMove) act;
-			if(pawnAct.getType() == PawnMove.PROMOTION)
+			PawnMove pawnAct = (PawnMove) act;
+			if(pawnAct.getType() == PawnMove.EN_PASSANT)
 			{
-				//TODO 
-			}*/
+				piece.move(position);
+				
+				pieceMap[newYPos][newXPos] = piece;
+				pieceMap[oldYPos][oldXPos] = null;
+				
+				whoseTurn = !whoseTurn;
+				
+				//Update the player's points after a turn
+				player1Points = Evaluator.evalulate(this);
+				player2Points = -player1Points;
+				updateCanCastle();
+				return true;
+			}
 		}
-		if (validMoves[newYPos][newXPos] == true)
+		if(act instanceof RookMove)
+		{
+			//Castling
+			
+			updateCanCastle();
+			RookMove rookAct = (RookMove) act;
+			if(rookAct.getType() == RookMove.CASTLE_LEFT || rookAct.getType() == RookMove.CASTLE_RIGHT)
+			{
+				if(act.getPlayer() instanceof ChessPlayer)
+				{
+					boolean isPlayer1 = ((ChessPlayer)rookAct.getPlayer()).isPlayer1();
+					int j;
+					ChessPiece king =findPiece(ChessPiece.KING,isPlayer1)[0];;
+					int newKingX = 0;
+					int newRookX = 0;
+					int canCastleX = 0;
+					int canCastleY;
+					
+					//Find the king, current row, and if the player is in check
+					if(isPlayer1)
+					{
+						j = BOARD_HEIGHT-1;
+						canCastleY = 1;
+					}
+					else
+					{
+						j = 0;
+						canCastleY = 0;
+					}
+					
+					if(rookAct.getType() == RookMove.CASTLE_LEFT)
+					{
+						newRookX = 2;
+						newKingX = 1;
+						canCastleX = 0;
+					}
+					if(rookAct.getType() == RookMove.CASTLE_RIGHT)
+					{
+						newRookX = 5;
+						newKingX = 6;
+						canCastleY = 1;
+					}
+					
+					if(canCastle[canCastleY][canCastleX])
+					{
+						int[] kingLoc = king.getLocation();
+						int[] rookLoc = rookAct.getWhichPiece().getLocation();
+						pieceMap[kingLoc[0]][kingLoc[1]] = null;
+						pieceMap[rookLoc[0]][rookLoc[1]] = null;
+						
+						king.move(new int[]{j,newKingX});
+						piece.move(new int[]{j,newRookX});
+						
+						pieceMap[j][newKingX] = king;
+						pieceMap[j][newRookX] = piece;
+						
+						whoseTurn = !whoseTurn;
+						
+						//Update the player's points after a turn
+						player1Points = Evaluator.evalulate(this);
+						player2Points = -player1Points;
+						updateCanCastle();
+						return true;
+					}
+				}
+				
+			}
+		}
+		if(validMoves[newYPos][newXPos] == true)
 		{
 			// If the move is valid, apply the move and return true
 			
@@ -1310,6 +1474,11 @@ public class ChessGameState extends GameState {
 			
 			piece.move(position);
 			whoseTurn = !whoseTurn;
+			
+			//Update the player's points after a turn
+			player1Points = Evaluator.evalulate(this);
+			player2Points = -player1Points;
+			updateCanCastle();
 			return true;
 		}
 		else
@@ -1317,5 +1486,133 @@ public class ChessGameState extends GameState {
 			// do nothing and return false
 			return false;
 		}
+	}
+	private void updateCanCastle()
+	{
+		int i1 = -1;
+		int i2 = -1;
+		int j;
+		ChessPiece king = null;
+		boolean check = false;
+		ChessPiece rookL = null;
+		ChessPiece rookR = null;
+		
+		for(int x = 0; x < 2; x++)
+		{
+			for(int y = 0; y < 2; y++)
+			{
+				ChessPiece[] rooks;
+				if(x == 0)//player2
+				{
+					j = 0;
+					
+					king = findPiece(ChessPiece.KING,false)[0];
+					check = player2InCheck;
+					
+					rooks = findPiece(ChessPiece.ROOK,false);
+				}
+				else//player 1
+				{
+					j = BOARD_HEIGHT-1;
+					king = findPiece(ChessPiece.KING,true)[0];
+					rooks = findPiece(ChessPiece.ROOK,true);
+					
+					check = player2InCheck;
+				}
+				
+				for(ChessPiece rook:rooks)
+				{
+					if(rook.getLocation()[1] == 0)
+					{
+						rookL = rook;
+					}
+					if(rook.getLocation()[1] == BOARD_WIDTH-1)
+					{
+						rookR = rook;
+					}
+					
+				}
+				if(y == 0)
+				{
+					i1 = 1;
+					i2 = 2;
+				}
+				if(y == 1)
+				{
+					i1 = 6;
+					i2 = 5;
+				}
+				
+				if(pieceMap[j][i1] == null && pieceMap[j][i2] == null)
+				{
+					ChessPiece rook = null;
+					if(y == 0)
+					{
+						rook = rookL;
+					}
+					if(y == 1)
+					{
+						rook = rookR;
+					}
+					if(!rook.getHasMoved())
+					{
+						if(!king.getHasMoved())
+						{
+							if(!check)
+							{
+								canCastle[y][x] = true;
+							}
+							else
+							{
+								canCastle[y][x] = false;
+							}
+						}
+						else
+						{
+							canCastle[y][x] = false;
+						}
+					}
+					else
+					{
+						canCastle[y][x] = false;
+					}
+				}
+				else
+				{
+					canCastle[y][x] = false;
+				}
+			}
+		}
+		
+	}
+	public ChessPiece[] findPiece(int type, boolean isPlayer1)
+	{
+		ArrayList<ChessPiece> pieces = new ArrayList<ChessPiece>();
+		if(isPlayer1)
+		{
+			for(ChessPiece p:getPlayer1Pieces())
+			{
+				if(p.getType() == type)
+				{
+					pieces.add(p);
+				}
+			}
+		}
+		else
+		{
+			for(ChessPiece p:getPlayer2Pieces())
+			{
+				if(p.getType() == type)
+				{
+					pieces.add(p);
+				}
+			}
+		}
+		ChessPiece[] rtnPieceArray = new ChessPiece[pieces.size()];
+		for(int i=0;i<pieces.size();i++)
+		{
+			rtnPieceArray[i] = pieces.get(i);
+		}
+		return rtnPieceArray;
 	}
 }

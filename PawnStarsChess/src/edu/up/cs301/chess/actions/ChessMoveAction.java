@@ -30,11 +30,8 @@ public class ChessMoveAction extends GameAction {
 	//The new location of the selected piece
 	private int[] newPos;
 	
-	//Color of the mover
-	private boolean whichColor;
-	
-	//Whether or not the move is valid
-	private boolean valid;
+	//The old location of the selected piece
+	private int[] oldPos;
 	
 	//TODO could make it possible to undo a turn with this info and the last position
 	
@@ -49,41 +46,13 @@ public class ChessMoveAction extends GameAction {
 	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece)
 	{
 		super(player);
-		valid = true;
 		
 		this.takenPiece = takenPiece;
-		if(player != null && player instanceof ChessPlayer)
-		{
-			if(takenPiece != null)
-			{
-				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor == takenPiece.isWhite())
-				{
-					valid = false;
-				}
-			}
-		}
-		
 		this.whichPiece = whichPiece;
-		if(whichPiece == null)
-		{
-			valid = false;
-		}
-		
-		if(newPos == null)
-		{
-			valid = false;
-		}
-		else
-		{
-			this.newPos = newPos.clone();
-		}
-		if(ChessGameState.outOfBounds(newPos))
-		{
-			valid = false;
-		}
+		this.newPos = newPos.clone();
+		this.oldPos = whichPiece.getLocation().clone();
 	}
-	
+
 	/**
 	 * Copy constructor for adding a player to an invalid ChessMoveAction
 	 * @param player
@@ -91,40 +60,11 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction(GamePlayer player, ChessMoveAction action) {
 		super(player);
-		valid = true;
-		if(player instanceof ChessPlayer)
-		{
-			if(action != null && action.getTakenPiece() != null)
-			{
-				whichColor = ((ChessPlayer)player).isWhite();
-				if(whichColor == action.getTakenPiece().isWhite())
-				{
-					valid = false;
-				}
-			}
-		}
-		else
-		{
-			valid = false;
-		}
-		if(action == null)
-		{
-			valid = false;
-		}
-		else
-		{
-			this.whichPiece = action.getWhichPiece();
-			if(whichPiece == null)
-			{
-				valid = false;
-			}
-			this.newPos = action.getNewPos();
-			if(newPos == null)
-			{
-				valid = false;
-			}
-			this.takenPiece = action.getTakenPiece();
-		}
+		
+		this.whichPiece = action.getWhichPiece();
+		this.newPos = action.getNewPos();
+		this.takenPiece = action.getTakenPiece();
+		this.oldPos = whichPiece.getLocation().clone();
 	}
 
 	/**
@@ -152,13 +92,8 @@ public class ChessMoveAction extends GameAction {
 		return newPos;
 	}
 	
-	/**
-	 * Returns true if the move is a move that can be applied
-	 * @return true if valid
-	 */
-	public boolean isValid()
-	{
-		return valid;
+	public int[] getOldPos() {
+		return oldPos;
 	}
 
 	/**
@@ -168,21 +103,18 @@ public class ChessMoveAction extends GameAction {
 	public String toString()
 	{
 		String rtnVal = "";
-		if(valid)
-		{
-			rtnVal += whichPiece.toCharacter();
-			int[] loc = whichPiece.getLocation();
-			
-			//convert to chess notation
-			//TODO doesn't work for special moves
-			rtnVal += (char)(97+loc[1]);
-			rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
-			rtnVal += " ";
-			
-			rtnVal += (char)(97+newPos[1]);
-			rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
-			rtnVal += " ";
-		}
+		rtnVal += whichPiece.toCharacter();
+		int[] loc = whichPiece.getLocation();
+		
+		//convert to chess notation
+		//TODO doesn't work for special moves
+		rtnVal += (char)(97+loc[1]);
+		rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
+		rtnVal += " ";
+		
+		rtnVal += (char)(97+newPos[1]);
+		rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
+		rtnVal += " ";
 		return rtnVal;
 	}
 }//class CounterMoveAction

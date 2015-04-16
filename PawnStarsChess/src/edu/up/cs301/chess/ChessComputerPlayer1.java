@@ -136,7 +136,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				{
 					System.out.print(possibleActions[i].toString()+", ");
 					ChessMoveAction tempMove = new ChessMoveAction(this,possibleActions[i]);
-					if(tempMove != null && tempMove.isValid())
+					if(tempMove != null)
 					{
 						chosenMove = tempMove;
 						if(smart == RANDOM)

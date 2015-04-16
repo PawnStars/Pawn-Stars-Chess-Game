@@ -349,14 +349,101 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 							if(lastPieceSelected.getType() == ChessPiece.PAWN)
 							{
 								//TODO implement special moves
-								move = new PawnMove(this, lastPieceSelected, selectedLoc,
-										takenPiece,PawnMove.NONE);
+								
+								if(selectedLoc[0] == 0 || selectedLoc[0] == ChessGameState.BOARD_HEIGHT)
+								{
+									move = new PawnMove(this, lastPieceSelected, selectedLoc,
+											takenPiece,PawnMove.PROMOTION);
+									selectUpgrade();
+								}
+								else if(!lastPieceSelected.getHasMoved())
+								{
+									move = new PawnMove(this, lastPieceSelected, selectedLoc,
+											takenPiece,PawnMove.FIRST_MOVE);
+								}
+								else if(state.getMoveList().getLast() instanceof PawnMove)
+								{
+									PawnMove lastPawnMove = (PawnMove)state.getMoveList().getLast();
+									int[] oldLoc = lastPawnMove.getOldPos();
+									if(isPlayer1())
+									{
+										if(selectedLoc[0] == oldLoc[0]+1)
+										{
+											move = new PawnMove(this, lastPieceSelected, selectedLoc,
+													takenPiece,PawnMove.EN_PASSANT);
+										}
+									}
+									else
+									{
+										if(selectedLoc[0] == oldLoc[0]-1)
+										{
+											move = new PawnMove(this, lastPieceSelected, selectedLoc,
+													takenPiece,PawnMove.EN_PASSANT);
+										}
+									}
+								}
+								else
+								{
+									move = new PawnMove(this, lastPieceSelected, selectedLoc,
+											takenPiece,PawnMove.NONE);
+								}
 							}
 							else if(lastPieceSelected.getType() == ChessPiece.ROOK)
 							{
 								//TODO implement special moves
-								move = new RookMove(this, lastPieceSelected, selectedLoc,
-										takenPiece,RookMove.NONE);
+								ChessPiece king = null;
+								if(isPlayer1())
+								{
+									for(ChessPiece p:state.getPlayer1Pieces())
+									{
+										if(p.getType() == ChessPiece.KING)
+										{
+											king = p;
+										}
+									}
+								}
+								else
+								{
+									for(ChessPiece p:state.getPlayer2Pieces())
+									{
+										if(p.getType() == ChessPiece.KING)
+										{
+											king = p;
+										}
+									}
+								}
+								
+								//Castling
+								if(king != null)
+								{
+									int[] kingLoc = king.getLocation();
+									if(selectedLoc[0] == kingLoc[0] && selectedLoc[1] == kingLoc[1])
+									{
+										int[] lastPLoc = lastPieceSelected.getLocation();
+										if(!lastPieceSelected.getHasMoved())
+										{
+											if(!king.getHasMoved())
+											{
+												if(lastPLoc[1] == 0)
+												{
+													move = new RookMove(this, lastPieceSelected, selectedLoc,
+															takenPiece,RookMove.CASTLE_LEFT);
+												}
+												if(lastPLoc[1] == ChessGameState.BOARD_WIDTH-1)
+												{
+													move = new RookMove(this, lastPieceSelected, selectedLoc,
+															takenPiece,RookMove.CASTLE_RIGHT);
+												}
+											}
+										}
+									}
+								}
+								else
+								{
+									//Normal move
+									move = new RookMove(this, lastPieceSelected, selectedLoc,
+											takenPiece,RookMove.NONE);
+								}
 							}
 							else
 							{
@@ -437,11 +524,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		builder.show();
 	}
 	
-	public SelectUpgradeAction doSelectAction(int type)
+	public void doSelectAction(int type)
 	{
 		SelectUpgradeAction newAct = new SelectUpgradeAction(this, this.lastPieceSelected, types[type]);
 		game.sendAction(newAct);
-		return null;
 	}
 	
 	public void vibrate(int time)
