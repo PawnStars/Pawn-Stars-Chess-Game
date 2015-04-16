@@ -105,6 +105,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public ChessMoveAction makeMove()
 	{
+		//sleep for a second before a move
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
 		Log.d("computer player", "trying to make a move");
 		
 		//TODO check if it can make a move
