@@ -1,5 +1,7 @@
 package edu.up.cs301.chess;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 
 import android.graphics.Canvas;
@@ -52,6 +54,15 @@ public class ChessBoard extends SurfaceView
 	private boolean flipped = false;
 	
 	private float[] tileSize = new float[]{0,0};
+	
+	private ArrayList <ChessPiece> whiteTakenPieces = new ArrayList<ChessPiece>();
+	private ArrayList <ChessPiece> blackTakenPieces = new ArrayList<ChessPiece>();
+	
+	private ArrayList <Integer> whiteTakenIndex = new ArrayList<Integer>();
+	private ArrayList <Integer> blackTakenIndex = new ArrayList<Integer>();
+	
+	int count = 1;
+
 	
 	/**
 	 * constructor
@@ -208,6 +219,89 @@ public class ChessBoard extends SurfaceView
 			
 			}
 		}
+		
+		
+		if (blackTakenPieces != null && blackTakenPieces.size() > 0) {
+			
+			//Goes through the taken black array and draws them on the board
+			for (int k = 0; k < blackTakenPieces.size(); k++) {
+				if (blackTakenPieces.get(k) != null) {
+					
+					int type = blackTakenPieces.get(k).getType();
+					String str = blackPieceStrs[type];
+
+					if (type >= 0 && type < blackPieceStrs.length) {
+
+						//sets the x and y location of the piece 
+						int x = (int) (tileSize[1] * 8);
+						int y = (int) (tileSize[0]);
+						x += (k * tileSize[1]);
+
+						//Goes to a new row of taken pieces
+						if (x > canvas.getWidth() - 100) {
+							y = (int) (tileSize[0] * 2);
+							x = (int) ((int) (tileSize[1] * 8) + ((k - 4) * tileSize[1]));
+							
+							//Goes to a new row of taken pieces
+							if (x > canvas.getWidth() - 100) {
+								y = (int) (tileSize[0] * 3);
+								x = (int) ((int) (tileSize[1] * 8) + ((k - 8) * tileSize[1]));
+								
+								//Goes to a new row of taken pieces
+								if (x > canvas.getWidth() - 100) {
+									y = (int) (tileSize[0] * 4);
+									x = (int) ((int) (tileSize[1] * 8) + ((k - 12) * tileSize[1]));
+								}
+							}
+						}
+
+						canvas.drawText(str, x, y, blackPieceColor);
+					}
+				}
+			}
+		}
+		if (whiteTakenPieces != null && whiteTakenPieces.size() > 0) {
+			
+			//Goes through the taken white array and draws them on the board
+			for (int k = 0; k < whiteTakenPieces.size(); k++) {
+				if (whiteTakenPieces.get(k) != null) {
+					
+					int type = whiteTakenPieces.get(k).getType();
+					String str = whitePieceStrs[type];
+
+					if (type >= 0 && type < whitePieceStrs.length) {
+						
+						//sets the x and y location of the piece 
+						int x = (int) ((tileSize[1] * 8));
+						int y = (int) tileSize[0];
+						y += (tileSize[0] * 4);
+						x += (k * tileSize[1]);
+						
+						//Goes to a new row of taken pieces
+						if (x > canvas.getWidth() - 100) {
+							y = (int) tileSize[0];
+							y += (int) (tileSize[0] * 5);
+							x = (int) ((int) (tileSize[1] * 8) + ((k - 4) * tileSize[1]));
+							
+							//Goes to a new row of taken pieces
+							if (x > canvas.getWidth() - 100) {
+								y = (int) tileSize[0];
+								y += (int) (tileSize[0] * 6);
+								x = (int) ((int) (tileSize[1] * 8) + ((k - 8) * tileSize[1]));
+
+								//Goes to a new row of taken pieces
+								if (x > canvas.getWidth() - 100) {
+									y = (int) tileSize[0];
+									y += (int) (tileSize[0] * 6);
+									x = (int) ((int) (tileSize[1] * 8) + ((k - 12) * tileSize[1]));
+								}
+							}
+						}
+						canvas.drawText(str, x, y, whitePieceColor);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -305,4 +399,49 @@ public class ChessBoard extends SurfaceView
 		return tileSize;
 	}
 	
+	/**
+	 * This method adds the white taken pieces to an ArrayList and 
+	 * makes sure there are no duplicate pieces 
+	 * 
+	 * @param piece: The piece that is taken 
+	 * @param index: The index of the piece in the original array 
+	 */
+	public void setWhiteTakenPiece(ChessPiece piece, int index) {
+		if(whiteTakenIndex.contains(index)){
+			return;
+		}
+		whiteTakenIndex.add(index);
+		whiteTakenPieces.add(piece);
+	}
+	
+	/**
+	 * 
+	 * @return WhiteTakenPieces ArrayList
+	 */
+	public ArrayList<ChessPiece> getWhiteTakenPieces() {
+		return whiteTakenPieces;
+	}
+
+	/**
+	 * This method adds the black taken pieces to an ArrayList and 
+	 * makes sure there are no duplicate pieces 
+	 * 
+	 * @param piece: The piece that is taken 
+	 * @param index: The index of the piece in the original array 
+	 */
+	public void setBlackTakenPiece(ChessPiece piece, int index) {
+		if(blackTakenIndex.contains(index)){
+			return;
+		}
+		blackTakenIndex.add(index);
+		blackTakenPieces.add(piece);
+	}
+	
+	/**
+	 * 
+	 * @return BlackTakenPieces ArrayList
+	 */
+	public ArrayList<ChessPiece> getBlackTakenPieces() {
+		return blackTakenPieces;
+	}
 }

@@ -106,8 +106,38 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	protected void updateDisplay() {
 		board.setPieceMap(state.getPieceMap());
-		player1Score.setText(""+state.getPlayer1Points());
-		player2Score.setText(""+state.getPlayer2Points());
+		player1Score.setText("" + state.getPlayer1Points());
+		player2Score.setText("" + state.getPlayer2Points());
+
+		
+		// Goes through player 1's pieces to see what ones are dead/alive
+		for (int i = 0; i < state.getPlayer1Pieces().length; i++) {
+			if (state.getPlayer1Pieces()[i].isAlive()) {
+				
+			} else if (state.getPlayer1Pieces()[i].isAlive() == false) {
+				//Add the taken piece to either the white or black array in Board Class
+				if (state.getPlayer1Pieces()[i].isWhite()){
+					board.setWhiteTakenPiece(state.getPlayer1Pieces()[i], i);
+				}
+				else {
+					board.setBlackTakenPiece(state.getPlayer1Pieces()[i], i);
+				}
+			}
+		}
+
+		// Goes through player 2's pieces to see what ones are dead/alive
+		for (int j = 0; j < state.getPlayer2Pieces().length; j++) {
+			if (state.getPlayer2Pieces()[j].isAlive()) {
+			} else if (state.getPlayer2Pieces()[j].isAlive() == false) {
+				//Add the taken piece to either the white or black array in Board Class
+				if (state.getPlayer2Pieces()[j].isWhite()){
+					board.setWhiteTakenPiece(state.getPlayer2Pieces()[j], j);
+				}
+				else {
+					board.setBlackTakenPiece(state.getPlayer2Pieces()[j], j);
+				}
+			}
+		}
 	}
 
 	/**
@@ -162,7 +192,12 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		// update our state; then update the display
 		state = newState;
-		//Log.d("human player",state.toString());
+		if(state!=null && !state.isGameOver())
+		{
+			this.player1Score.setText(state.getPlayer1Points()+ "");
+			this.player2Score.setText(state.getPlayer2Points() + "");
+		}
+		Log.d("human player",state.toString());
 		updateDisplay();
 	}
 	
@@ -230,11 +265,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		//make a dialog to ask which color the human wants to be
 		MessageBox.popUpChoice(colorQuestion, whiteLabel, blackLabel, whiteListener, blackListener, activity);
-		
-		if(!isPlayer1())
-		{
-			board.flipBoard();
-		}
 	}
 	/**
 	 * Returns true if it is white
@@ -299,18 +329,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				
 				//Now that the error checks are done, it is safe to handle the touch
 				down = false;
-				
+				//TODO not sure
 				ChessPiece pieceSelected = state.getPieceMap()[tileY][tileX];
 				
 				//selected the same piece twice
 				if(lastPieceSelected != null && lastPieceSelected.equals(pieceSelected))
 				{
 					lastPieceSelected = null;
-					
-					//clear the board of highlighted tiles
-					board.setSelectedTiles(null);
-					board.setSelectedLoc(-1, -1);
-					
 					return true;
 				}
 				
@@ -470,9 +495,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					board.setSelectedLoc(-1, -1);
 					lastPieceSelected = null;
 				}
-				
+				//TODO make sure this isn't needed
 				//selected a distinct piece of your color for the first time and did not make a move
-				if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
+				/*if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
 				{
 					if(pieceSelected.isWhite() == isWhite())
 					{
@@ -484,7 +509,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						//Keep a reference to the piece
 						lastPieceSelected = pieceSelected;
 					}
-				}
+				}*/
 			}
 		}
 		return true;
@@ -504,10 +529,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public void setWhite(boolean isWhite) {
 		this.isWhite = isWhite;
-		if(!isWhite)
-		{
-			board.flipBoard();
-		}
 	}
 
 	/**
@@ -531,6 +552,19 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			}
 			updateDisplay();
 		}
+		// Flip the board if the human player chooses to be black
+		if (!isWhite()) {
+			board.flipBoard();
+		}
+
+		// Set the name text views:
+		TextView player1View = (TextView) activity
+				.findViewById(R.id.player1TextView);
+		TextView player2View = (TextView) activity
+				.findViewById(R.id.player2TextView);
+
+		player1View.setText(this.name);
+		player2View.setText(this.allPlayerNames[1]);
 	}
 
 	/**

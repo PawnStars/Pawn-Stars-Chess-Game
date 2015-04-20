@@ -125,7 +125,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 				if(players[i] instanceof ChessPlayer)
 				{
 					ChessPlayer p = (ChessPlayer)players[i];
-					if(p.isPlayer1())
+					if(p instanceof ChessHumanPlayer)
 					{
 						p.setWhite(act.isWhichColor());
 					}
@@ -135,6 +135,10 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 					}
 				}
 			}
+			
+			//Make sure both players get updated state information
+			this.sendAllUpdatedState();
+			
 			return true;
 		}
 		else {

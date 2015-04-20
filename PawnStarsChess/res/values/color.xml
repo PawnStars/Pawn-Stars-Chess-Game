@@ -6,6 +6,6 @@
     <color name="button_color">#FFAAAAAA</color>
     <drawable name="raised_button_background">#FFFFFFFF</drawable>
     <drawable name="colorButtonSpecial">#FFFF0000</drawable>
-    <color name="background_color">#FFFFFFFF</color>
+    <color name="background_color">#FF00FF00</color>
     
 </resources>

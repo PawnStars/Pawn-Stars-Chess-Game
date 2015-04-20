@@ -90,14 +90,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			else
 			{
 				gameState = newState;
-				Log.d("computer player", "trying to make a move");
+				Log.d("computer player",gameState.toString());
+				//not sure if we need to apply move
 				GameAction move = makeMove();
-				if(move != null)
-				{
-					//Log.d("computer player",gameState.toString());
-					//Log.d("computer player", "Sending this move: "+move);
-					game.sendAction(move);
-				}
+				Log.d("computer player", "Sending this move: "+move);
+				gameState.applyMove(move);
+				game.sendAction(move);
 			}
 		}
 		else
@@ -163,7 +161,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			
 			//Make sure the player is included as a reference
-			//chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
+			chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
 
 		}
 		else if(smart > 1)
@@ -202,15 +200,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public void setWhite(boolean color)
 	{
-		
 		isWhite = color;
-		GameAction move = makeMove();
-		if(move != null)//TODO not sure about this
-		{
-			Log.d("computer player",gameState.toString());
-			Log.d("computer player", "Sending this move: "+move);
-			game.sendAction(move);
-		}
 	}
 
 	/**

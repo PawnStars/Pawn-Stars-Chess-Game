@@ -325,9 +325,18 @@ public class ChessGameState extends GameState {
 			return false;
 		
 		// Check if all primitive instance variables are equals
+		if(player1Points != comp.getPlayer1Points()) return false;
+		if(player2Points != comp.getPlayer2Points()) return false;
+		
 		if(whoseTurn != comp.isWhoseTurn()) return false;
+		
+		if(player1InCheck != comp.isPlayer1InCheck()) return false;
+
+		if(player2InCheck != comp.isPlayer2InCheck()) return false;
 
 		if(isGameOver != comp.isGameOver()) return false;
+
+		if(!Arrays.deepEquals(canCastle,comp.getCanCastle())) return false;
 
 		if(player1IsWhite != comp.isPlayer1IsWhite()) return false;
 		
@@ -366,7 +375,7 @@ public class ChessGameState extends GameState {
 			ChessMoveAction move = (ChessMoveAction)act;
 			
 			//Check for a draw:
-			if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
+			/*if(lastCapture > MAX_MOVES_SINCE_CAPTURE)
 			{
 				isGameOver = true;
 				player1Won = false;
@@ -374,9 +383,9 @@ public class ChessGameState extends GameState {
 				return true;
 			}
 			else
-			{
+			{*/
 				return movePiece(move);
-			}
+			//}
 		}
 		else
 		{
@@ -470,6 +479,11 @@ public class ChessGameState extends GameState {
 		}
 		return false;
 	}
+	
+	/*
+	 * The following methods are getters and setters
+	 * for all necessary variables in the class
+	 */
 	
 	/**
 	 * 
@@ -1296,7 +1310,7 @@ public class ChessGameState extends GameState {
 		{
 			return false;
 		}
-		
+		//TODO find bugs
 		//Assume the move was not made
 		boolean success = false;
 		
@@ -1424,7 +1438,7 @@ public class ChessGameState extends GameState {
 			//Check if any pawns can en passant
 			updateCanEnPassant();
 			
-			UpdateCanDraw();
+			//UpdateCanDraw();
 			
 			//Check if the king is being taken
 			if(takenPiece != null && takenPiece.getType() == ChessPiece.KING)
@@ -1766,6 +1780,7 @@ public class ChessGameState extends GameState {
 	 */
 	public ChessPiece findPiece(ChessPiece piece)
 	{
+		//TODO this doesn't work all the time
 		for(ChessPiece p:getPlayer1Pieces())
 		{
 			if(p.equals(piece))
