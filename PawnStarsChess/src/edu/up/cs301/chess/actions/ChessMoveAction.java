@@ -1,5 +1,7 @@
 package edu.up.cs301.chess.actions;
 
+import java.util.Arrays;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
@@ -22,16 +24,20 @@ public class ChessMoveAction extends GameAction {
 	private static final long serialVersionUID = 2806249547013L;
 	
 	//The piece moved by the player
-	private ChessPiece whichPiece;
+	protected ChessPiece whichPiece;
 	
 	//The piece to be taken
-	private ChessPiece takenPiece;
+	protected ChessPiece takenPiece;
 	
 	//The new location of the selected piece
-	private int[] newPos;
+	protected int[] newPos;
 	
 	//The old location of the selected piece
-	private int[] oldPos;
+	protected int[] oldPos;
+	
+	protected boolean makesCheck;
+	
+	protected boolean makesCheckmate;
 	
 	//TODO could make it possible to undo a turn with this info and the last position
 	
@@ -47,10 +53,20 @@ public class ChessMoveAction extends GameAction {
 	{
 		super(player);
 		
-		this.takenPiece = takenPiece;
-		this.whichPiece = whichPiece;
-		this.newPos = newPos.clone();
-		this.oldPos = whichPiece.getLocation().clone();
+		if(takenPiece != null)
+		{
+			this.takenPiece = new ChessPiece(takenPiece);
+		}
+		else
+		{
+			this.takenPiece = null;
+		}
+		
+		this.whichPiece = new ChessPiece(whichPiece);
+		this.newPos = Arrays.copyOf(newPos,2);
+		this.oldPos = Arrays.copyOf(whichPiece.getLocation(),2);
+		makesCheck = false;
+		makesCheckmate = false;
 	}
 
 	/**
@@ -61,10 +77,20 @@ public class ChessMoveAction extends GameAction {
 	public ChessMoveAction(GamePlayer player, ChessMoveAction action) {
 		super(player);
 		
-		this.whichPiece = action.getWhichPiece();
-		this.newPos = action.getNewPos();
-		this.takenPiece = action.getTakenPiece();
-		this.oldPos = whichPiece.getLocation().clone();
+		if(takenPiece != null)
+		{
+			this.takenPiece = new ChessPiece(takenPiece);
+		}
+		else
+		{
+			this.takenPiece = null;
+		}
+		
+		this.whichPiece = new ChessPiece(action.getWhichPiece());
+		this.newPos = Arrays.copyOf(action.getNewPos(),2);
+		this.oldPos = Arrays.copyOf(action.getOldPos(),2);
+		makesCheck = action.isMakesCheck();
+		makesCheckmate = action.isMakesCheckmate();
 	}
 
 	/**
@@ -96,25 +122,73 @@ public class ChessMoveAction extends GameAction {
 		return oldPos;
 	}
 
+	public boolean isMakesCheck() {
+		return makesCheck;
+	}
+
+	public void setMakesCheck(boolean makesCheck) {
+		this.makesCheck = makesCheck;
+	}
+
+	public boolean isMakesCheckmate() {
+		return makesCheckmate;
+	}
+
+	public void setMakesCheckmate(boolean makesCheckmate) {
+		this.makesCheckmate = makesCheckmate;
+	}
+
 	/**
 	 * Convert the move into standard chess notation for debugging.
 	 */
 	@Override
 	public String toString()
 	{
-		String rtnVal = "";
-		rtnVal += whichPiece.toCharacter();
-		int[] loc = whichPiece.getLocation();
+		String msg = "";
+		int pieceType = whichPiece.getType();
+		if(pieceType == ChessPiece.QUEEN)
+		{
+			msg += "Q";
+		}
+		if(pieceType == ChessPiece.KING)
+		{
+			msg += "K";
+		}
+		if(pieceType == ChessPiece.ROOK)
+		{
+			msg += "R";
+		}
+		if(pieceType == ChessPiece.BISHOP)
+		{
+			msg += "B";
+		}
+		if(pieceType == ChessPiece.KNIGHT)
+		{
+			msg += "N";
+		}
+		if(takenPiece != null)
+		{
+			msg += "x";
+		}
+		msg += (char)(97+oldPos[1]);
+		msg += ChessGameState.BOARD_HEIGHT-oldPos[0];
+		msg += (char)(97+newPos[1]);
+		msg += ChessGameState.BOARD_HEIGHT-newPos[0];
 		
-		//convert to chess notation
-		//TODO doesn't work for special moves
-		rtnVal += (char)(97+loc[1]);
-		rtnVal += ChessGameState.BOARD_HEIGHT-loc[0];
-		rtnVal += " ";
+		if(makesCheck)
+		{
+			msg += "+";
+		}
+		else if(makesCheckmate)
+		{
+			msg += "#";
+		}
 		
-		rtnVal += (char)(97+newPos[1]);
-		rtnVal += ChessGameState.BOARD_HEIGHT-newPos[0];
-		rtnVal += " ";
-		return rtnVal;
+		return msg;
+	}
+	
+	public ChessMoveAction clone()
+	{
+		return new ChessMoveAction(super.getPlayer(),this);
 	}
 }//class CounterMoveAction

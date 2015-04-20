@@ -4,6 +4,7 @@
 package edu.up.cs301.chess.actions;
 
 import edu.up.cs301.chess.ChessHumanPlayer;
+import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 
@@ -38,8 +39,7 @@ public class ResignAction extends GameAction {
 		super(player);
 		if(player instanceof ChessHumanPlayer)
 		{
-			//playerIdx = ((ChessHumanPlayer)player).;
-			//TODO get the name of who lost somehow
+			playerIdx = ((ChessPlayer)player).getPlayerID();
 		}
 	}
 	

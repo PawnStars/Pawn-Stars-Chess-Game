@@ -25,8 +25,8 @@ public class RookMove extends ChessMoveAction {
 	
 	//the types of special moves for rooks
 	public static final int CASTLE_RIGHT = 1;
-	public static final int CASTLE_LEFT = 2;
-	public static final int NONE = 3;
+	public static final int CASTLE_LEFT = 0;
+	public static final int NONE = 2;
 	
 	//the type of this move
 	private int type;
@@ -40,10 +40,40 @@ public class RookMove extends ChessMoveAction {
 	}
 	
 	/**
+	 * Copy constructor
+	 * @param player
+	 * @param move
+	 */
+	public RookMove(GamePlayer player, PawnMove move)
+	{
+		super(player, move.getWhichPiece(), move.getNewPos(), move.getTakenPiece());
+		this.type = move.getType();
+	}
+	
+	/**
 	 * Returns the type of the move
 	 * @return type
 	 */
 	public int getType() {
 		return type;
 	}
+	
+	@Override
+	public String toString()
+	{
+		if(type == CASTLE_LEFT)
+		{
+			return "O-O-O ";
+		}
+		else if(type == CASTLE_RIGHT)
+		{
+			return "O-O";
+		}
+		else
+		{
+			return super.toString();
+		}
+	}
+	
+	
 }

@@ -4,10 +4,12 @@ import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.chess.actions.DrawAction;
-import edu.up.cs301.chess.actions.SelectUpgradeAction;
+import edu.up.cs301.chess.actions.PawnMove;
+//import edu.up.cs301.chess.actions.SelectUpgradeAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.Search;
 import edu.up.cs301.game.GameComputerPlayer;
+import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.Tickable;
     
@@ -77,10 +79,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			return;
 		}
 		else if (info instanceof ChessGameState) {
-			// if we indeed have a chess game state, update the GUI
 			ChessGameState newState = (ChessGameState)info;
 			
-			//null check and make sure a move was made
+			//make sure the state was changed
 			if(newState.equals(gameState))
 			{
 				Log.d("computer player", "equal game state");
@@ -89,13 +90,19 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			else
 			{
 				gameState = newState;
-				Log.d("computer player",gameState.toString());
-				
-				ChessMoveAction move = makeMove();
-				Log.d("computer player", "Sending this move: "+move);
-				gameState.applyMove(move);
-				game.sendAction(move);
+				Log.d("computer player", "trying to make a move");
+				GameAction move = makeMove();
+				if(move != null)
+				{
+					//Log.d("computer player",gameState.toString());
+					//Log.d("computer player", "Sending this move: "+move);
+					game.sendAction(move);
+				}
 			}
+		}
+		else
+		{
+			Log.d("computer player", "error");
 		}
 	}
 	
@@ -103,17 +110,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * Generates a move according to the AI's intelligence
 	 * level.
 	 */
-	public ChessMoveAction makeMove()
+	public GameAction makeMove()
 	{
-		Log.d("computer player", "trying to make a move");
+		//Log.d("computer player", "trying to make a move");
 		
-		//TODO check if it can make a move
 		if(gameState == null || gameState.isWhoseTurn() != isPlayer1())
 		{
 			return null;
 		}
 		ChessGameState newState = new ChessGameState(gameState);
-		ChessMoveAction chosenMove = null;
+		GameAction chosenMove = null;
 		if(smart == RANDOM || smart == TAKE_PIECES)
 		{
 			//Get all the possible moves
@@ -157,7 +163,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			
 			//Make sure the player is included as a reference
-			chosenMove = new ChessMoveAction(this,chosenMove);
+			//chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
 
 		}
 		else if(smart > 1)
@@ -166,17 +172,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			bestMove = new ChessMoveAction(this,bestMove);
 			chosenMove = bestMove;
 		}
-		
+		if(chosenMove == null)
+		{
+			/*
+			 * The game ends in a stalemate if one of the
+			 * players cannot make a valid move
+			 */
+			chosenMove = new DrawAction(this,isWhite(),true);
+		}
 		//send the new game state if it worked
-		if(chosenMove != null)
-		{
-			return chosenMove;
-		}
-		else
-		{
-			Log.d("computer player", "Failed to make a move.");
-			return null;
-		}
+		return chosenMove;
 	}
 
 	/**
@@ -186,6 +191,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * 		   false if not.
 	 */
 	public boolean isWhite() {
+		
 		return isWhite;
 	}
 	
@@ -196,7 +202,15 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public void setWhite(boolean color)
 	{
+		
 		isWhite = color;
+		GameAction move = makeMove();
+		if(move != null)//TODO not sure about this
+		{
+			Log.d("computer player",gameState.toString());
+			Log.d("computer player", "Sending this move: "+move);
+			game.sendAction(move);
+		}
 	}
 
 	/**
@@ -212,47 +226,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		return playerNum;
 	}
 
-	public void selectUpgrade() {
-		ChessPiece[] pieces = null;
-		if(isPlayer1())
-		{
-			pieces = gameState.getPlayer1Pieces();
-		}
-		else
-		{
-			pieces = gameState.getPlayer2Pieces();
-		}
-		for(ChessPiece piece:pieces)
-		{
-			if(piece.getLocation()[0] == 0 
-					|| piece.getLocation()[0] == ChessGameState.BOARD_HEIGHT-1)
-			{
-				if(piece.getType() == ChessPiece.PAWN)
-				{
-					int type = ChessPiece.INVALID;
-					if(smart == 0)
-					{
-						type = ChessPiece.KNIGHT;
-					}
-					else
-					{
-						type = ChessPiece.QUEEN;
-					}
-					
-					SelectUpgradeAction newAct = new SelectUpgradeAction(this, piece, type);
-					game.sendAction(newAct);
-					return;
-				}
-			}
-		}
-	}
-
 	/**
 	 * How to respond when a player asks for a draw
 	 */
 	public void askDraw(String msg)
 	{
-		if(smart == 0)
+		if(smart < 10)
 		{
 			DrawAction act = new DrawAction(this,isWhite,true);
 			game.sendAction(act);

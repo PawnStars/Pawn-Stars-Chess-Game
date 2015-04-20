@@ -1,5 +1,7 @@
 package edu.up.cs301.chess;
 
+import java.util.Arrays;
+
 import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
@@ -34,7 +36,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 	/* instance variables */
 	
-	public static final int[] types = {
+	private static final String upgradeChoices[] = new String[] {"\u2655 Queen", "\u2658 Knight", "\u2656 Rook", "\u2657 Bishop"};
+	
+	private static final int[] promotionTypes = {
 		ChessPiece.QUEEN,
 		ChessPiece.KNIGHT,
 		ChessPiece.ROOK,
@@ -73,6 +77,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	private boolean[][] validLocs;
 	
 	private Vibrator vibrator;
+	
+	//The last move generated
+	private ChessMoveAction move;
 	
 	/**
 	 * constructor
@@ -155,9 +162,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		// update our state; then update the display
 		state = newState;
-		Log.d("human player",state.toString());
+		//Log.d("human player",state.toString());
 		updateDisplay();
-		//Log.d("human player", "state updated:"+state);
 	}
 	
 	/**
@@ -258,31 +264,28 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				//TODO sound feedback/vibration
 				
 				//check if it is your turn
-				if(state.isWhoseTurn() != isPlayer1())
+				if(state == null || state.isWhoseTurn() != isPlayer1())
 				{
 					return false;
 				}
 				
 				float[] tileSize = board.getTileSize();
-				int tileX;
+				int tileX = (int) (event.getX()/tileSize[0]);;
 				int tileY;
-				int[] selectedLoc;
 				
 				//translate the points if the board is flipped
 				if(board.isFlipped())
 				{
-					tileX = (int) (event.getX()/tileSize[0]);
 					tileY = ChessGameState.BOARD_WIDTH-1-(int) (event.getY()/tileSize[1]);
-					selectedLoc = new int[]{tileY,tileX};
 				}
 				else
 				{
-					tileX = (int) (event.getX()/tileSize[0]);
 					tileY = (int) (event.getY()/tileSize[1]);
-					selectedLoc = new int[]{tileY,tileX};
 				}
 				
-				ChessPiece pieceSelected = null;
+				int[] selectedLoc = new int[]{tileY,tileX};
+				
+				
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -294,172 +297,193 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					return false;
 				}
 				
+				//Now that the error checks are done, it is safe to handle the touch
 				down = false;
 				
-				if(state.getPieceMap()[tileY][tileX] != null)
-				{
-					pieceSelected = new ChessPiece(state.getPieceMap()[tileY][tileX]);
-				}
-				
-				//clear the selected locations first
-				board.setSelectedTiles(null);
-				
-				//make the selected location invalid
-				board.setSelectedLoc(-1, -1);
+				ChessPiece pieceSelected = state.getPieceMap()[tileY][tileX];
 				
 				//selected the same piece twice
 				if(lastPieceSelected != null && lastPieceSelected.equals(pieceSelected))
 				{
 					lastPieceSelected = null;
+					
+					//clear the board of highlighted tiles
+					board.setSelectedTiles(null);
+					board.setSelectedLoc(-1, -1);
+					
 					return true;
 				}
 				
-				//selected a piece of the same color different from the last one
-				if(pieceSelected != null && pieceSelected.isWhite() == isWhite() && !pieceSelected.equals(lastPieceSelected))
-				{
-					//reset the valid locations
-
-					//pass selected tile to ChessBoard
-					board.setSelectedLoc(tileY,tileX);
-					
-					// Highlight valid moves for the player:
-					validLocs = state.getPossibleMoves(pieceSelected);
-					
-					//TODO check for illegal moves
-					board.setSelectedTiles(validLocs);
-					
-					lastPieceSelected = pieceSelected;
-					return true;
-				}
+				move = null;
 				
-				/*
-				 * Didn't select a tile with a piece on it or it is of a different color,
-				 * so the last piece could possibly move here.
-				 */
-				if(pieceSelected == null || pieceSelected.isWhite() != isWhite())
+				//Is a valid location to move the piece to
+				if(validLocs != null && validLocs[tileY][tileX] == true)
 				{
-					//Is a valid location to move the piece to
-					if(validLocs != null && validLocs[tileY][tileX] == true)
+					//Create and apply the move
+					ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
+					if(lastPieceSelected != null)
 					{
-						//Create and apply the move
-						ChessMoveAction move = null;
-						ChessPiece takenPiece = state.getPieceMap()[tileY][tileX];
-						if(lastPieceSelected != null)
+						if(lastPieceSelected.getType() == ChessPiece.PAWN)
 						{
-							if(lastPieceSelected.getType() == ChessPiece.PAWN)
+							if(selectedLoc[0] == 0 || selectedLoc[0] == ChessGameState.BOARD_HEIGHT-1)
 							{
-								//TODO implement special moves
+								//Pawns only reach the edge when they are promoted
 								
-								if(selectedLoc[0] == 0 || selectedLoc[0] == ChessGameState.BOARD_HEIGHT)
+								//Only use the first move assigned
+								if(move == null && takenPiece == null)
 								{
 									move = new PawnMove(this, lastPieceSelected, selectedLoc,
-											takenPiece,PawnMove.PROMOTION);
+										null,PawnMove.PROMOTION);
+									
+									board.setSelectedTiles(null);
+									board.setSelectedLoc(-1, -1);
+									
+									//let the select upgrade method make a move
 									selectUpgrade();
+									return true;
 								}
-								else if(!lastPieceSelected.getHasMoved())
+								
+							}
+							else if(!lastPieceSelected.getHasMoved())
+							{
+								//First move
+								if(move == null && takenPiece == null)
 								{
 									move = new PawnMove(this, lastPieceSelected, selectedLoc,
-											takenPiece,PawnMove.FIRST_MOVE);
+										takenPiece,PawnMove.FIRST_MOVE);
 								}
-								else if(state.getMoveList().getLast() instanceof PawnMove)
+							}
+							else if(state.getMoveList().getLast() instanceof PawnMove)
+							{
+								PawnMove lastMove = (PawnMove)state.getMoveList().getLast();
+								int[] newLoc = lastMove.getNewPos();
+								
+								//The last move was a double pawn jump
+								if(lastMove.getType() == PawnMove.FIRST_MOVE)
 								{
-									PawnMove lastPawnMove = (PawnMove)state.getMoveList().getLast();
-									int[] oldLoc = lastPawnMove.getOldPos();
-									if(isPlayer1())
+									//Is trying to do an en passant
+									if(Math.abs(selectedLoc[1]-newLoc[1]) == 1 && takenPiece != null)
 									{
-										if(selectedLoc[0] == oldLoc[0]+1)
+										if(isPlayer1() && selectedLoc[0] == newLoc[0]-1 && move == null)
 										{
 											move = new PawnMove(this, lastPieceSelected, selectedLoc,
 													takenPiece,PawnMove.EN_PASSANT);
 										}
+										if(!isPlayer1() && selectedLoc[0] == newLoc[0]+1 && move == null)
+										{
+											move = new PawnMove(this, lastPieceSelected, selectedLoc,
+													takenPiece,PawnMove.EN_PASSANT);
+										}
+									}
+								}
+							}
+							
+							//Normal pawn move
+							if(move == null)
+							{
+								move = new PawnMove(this, lastPieceSelected, selectedLoc,
+										takenPiece,PawnMove.NONE);
+							}
+						}
+						else if(lastPieceSelected.getType() == ChessPiece.ROOK)
+						{
+							ChessPiece king = state.getKing(isWhite() == state.isPlayer1IsWhite());
+							
+							//Castling
+							if(king != null)
+							{
+								int[] kingLoc = king.getLocation();
+								
+								//selected the king
+								if(Arrays.equals(selectedLoc,kingLoc))
+								{
+									int lastX = lastPieceSelected.getLocation()[1];
+									int canCastleX = -1;
+									int canCastleY;
+									int type = RookMove.NONE;
+									
+									//last selected the left rook
+									if(lastX == 0)
+									{
+										type = RookMove.CASTLE_LEFT;
+										canCastleX = 0;
+									}
+									
+									//last selected the right rook
+									if(lastX == ChessGameState.BOARD_WIDTH-1)
+									{
+										type = RookMove.CASTLE_RIGHT;
+										canCastleX = 1;
+									}
+									if(isPlayer1())
+									{
+										canCastleY = 1;
 									}
 									else
 									{
-										if(selectedLoc[0] == oldLoc[0]-1)
-										{
-											move = new PawnMove(this, lastPieceSelected, selectedLoc,
-													takenPiece,PawnMove.EN_PASSANT);
-										}
+										canCastleY = 0;
 									}
-								}
-								else
-								{
-									move = new PawnMove(this, lastPieceSelected, selectedLoc,
-											takenPiece,PawnMove.NONE);
+									
+									//Check if you can castle
+									if(canCastleX != -1 && state.getCanCastle()[canCastleY][canCastleX] && move == null)
+									{
+										move = new RookMove(this, lastPieceSelected, selectedLoc,
+												null,type);
+									}
+									else if(move == null)
+									{
+										//Normal rook move
+										move = new RookMove(this, lastPieceSelected, selectedLoc,
+												takenPiece,RookMove.NONE);
+									}
 								}
 							}
-							else if(lastPieceSelected.getType() == ChessPiece.ROOK)
+							if(move == null)
 							{
-								//TODO implement special moves
-								ChessPiece king = null;
-								if(isPlayer1())
-								{
-									for(ChessPiece p:state.getPlayer1Pieces())
-									{
-										if(p.getType() == ChessPiece.KING)
-										{
-											king = p;
-										}
-									}
-								}
-								else
-								{
-									for(ChessPiece p:state.getPlayer2Pieces())
-									{
-										if(p.getType() == ChessPiece.KING)
-										{
-											king = p;
-										}
-									}
-								}
-								
-								//Castling
-								if(king != null)
-								{
-									int[] kingLoc = king.getLocation();
-									if(selectedLoc[0] == kingLoc[0] && selectedLoc[1] == kingLoc[1])
-									{
-										int[] lastPLoc = lastPieceSelected.getLocation();
-										if(!lastPieceSelected.getHasMoved())
-										{
-											if(!king.getHasMoved())
-											{
-												if(lastPLoc[1] == 0)
-												{
-													move = new RookMove(this, lastPieceSelected, selectedLoc,
-															takenPiece,RookMove.CASTLE_LEFT);
-												}
-												if(lastPLoc[1] == ChessGameState.BOARD_WIDTH-1)
-												{
-													move = new RookMove(this, lastPieceSelected, selectedLoc,
-															takenPiece,RookMove.CASTLE_RIGHT);
-												}
-											}
-										}
-									}
-								}
-								else
-								{
-									//Normal move
-									move = new RookMove(this, lastPieceSelected, selectedLoc,
+								//Normal rook move
+								move = new RookMove(this, lastPieceSelected, selectedLoc,
 											takenPiece,RookMove.NONE);
-								}
 							}
-							else
-							{
-								move = new ChessMoveAction(this,
-										lastPieceSelected, selectedLoc,takenPiece);
-							}
-							state.applyMove(move);
-							game.sendAction(move);
 						}
+						if(move == null)
+						{
+							//Normal move
+							move = new ChessMoveAction(this,
+									lastPieceSelected, selectedLoc,takenPiece);
+						}
+						
+						//state.applyMove(move);
+						game.sendAction(move);
+						Log.d("human player", "sending this move: "+move);
+						
+						//clear the highlighted tiles after a move
+						board.setSelectedTiles(null);
+						board.setSelectedLoc(-1, -1);
+						lastPieceSelected = null;
+						pieceSelected = null;
 					}
-					
-					/*
-					 * The user either tried to make an invalid move or made
-					 * a move, so clear piece selections.
-					 */
+				}
+				else
+				{
+					//clear piece selections if the selected tile was invalid
+					board.setSelectedTiles(null);
+					board.setSelectedLoc(-1, -1);
 					lastPieceSelected = null;
+				}
+				
+				//selected a distinct piece of your color for the first time and did not make a move
+				if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
+				{
+					if(pieceSelected.isWhite() == isWhite())
+					{
+						// Highlight valid moves for the player:
+						validLocs = state.getPossibleMoves(pieceSelected);
+						board.setSelectedTiles(validLocs);
+						board.setSelectedLoc(tileY,tileX);
+						
+						//Keep a reference to the piece
+						lastPieceSelected = pieceSelected;
+					}
 				}
 			}
 		}
@@ -480,6 +504,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public void setWhite(boolean isWhite) {
 		this.isWhite = isWhite;
+		if(!isWhite)
+		{
+			board.flipBoard();
+		}
 	}
 
 	/**
@@ -505,10 +533,12 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		}
 	}
 
+	/**
+	 * Prompts the user to choose a piece type for promotion
+	 */
 	public void selectUpgrade() {
-		CharSequence upgradeChoices[] = new CharSequence[] {"Queen", "Knight", "Rook", "Bishop"};
+		//The choices when making a promotion
 		
-		//TODO fix
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle("Pick a new piece.");
 		
@@ -521,13 +551,28 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		};
 		
 		builder.setItems(upgradeChoices, pieceListener);
+		builder.setCancelable(false);
 		builder.show();
 	}
 	
+	/**
+	 * Sends a promotion action
+	 * @param type
+	 */
 	public void doSelectAction(int type)
 	{
-		SelectUpgradeAction newAct = new SelectUpgradeAction(this, this.lastPieceSelected, types[type]);
-		game.sendAction(newAct);
+		if(move instanceof PawnMove)
+		{
+			PawnMove pawnAct = (PawnMove)move;
+			if(pawnAct.getType() == PawnMove.PROMOTION && lastPieceSelected != null)
+			{
+				//Trying to do a promotion and the action was not sent before
+				pawnAct.setNewType(promotionTypes[type]);
+				game.sendAction(pawnAct);
+				
+				lastPieceSelected = null;
+			}
+		}
 	}
 	
 	public void vibrate(int time)
@@ -535,6 +580,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		vibrator.vibrate(time);
 	}
 
+	/**
+	 * Asks the player for a draw
+	 */
 	public void askDraw(String msg) {
 		
 		//The accept and decline button text
@@ -555,6 +603,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		MessageBox.popUpChoice(msg, acceptLabel, declineLabel, acceptListener, null, activity);
 	}
 	
+	/**
+	 * Creates and sends a draw action that asks the other player
+	 * if he/she wants to draw
+	 */
 	public void doDraw()
 	{
 		DrawAction act = new DrawAction(this,isWhite,true);

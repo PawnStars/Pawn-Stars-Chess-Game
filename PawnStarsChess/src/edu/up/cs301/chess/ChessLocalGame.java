@@ -59,24 +59,15 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			
 			if(canMove(getPlayerIdx(act.getPlayer())))
 			{
-				if(act instanceof PawnMove)
-				{
-					//Prompt for user input when there is a promotion
-					PawnMove pawnAct = (PawnMove)act;
-					if(pawnAct.getType() == PawnMove.PROMOTION)
-					{
-						((ChessPlayer)(act.getPlayer())).selectUpgrade();
-					}
-				}
 				gameState.applyMove(act);
 			}
 			return true;
 		}
-		else if (action instanceof SelectUpgradeAction) {
-			//TODO implement what each move does
+		/*else if (action instanceof SelectUpgradeAction) {
+			//A player select an upgrade at any time after a pawn reaches the end of the board
 			gameState.applyMove(action);
 			return true;
-		}
+		}*/
 		else if (action instanceof ResignAction) {
 			
 			ResignAction act = (ResignAction)action;
@@ -207,9 +198,13 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			{
 				winningPlayerName  = playerNames[0];
 			}
-			if(gameState.isPlayer2Won())
+			else if(gameState.isPlayer2Won())
 			{
-				winningPlayerName  = playerNames[0];
+				winningPlayerName = playerNames[1];
+			}
+			else
+			{
+				winningPlayerName = "Nobody";
 			}
 			
 			return "The game is over. "+winningPlayerName+" has won.";

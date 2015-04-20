@@ -60,6 +60,7 @@ public class MessageBox {
 		builder.setMessage(msg);
 		builder.setPositiveButton(posButtonText, posListener);
 		builder.setNegativeButton(negButtonText, negListener);
+		builder.setCancelable(false);
 		AlertDialog alert = builder.create();
 		alert.show();
 	}// popUpChoice

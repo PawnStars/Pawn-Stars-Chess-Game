@@ -148,7 +148,6 @@ public class ChessBoard extends SurfaceView
 				{
 					// Draw the highlighted tiles
 					currentColor =  highlightColor;
-					//canvas.drawRect(right,bottom,left,top, currentColor);
 				}
 				else if((i%2) == (j%2))
 				{
@@ -190,15 +189,17 @@ public class ChessBoard extends SurfaceView
 						}
 						int type = piece.getType();
 						String typeStr = whitePieceStrs[piece.getType()];
+						String fillTypeStr = blackPieceStrs[piece.getType()];
 						if(type >= 0 && type < whitePieceStrs.length)
 						{
 							if(piece.isWhite())
 							{
-								canvas.drawText(typeStr, x, y, whitePieceColor);
+								canvas.drawText(fillTypeStr, x, y, whitePieceColor);
+								canvas.drawText(typeStr, x, y, blackPieceColor);
 							}
 							else
 							{
-								canvas.drawText(typeStr, x, y, blackPieceColor);
+								canvas.drawText(fillTypeStr, x, y, blackPieceColor);
 							}
 						}
 						
@@ -219,6 +220,7 @@ public class ChessBoard extends SurfaceView
 		tileColor.setColor(0xFFEFD284);//brownish
 		textColor.setColor(Color.RED);//red
 		whitePieceColor.setColor(0xFFFFFFFF);//white
+		blackPieceColor.setStyle(Paint.Style.FILL);
 		blackPieceColor.setColor(0xFF000000);//black
 		highlightColor.setColor(0xAA32CD32);//faded green
 		selectColor.setColor(0xFF00FF00);//blue
@@ -256,28 +258,11 @@ public class ChessBoard extends SurfaceView
 		}
 		else if(selectedTiles.length != ChessGameState.BOARD_HEIGHT || selectedTiles[0].length != ChessGameState.BOARD_WIDTH)
 		{
-			//error
-			return;
+			return; //error
 		}
 		else
 		{
-			/*if(flipped)
-			{
-				boolean[][] newSelectedTiles = new boolean[ChessGameState.BOARD_HEIGHT][ChessGameState.BOARD_WIDTH];
-				for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
-				{
-					for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
-					{
-						int newI = ChessGameState.BOARD_HEIGHT-1-i;
-						newSelectedTiles[newI][j] = selectedTiles[i][j];
-					}
-				}
-				this.selectedTiles = newSelectedTiles;
-			}
-			else
-			{*/
-				this.selectedTiles = selectedTiles;
-			//}
+			this.selectedTiles = selectedTiles;
 			invalidate();
 		}
 	}
@@ -290,14 +275,7 @@ public class ChessBoard extends SurfaceView
 	public void setSelectedLoc(int i,int j) {
 		int[] newSelectedLoc = new int[2];
 		newSelectedLoc[0] = j;
-		/*if(flipped)
-		{
-			newSelectedLoc[1] = ChessGameState.BOARD_HEIGHT-1-i;
-		}
-		else
-		{*/
-			newSelectedLoc[1] = i;
-		//}
+		newSelectedLoc[1] = i;
 		
 		selectedLoc = newSelectedLoc;
 		invalidate();

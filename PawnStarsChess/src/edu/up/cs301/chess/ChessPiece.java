@@ -25,8 +25,8 @@ public class ChessPiece {
 	public static final int ROOK = 2;
 	public static final int BISHOP = 3;
 	public static final int KNIGHT = 4;
-	public static final int QUEEN = 1;
-	public static final int KING = 0;
+	public static final int QUEEN = 0;
+	public static final int KING = 1;
 	
 	public static final int INVALID = -1;
 	public static final int[] INVALID_LOCATION = new int[]{-1,-1};
@@ -64,7 +64,7 @@ public class ChessPiece {
 		this.hasMoved = piece.getHasMoved();
 		this.isWhite = piece.isWhite();
 		this.isAlive = piece.isAlive();
-		this.location = piece.getLocation().clone();
+		this.location = Arrays.copyOf(piece.getLocation(),2);
 		this.type = piece.getType();
 	}
 	
@@ -115,9 +115,7 @@ public class ChessPiece {
 	public void kill()
 	{
 		isAlive = false;
-		
-		//set the location as invalid, not sure if necessary
-		location = new int[]{-1,-1};
+		location = INVALID_LOCATION;
 	}
 	
 	/**
@@ -127,7 +125,7 @@ public class ChessPiece {
 	public void move(int[] newLoc)
 	{
 		hasMoved = true;
-		location = newLoc.clone();
+		location = Arrays.copyOf(newLoc,2);
 	}
 	
 	/**
@@ -153,7 +151,7 @@ public class ChessPiece {
 	 */
 	public void setLocation(int[] location)
 	{
-		this.location = location.clone();
+		this.location = Arrays.copyOf(location,2);
 	}
 	
 	/**

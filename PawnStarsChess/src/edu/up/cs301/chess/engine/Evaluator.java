@@ -456,7 +456,7 @@ public class Evaluator
 				//black pawn at c7
 				if(board[1][2].getType() == ChessPiece.PAWN && board[1][2].isWhite() != bishopColor)
 				{
-					if(bishopColor == state.getPlayer1Color())
+					if(bishopColor == state.isPlayer1IsWhite())
 					{
 						score -= pawnVal * 3 / 2;
 					}
@@ -480,7 +480,7 @@ public class Evaluator
 				if(board[1][5] != null && board[1][2].getType() == ChessPiece.PAWN &&
 						board[1][2].isWhite() != bishopColor)
 				{
-					if(p1Queen && bishopColor == state.getPlayer1Color())
+					if(p1Queen && bishopColor == state.isPlayer1IsWhite())
 					{
 						score -= pawnVal;
 					}
@@ -502,7 +502,7 @@ public class Evaluator
 				//black pawn at c2
 				if(board[6][2].getType() == ChessPiece.PAWN && board[6][2].isWhite() != bishopColor)
 				{
-					if(bishopColor == state.getPlayer1Color())
+					if(bishopColor == state.isPlayer1IsWhite())
 					{
 						score -= pawnVal * 3 / 2;
 					}
@@ -527,7 +527,7 @@ public class Evaluator
 						board[6][5].isWhite() != bishopColor)
 				{
 					//player 1's bishop
-					if(bishopColor == state.getPlayer1Color())
+					if(bishopColor == state.isPlayer1IsWhite())
 					{
 						if(p1Queen)
 						{

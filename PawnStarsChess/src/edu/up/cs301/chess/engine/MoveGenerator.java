@@ -10,6 +10,7 @@ import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.PawnMove;
+import edu.up.cs301.chess.actions.RookMove;
 
 /**
  * This generates a list of moves that the AI will use to make a move.
@@ -221,6 +222,26 @@ public class MoveGenerator {
 		//Get the locations the piece can move to
 		boolean[][] possibleLocs = state.getPossibleMoves(piece);
 		
+		if(possibleLocs == null)
+		{
+			return null;
+		}
+		int x1 = piece.getLocation()[1];
+		int y1 = piece.getLocation()[0];
+		
+		int canEnPassant;
+		int dir;
+		if(player.isPlayer1())
+		{
+			canEnPassant = state.getCanEnPassant()[1][x1];
+			dir = -1;
+		}
+		else
+		{
+			canEnPassant = state.getCanEnPassant()[0][x1];
+			dir = 1;
+		}
+		
 		//Add a move for each location it can more to
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
 		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
@@ -230,8 +251,76 @@ public class MoveGenerator {
 				if(possibleLocs[i][j])
 				{
 					int[] newLoc = new int[]{i,j};
-					ChessPiece taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
-					moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					
+					
+					ChessPiece taken = state.getPieceMap()[i][j];
+					
+					//special moves
+					if(piece.getType() == ChessPiece.PAWN)
+					{
+						if(Math.abs(y1-i) == 2)
+						{
+							//vertical distance is 2
+							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.FIRST_MOVE));
+						}
+						else if(canEnPassant != 0)
+						{
+							//can do an en passant
+							if(canEnPassant == PawnMove.RIGHT_EN_PASSANT)
+							{
+								//get an adjusted taken piece
+								taken = state.getPieceMap()[i+dir][j-1];
+							}
+							else if(canEnPassant == PawnMove.LEFT_EN_PASSANT)
+							{
+								taken = state.getPieceMap()[i+dir][j+1];
+							}
+							else
+							{
+								continue;//unhandled behavior
+							}
+							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.EN_PASSANT));
+						}
+						else if(i == ChessGameState.BOARD_HEIGHT-1 || i == 0)
+						{
+							PawnMove pawnAct = new PawnMove(player, piece, newLoc, taken,PawnMove.PROMOTION);
+							pawnAct.setNewType(ChessPiece.QUEEN);
+							moveList.add(pawnAct);
+						}
+						else
+						{
+							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.NONE));
+						}
+					}
+					else if(piece.getType() == ChessPiece.ROOK)
+					{
+						if(taken != null && taken.getType() == ChessPiece.KING && taken.isWhite() == piece.isWhite())
+						{
+							//castling
+							int moveType = 0;
+							if(piece.getLocation()[1] == 0)
+							{
+								moveType = RookMove.CASTLE_LEFT;
+							}
+							else if(piece.getLocation()[1] == ChessGameState.BOARD_WIDTH-1)
+							{
+								moveType = RookMove.CASTLE_RIGHT;
+							}
+							else
+							{
+								continue;//unhandled behavior
+							}
+							moveList.add(new RookMove(player, piece, newLoc, null, moveType));
+						}
+						else
+						{
+							moveList.add(new RookMove(player, piece, newLoc, taken,RookMove.NONE));
+						}
+					}
+					else
+					{
+						moveList.add(new ChessMoveAction(player, piece, newLoc, taken));
+					}
 				}
 			}
 		}

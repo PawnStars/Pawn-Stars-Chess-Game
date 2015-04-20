@@ -40,7 +40,7 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 	
 	// If this player is running the GUI, the handler for the GUI thread (otherwise
 	// null)
-	private Handler guiHandler = null;
+	//private Handler guiHandler = null;
 	
 	/**
 	 * constructor
@@ -70,9 +70,12 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 						}
 					}});
 		}*/
-		board.setPieceMap(gameState.getPieceMap());
-		player1Score.setText(""+gameState.getPlayer1Points());
-		player2Score.setText(""+gameState.getPlayer2Points());
+		if(gameState != null)
+		{
+			board.setPieceMap(gameState.getPieceMap());
+			player1Score.setText(""+gameState.getPlayer1Points());
+			player2Score.setText(""+gameState.getPlayer2Points());
+		}
 	}
 	
 	/**
@@ -99,7 +102,7 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		this.activityForGui = act;
 		
 		// remember the handler for the GUI thread
-		this.guiHandler = new Handler();
+		//this.guiHandler = new Handler();
 		
 		// Load the layout resource for the our GUI's configuration
 		activityForGui.setContentView(R.layout.chess_human_player);
@@ -117,14 +120,9 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		setWhite(Math.random() > 0.5);
 		
 		// if the state is non=null, update the display
-		if (gameState != null) {
-			ChooseColorAction action = new ChooseColorAction(this,isWhite);
-			if(game instanceof ChessLocalGame)
-			{
-				ChessLocalGame chessGame = (ChessLocalGame)game;
-				chessGame.makeMove(action);
-			}
-			updateDisplay();
-		}
+		
+		ChooseColorAction action = new ChooseColorAction(this,isWhite);
+		game.sendAction(action);
+		updateDisplay();
 	}
 }
