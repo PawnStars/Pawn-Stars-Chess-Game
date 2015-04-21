@@ -351,6 +351,16 @@ public class MoveTest extends AndroidTestCase {
 		}
 	}
 	
+	public void testCastling()
+	{
+		//TODO implement method
+	}
+	
+	public void testEnPassant()
+	{
+		//TODO implement method
+	}
+	
 	/**
 	 * Test that the smart AI can beat the dumb AI
 	 * @throws Throwable

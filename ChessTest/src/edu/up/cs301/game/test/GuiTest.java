@@ -141,4 +141,9 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		//TODO check if flipping the board works
 	}
 	
+	public void testPromotion()
+	{
+		
+	}
+	
 }
