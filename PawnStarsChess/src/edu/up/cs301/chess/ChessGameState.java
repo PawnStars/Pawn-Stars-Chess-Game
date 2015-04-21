@@ -1424,6 +1424,9 @@ public class ChessGameState extends GameState {
 		}
 		if(success)
 		{
+			//update the scores:
+			updateScores(act);
+			
 			//Switch turns
 			whoseTurn = !whoseTurn;
 			
@@ -1453,6 +1456,14 @@ public class ChessGameState extends GameState {
 			}
 		}
 		return success;
+	}
+	
+	/**
+	 * Updates the score when a piece is taken
+	 */
+	private void updateScores(ChessMoveAction act) 
+	{
+		
 	}
 	
 	/**
