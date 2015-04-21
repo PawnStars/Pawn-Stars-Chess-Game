@@ -61,7 +61,7 @@ public class MoveGenerator {
 				 * including ones that do not protect the king
 				 */
 				
-				ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, color, false);
+				ChessMoveAction[] newActions = getPieceMoves(state, new ChessPiece(pieces[i]), player, color, false);
 				moveList2d[i] = newActions;
 			}
 		}

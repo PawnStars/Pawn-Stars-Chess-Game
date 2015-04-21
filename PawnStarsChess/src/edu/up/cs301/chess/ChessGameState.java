@@ -873,7 +873,7 @@ public class ChessGameState extends GameState {
 		// See if the squares in front are taken:
 		int j = 0;
 		int i = 0;
-		if (piece.isWhite() == player1IsWhite) {//player 1
+		if (piece.isWhite()) {//piece is white
 			j = yLocation - 1;
 			i = xLocation;
 			if (yLocation - 1 >= 0) {
@@ -923,7 +923,7 @@ public class ChessGameState extends GameState {
 			}
 			
 		} 
-		else//player 2
+		else//player 2 is white
 		{
 			j = yLocation + 1;
 			i = xLocation;
@@ -1320,7 +1320,8 @@ public class ChessGameState extends GameState {
 			return false;
 		}
 		
-		ChessPiece takenPiece = findPiece(act.getTakenPiece());
+		int [] location = act.getNewPos();
+		ChessPiece takenPiece = pieceMap[location[0]][location[1]];//findPiece(act.getTakenPiece());
 		int[] newPos = act.getNewPos();
 		
 		int newYPos = newPos[0];
