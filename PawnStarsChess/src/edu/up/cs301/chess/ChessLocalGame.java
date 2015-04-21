@@ -125,7 +125,7 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 				if(players[i] instanceof ChessPlayer)
 				{
 					ChessPlayer p = (ChessPlayer)players[i];
-					if(p instanceof ChessHumanPlayer)
+					if(p.getPlayerID() == act.getPlayerID())
 					{
 						p.setWhite(act.isWhichColor());
 					}

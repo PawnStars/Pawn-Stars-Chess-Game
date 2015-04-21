@@ -16,6 +16,7 @@ public final class R {
         public static final int button_color=0x7f040003;
         public static final int green=0x7f040001;
         public static final int red=0x7f040002;
+        public static final int white=0x7f040005;
     }
     public static final class dimen {
         public static final int config_horiz_margin=0x7f050005;
@@ -26,49 +27,52 @@ public final class R {
         public static final int table_row_vert_pad=0x7f050003;
     }
     public static final class drawable {
-        public static final int colorButtonSpecial=0x7f020004;
-        public static final int ic_action_search=0x7f020000;
-        public static final int ic_launcher=0x7f020001;
-        public static final int purple_delete_button=0x7f020002;
-        public static final int raised_button_background=0x7f020003;
+        public static final int buttonshape=0x7f020000;
+        public static final int cherrywooddesk=0x7f020001;
+        public static final int colorButtonSpecial=0x7f020006;
+        public static final int ic_action_search=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int purple_delete_button=0x7f020004;
+        public static final int raised_button_background=0x7f020005;
     }
     public static final class id {
         public static final int LinearLayout2=0x7f090001;
-        public static final int addPlayerButton=0x7f090019;
-        public static final int backButton2=0x7f09000e;
-        public static final int configTableLayout=0x7f090013;
-        public static final int delPlayerButton=0x7f09001d;
+        public static final int addPlayerButton=0x7f09001a;
+        public static final int backButton2=0x7f09000f;
+        public static final int configTableLayout=0x7f090014;
+        public static final int delPlayerButton=0x7f09001e;
         public static final int drawButton=0x7f090007;
         public static final int flipBoardButton=0x7f090008;
         public static final int gameBoardSurfaceView=0x7f09000a;
-        public static final int ipCodeLabel=0x7f090015;
-        public static final int localGameTab=0x7f09000f;
-        public static final int localTabLayout=0x7f090010;
-        public static final int menu_settings=0x7f090023;
-        public static final int playGameButton=0x7f09000d;
-        public static final int player1=0x7f090014;
+        public static final int ipCodeLabel=0x7f090016;
+        public static final int localGameTab=0x7f090010;
+        public static final int localTabLayout=0x7f090011;
+        public static final int menu_settings=0x7f090024;
+        public static final int playGameButton=0x7f09000e;
+        public static final int player1=0x7f090015;
         public static final int player1ScoreTextView=0x7f090004;
         public static final int player1TextView=0x7f090003;
         public static final int player2ScoreTextView=0x7f090006;
         public static final int player2TextView=0x7f090005;
-        public static final int playerNameEditText=0x7f09001b;
-        public static final int playerNameHeadingText=0x7f090017;
-        public static final int playerTypeHeadingText=0x7f090018;
-        public static final int playerTypeSpinner=0x7f09001c;
-        public static final int remoteGameTab=0x7f090011;
-        public static final int remoteIPCodeEditText=0x7f090022;
-        public static final int remoteNameEditText=0x7f09001f;
-        public static final int remoteTabLayout=0x7f090012;
-        public static final int remote_player_spinner=0x7f090020;
+        public static final int playerNameEditText=0x7f09001c;
+        public static final int playerNameHeadingText=0x7f090018;
+        public static final int playerTypeHeadingText=0x7f090019;
+        public static final int playerTypeSpinner=0x7f09001d;
+        public static final int remoteGameTab=0x7f090012;
+        public static final int remoteIPCodeEditText=0x7f090023;
+        public static final int remoteNameEditText=0x7f090020;
+        public static final int remoteTabLayout=0x7f090013;
+        public static final int remote_player_spinner=0x7f090021;
         public static final int resignButton=0x7f090009;
-        public static final int saveConfigButton=0x7f09000c;
+        public static final int saveConfigButton=0x7f09000d;
         public static final int scoreTextView=0x7f090002;
-        public static final int serverIPCode=0x7f090021;
-        public static final int tabHost=0x7f09000b;
-        public static final int tableDataRow=0x7f09001e;
-        public static final int tableHeadingRow=0x7f090016;
-        public static final int textView2=0x7f09001a;
+        public static final int serverIPCode=0x7f090022;
+        public static final int tabHost=0x7f09000c;
+        public static final int tableDataRow=0x7f09001f;
+        public static final int tableHeadingRow=0x7f090017;
+        public static final int textView2=0x7f09001b;
         public static final int top_gui_layout=0x7f090000;
+        public static final int woodBackgroundImageView=0x7f09000b;
     }
     public static final class layout {
         public static final int chess_human_player=0x7f030000;
@@ -87,6 +91,7 @@ public final class R {
         public static final int action_settings=0x7f060014;
         public static final int add_player=0x7f060009;
         public static final int app_name=0x7f060000;
+        public static final int backgroundDescription=0x7f060023;
         public static final int begin_game=0x7f060005;
         public static final int decline=0x7f060022;
         public static final int dialog_black_label=0x7f06001f;
