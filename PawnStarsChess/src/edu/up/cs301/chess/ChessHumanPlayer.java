@@ -495,9 +495,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					board.setSelectedLoc(-1, -1);
 					lastPieceSelected = null;
 				}
-				//TODO make sure this isn't needed
+				
 				//selected a distinct piece of your color for the first time and did not make a move
-				/*if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
+				if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
 				{
 					if(pieceSelected.isWhite() == isWhite())
 					{
@@ -509,7 +509,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						//Keep a reference to the piece
 						lastPieceSelected = pieceSelected;
 					}
-				}*/
+				}
 			}
 		}
 		return true;
