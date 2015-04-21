@@ -1,7 +1,6 @@
 package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
@@ -9,8 +8,6 @@ import java.util.Vector;
 import android.util.Log;
 
 import edu.up.cs301.chess.actions.*;
-import edu.up.cs301.chess.engine.Evaluator;
-import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
 
@@ -823,6 +820,12 @@ public class ChessGameState extends GameState {
 		
 		// Get coordinates of the piece in the piecemap:
 		int[] location = piece.getLocation();
+		
+		if(outOfBounds(location))
+		{
+			return null;
+		}
+		
 		int xLocation = location[1];
 		int yLocation = location[0];
 
@@ -1319,8 +1322,12 @@ public class ChessGameState extends GameState {
 		{
 			return false;
 		}
-		
-		ChessPiece takenPiece = findPiece(act.getTakenPiece());
+		ChessPiece takenPiece = null;
+		if(act.getTakenPiece() != null)
+		{
+			int[] loc = act.getTakenPiece().getLocation();
+			takenPiece = pieceMap[loc[0]][loc[1]];
+		}
 		int[] newPos = act.getNewPos();
 		
 		int newYPos = newPos[0];

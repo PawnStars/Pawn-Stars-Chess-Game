@@ -61,7 +61,7 @@ public class MoveGenerator {
 				 * including ones that do not protect the king
 				 */
 				
-				ChessMoveAction[] newActions = getPieceMoves(state, pieces[i], player, color, false);
+				ChessMoveAction[] newActions = getPieceMoves(state, new ChessPiece(pieces[i]), player, color, false);
 				moveList2d[i] = newActions;
 			}
 		}
@@ -231,7 +231,7 @@ public class MoveGenerator {
 		
 		int canEnPassant;
 		int dir;
-		if(player.isPlayer1())
+		if(piece.isWhite() == state.isPlayer1IsWhite())
 		{
 			canEnPassant = state.getCanEnPassant()[1][x1];
 			dir = -1;
@@ -266,20 +266,27 @@ public class MoveGenerator {
 						else if(canEnPassant != 0)
 						{
 							//can do an en passant
+							int x;
+							int y = i+dir;
 							if(canEnPassant == PawnMove.RIGHT_EN_PASSANT)
 							{
 								//get an adjusted taken piece
-								taken = state.getPieceMap()[i+dir][j-1];
+								
+								x = j-1;
 							}
 							else if(canEnPassant == PawnMove.LEFT_EN_PASSANT)
 							{
-								taken = state.getPieceMap()[i+dir][j+1];
+								x = j+1;
 							}
 							else
 							{
 								continue;//unhandled behavior
 							}
-							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.EN_PASSANT));
+							if(!ChessGameState.outOfBounds(x, y))
+							{
+								taken = state.getPieceMap()[i+dir][j+1];
+								moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.EN_PASSANT));
+							}
 						}
 						else if(i == ChessGameState.BOARD_HEIGHT-1 || i == 0)
 						{
@@ -371,22 +378,6 @@ public class MoveGenerator {
 			{
 				moves[i] = null;
 				numRemoved++;
-			}
-		}
-		
-		// Remove moves that take your own pieces
-		for(int i=0;i<moves.length;i++)
-		{
-			if(moves[i] != null)
-			{
-				if(moves[i].getTakenPiece() != null)
-				{
-					if(moves[i].getTakenPiece().isWhite() == color)
-					{
-						moves[i] = null;
-						numRemoved++;//TODO not sure if this is ever executed
-					}
-				}
 			}
 		}
 		

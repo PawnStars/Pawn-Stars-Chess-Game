@@ -300,19 +300,19 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				}
 				
 				float[] tileSize = board.getTileSize();
-				int tileX = (int) (event.getX()/tileSize[0]);;
+				int tileX = (int) (event.getX()/tileSize[0]);
 				int tileY;
 				
 				//translate the points if the board is flipped
 				if(board.isFlipped())
 				{
-					tileY = ChessGameState.BOARD_WIDTH-1-(int) (event.getY()/tileSize[1]);
+					tileY = ChessGameState.BOARD_WIDTH-1-((int) (event.getY()/tileSize[1]));
 				}
 				else
 				{
 					tileY = (int) (event.getY()/tileSize[1]);
 				}
-				
+				Log.d("human player","selected x:"+tileX+" y:"+tileY);
 				int[] selectedLoc = new int[]{tileY,tileX};
 				
 				
@@ -329,13 +329,18 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				
 				//Now that the error checks are done, it is safe to handle the touch
 				down = false;
-				//TODO not sure
+				
+				
 				ChessPiece pieceSelected = state.getPieceMap()[tileY][tileX];
 				
-				//selected the same piece twice
+				//selected the same piece twice in a row, so deselect it
 				if(lastPieceSelected != null && lastPieceSelected.equals(pieceSelected))
 				{
 					lastPieceSelected = null;
+					pieceSelected = null;
+					board.setSelectedTiles(null);
+					board.setSelectedLoc(-1, -1);
+					
 					return true;
 				}
 				
@@ -494,9 +499,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					board.setSelectedTiles(null);
 					board.setSelectedLoc(-1, -1);
 					lastPieceSelected = null;
+					vibrate(100);//to tell the user they did something wrong
 				}
 				
-				//selected a distinct piece of your color for the first time and did not make a move
+				//selected a piece to see what tiles it can move to
 				if(pieceSelected != null && !pieceSelected.equals(lastPieceSelected) && move == null)
 				{
 					if(pieceSelected.isWhite() == isWhite())

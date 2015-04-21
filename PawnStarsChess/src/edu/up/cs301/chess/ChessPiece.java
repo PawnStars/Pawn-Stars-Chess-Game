@@ -43,7 +43,6 @@ public class ChessPiece {
 	//Indicates which type of piece it is.
 	private int type = INVALID; 
 	
-	//TODO implement location
 	//Indicates where the piece is on the board
 	private int[] location = new int[2];
 	
@@ -315,15 +314,15 @@ public class ChessPiece {
 		if (getClass() != obj.getClass())
 			return false;
 		ChessPiece other = (ChessPiece) obj;
-		if (hasMoved != other.hasMoved)
+		if (hasMoved != other.getHasMoved())
 			return false;
-		if (isAlive != other.isAlive)
+		if (isAlive != other.isAlive())
 			return false;
-		if (isWhite != other.isWhite)
+		if (isWhite != other.isWhite())
 			return false;
-		if (!Arrays.equals(location, other.location))
+		if (!Arrays.equals(location, other.getLocation()))
 			return false;
-		if (type != other.type)
+		if (type != other.getType())
 			return false;
 		return true;
 	}

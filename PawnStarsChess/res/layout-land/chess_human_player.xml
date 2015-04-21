@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <ImageView
+        android:id="@+id/woodBackgroundImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/backgroundDescription"
+        android:scaleType="fitXY"
+        android:src="@drawable/cherrywooddesk" />
+
     <LinearLayout
         android:id="@+id/LinearLayout2"
         android:layout_width="wrap_content"
@@ -11,72 +19,84 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@color/background_color"
         android:orientation="vertical"
         android:weightSum="11.5" >
 
         <TextView
             android:id="@+id/scoreTextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/score"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/player1TextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/player1"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/player1ScoreTextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/randomNumber"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/player2TextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/player2"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/player2ScoreTextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/randomNumber"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
 
         <Button
             android:id="@+id/drawButton"
+            style="@style/importantButton"
             android:layout_width="172dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
+            android:background="@drawable/buttonshape"
             android:text="@string/draw" />
 
         <Button
             android:id="@+id/flipBoardButton"
-            android:layout_width="170dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.5"
-            android:text="@string/flipBoardBut"
-            style="?android:attr/borderlessButtonStyle" />
-
-        <Button
-            android:id="@+id/resignButton"
+            style="@style/importantButton"
             android:layout_width="172dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
+            android:background="@drawable/buttonshape"
+            android:text="@string/flipBoardBut" />
+
+        <Button
+            android:id="@+id/resignButton"
+            style="@style/importantButton"
+            android:layout_width="172dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:background="@drawable/buttonshape"
             android:text="@string/resign" />
 
     </LinearLayout>

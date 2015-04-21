@@ -2,11 +2,14 @@ package edu.up.cs301.chess;
 
 import java.util.ArrayList;
 
+import android.R;
 import android.content.Context;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.AttributeSet;
 
@@ -23,7 +26,7 @@ import android.util.AttributeSet;
  */
 public class ChessBoard extends SurfaceView
 {
-	// colors for each element drawn on the board
+	// Paints for each element drawn on the board
 	private Paint tileColor = new Paint();
 	private Paint highlightColor = new Paint();
 	private Paint selectColor = new Paint();
@@ -42,8 +45,6 @@ public class ChessBoard extends SurfaceView
 	// an 8x8 array of the pieces on the board
 	private ChessPiece pieceMap[][];
 	
-	//TODO implement the instance variables below
-	
 	// the highlighted tiles on the screen
 	private boolean[][] selectedTiles = new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
 	
@@ -53,6 +54,7 @@ public class ChessBoard extends SurfaceView
 	// false if not
 	private boolean flipped = false;
 	
+	//the size of a single tile
 	private float[] tileSize = new float[]{0,0};
 	
 	private ArrayList <ChessPiece> whiteTakenPieces = new ArrayList<ChessPiece>();
@@ -115,7 +117,6 @@ public class ChessBoard extends SurfaceView
 		{
 			dimensions = getWidth();
 		}
-		//TODO implement a graveyard where there is room
 		
 		// The size of each tile
 		tileSize[0] = dimensions/ChessGameState.BOARD_HEIGHT;
@@ -132,8 +133,6 @@ public class ChessBoard extends SurfaceView
 		// Draw a background behind everything
 		canvas.drawRect(0, 0, dimensions, dimensions, boardColor);
 		
-		//TODO not sure the board is flipped correctly
-		
 		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 		{
 			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
@@ -146,7 +145,7 @@ public class ChessBoard extends SurfaceView
 				{
 					int newI = ChessGameState.BOARD_WIDTH-1-i;
 					top = newI*tileSize[1];
-					bottom = (newI+1)*tileSize[1];//TODO check if this is right
+					bottom = (newI+1)*tileSize[1];
 				}
 				
 				Paint currentColor = null;
@@ -220,7 +219,7 @@ public class ChessBoard extends SurfaceView
 			}
 		}
 		
-		
+		//draw the grave yard for black pieces
 		if (blackTakenPieces != null && blackTakenPieces.size() > 0) {
 			
 			//Goes through the taken black array and draws them on the board
@@ -260,6 +259,8 @@ public class ChessBoard extends SurfaceView
 				}
 			}
 		}
+		
+		//draw the grave yard for white pieces
 		if (whiteTakenPieces != null && whiteTakenPieces.size() > 0) {
 			
 			//Goes through the taken white array and draws them on the board
@@ -267,7 +268,8 @@ public class ChessBoard extends SurfaceView
 				if (whiteTakenPieces.get(k) != null) {
 					
 					int type = whiteTakenPieces.get(k).getType();
-					String str = whitePieceStrs[type];
+					String str = blackPieceStrs[type];
+					String str2 = whitePieceStrs[type];
 
 					if (type >= 0 && type < whitePieceStrs.length) {
 						
@@ -298,6 +300,7 @@ public class ChessBoard extends SurfaceView
 							}
 						}
 						canvas.drawText(str, x, y, whitePieceColor);
+						canvas.drawText(str2, x, y, blackPieceColor);
 					}
 				}
 			}
@@ -318,6 +321,10 @@ public class ChessBoard extends SurfaceView
 		blackPieceColor.setColor(0xFF000000);//black
 		highlightColor.setColor(0xAA32CD32);//faded green
 		selectColor.setColor(0xFF00FF00);//blue
+		setZOrderOnTop(true);
+		SurfaceHolder holder = getHolder();
+		holder.setFormat(PixelFormat.TRANSPARENT);
+		
 	}
 	
 	/**

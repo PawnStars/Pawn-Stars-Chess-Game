@@ -4,8 +4,9 @@
     <color name="green">#0F0</color>
     <color name="red">#ff0000</color>
     <color name="button_color">#FFAAAAAA</color>
-    <drawable name="raised_button_background">#FFFFFFFF</drawable>
+    <drawable name="raised_button_background">#99FFFFFF</drawable>
     <drawable name="colorButtonSpecial">#FFFF0000</drawable>
-    <color name="background_color">#FF00FF00</color>
+    <color name="background_color">#00000000</color>
+    <color name="white">#FFFFFFFF</color>
     
 </resources>
