@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
 
-import android.util.Log;
-
 import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;

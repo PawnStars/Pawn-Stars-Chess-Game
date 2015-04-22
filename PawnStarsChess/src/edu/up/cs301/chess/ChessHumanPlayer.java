@@ -656,6 +656,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	{
 	    AssetManager assetManager = activity.getAssets();
 	    String[] files = null;
+	    //TODO fix
 	    try
 	    {
 	        files = assetManager.list("");

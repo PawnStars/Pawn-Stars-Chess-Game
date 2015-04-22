@@ -1,5 +1,10 @@
 package edu.up.cs301.chess;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Locale;
 
 import android.util.Log;
@@ -25,6 +30,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	
 	public static final int RANDOM = 0;
 	public static final int TAKE_PIECES = 1; 
+	
+	public static final int CRITTER = 9; 
+	public static final int STOCKFISH = 10; 
 	/*
 	 * The intelligence of the AI
 	 * A value of MAX_INTELLIGENCE corresponds to a deeper search
@@ -40,7 +48,22 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     //true if this player is white, false if not
     //protected boolean isWhite;
     
-    public static String ENGINE_PATH = "/data/data/edu.up.cs301.game/cache/stockfish.engine";
+    private String[] engines = {
+    	"/data/data/edu.up.cs301.game/cache/stockfish.engine",
+    	"/data/data/edu.up.cs301.game/cache/critter1.6a.engine"
+    	};
+    
+    //
+    private String engine;
+    
+    //whether or not the executable was copied
+    private boolean copied;
+    
+    //The interface between the chess engine executable and java
+    private UCIInterface client;
+    
+    //the time to wait before sending a move
+    private int waitTime;
     
 	/**
      * Constructor for objects of class CounterComputerPlayer1
@@ -52,6 +75,10 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         // invoke superclass constructor
         super(name);
         smart = intelligence;
+        copied = false;
+        waitTime = 2000;
+        
+        
         
         /*
          * Pick white or black randomly. The game state will
@@ -80,6 +107,26 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		}
 		else if (info instanceof ChessGameState) {
 			ChessGameState newState = (ChessGameState)info;
+			
+			//keep trying to copy assets until it succeeds
+			if(!copied)
+			{
+				//copyAssets();
+				if(smart > 1)
+				{
+					String engine = "";
+					if(smart == STOCKFISH)
+			        {
+			        	engine = engines[0];
+			        }
+			        
+			        if(smart == CRITTER)
+			        {
+			        	engine = engines[1];
+			        }
+					client = new UCIInterface(engine);
+				}
+			}
 			
 			//make sure the state was changed
 			if(newState.equals(gameState))
@@ -117,12 +164,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			return null;
 		}
 		
-		
+		long start = System.currentTimeMillis();
 		ChessGameState newState = new ChessGameState(gameState);
 		GameAction chosenMove = null;
 		if(smart > 1)
 		{
-			UCIInterface client = new UCIInterface(ENGINE_PATH);
 			String FEN = gameState.toFEN();
 			
 			if(FEN == null || FEN.equals(""))
@@ -131,68 +177,49 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			
 			// initialize and connect to engine
-			if (client.startEngine()) {
-				Log.d("search","Engine has started..");
-			} else {
-			    Log.d("search","Oops! Something went wrong..");
-			    return null;
-			}
-
-			// send commands manually
-			client.sendCommand("uci");
-			
-			String bestMove = client.getBestMove(FEN,5000);
-			
-			Log.d("computer player","best move:"+bestMove);
-			if(bestMove != null && !bestMove.equals("(none)"))
+			if (client.startEngine())
 			{
-				//get coordinates
+				Log.d("search","Engine has started..");
+				// send commands manually
+				client.sendCommand("uci");
 				
-				int oldX;
-				int oldY;
-				int newX;
-				int newY;
-				bestMove = bestMove.toLowerCase(Locale.US);
-				if(isWhite())
-				{
-					oldX = bestMove.charAt(bestMove.length()-4)-97;
-					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
-					newX = bestMove.charAt(bestMove.length()-2)-97;
-					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
-				}
-				else
-				{
-					oldX = bestMove.charAt(bestMove.length()-4)-97;
-					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
-					newX = bestMove.charAt(bestMove.length()-2)-97;
-					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
-				}
-				Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
+				String bestMove = client.getBestMove(FEN,5000);
 				
-				int[] newLoc = new int[]{newY,newX};
-				if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
+				Log.d("computer player","best move:"+bestMove);
+				if(bestMove != null && !bestMove.equals("(none)"))
 				{
-					ChessPiece whichPiece = gameState.getPieceMap()[oldY][oldX];
-					ChessPiece takenPiece = gameState.getPieceMap()[newY][newX];
-					chosenMove = new ChessMoveAction(this,whichPiece,newLoc,takenPiece);
-					//TODO make special moves work
+					//get coordinates
+					bestMove = bestMove.toLowerCase(Locale.US);
+					
+					int oldX = bestMove.charAt(bestMove.length()-4)-97;
+					int oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
+					int newX = bestMove.charAt(bestMove.length()-2)-97;
+					int newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
+
+					Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
+					
+					int[] newLoc = new int[]{newY,newX};
+					if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
+					{
+						ChessPiece whichPiece = gameState.getPieceMap()[oldY][oldX];
+						ChessPiece takenPiece = gameState.getPieceMap()[newY][newX];
+						chosenMove = new ChessMoveAction(this,whichPiece,newLoc,takenPiece);
+						//TODO make special moves work
+					}
+					
 				}
+
+				// get the evaluation score of current position
+				//System.out.println("Eval score : " + client.getEvalScore(FEN, 2000));
+
+				// stop the engine
+				Log.d("computer player","Stopping engine..");
+				client.stopEngine();
 				
 			}
-
-			// get the evaluation score of current position
-			//System.out.println("Eval score : " + client.getEvalScore(FEN, 2000));
-
-			// stop the engine
-			Log.d("computer player","Stopping engine..");
-			client.stopEngine();
-		}
-		else
-		{
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			else
+			{
+			    Log.d("search","Something went wrong..");
 			}
 		}
 		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
@@ -242,6 +269,18 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 
 		}
 		
+		//wait the remaining amount of time
+		if(start-System.currentTimeMillis() < waitTime)
+		{
+			try
+			{
+				Thread.sleep(waitTime+System.currentTimeMillis()-start);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		//send the new game state if it worked
 		return chosenMove;
 	}
@@ -256,16 +295,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		
 		return (isPlayer1() == gameState.isPlayer1IsWhite());
 	}
-	
-	/**
-	 * Sets the color as white if the parameter is true.
-	 * 
-	 * @param boolean true if white, false if black
-	 */
-	/*public void setWhite(boolean color)
-	{
-		isWhite = color;
-	}*/
 
 	/**
 	 * Returns true if this player is player 1 in the game state.
@@ -293,6 +322,4 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		//Do not accept if the computer is smart
 		
 	}
-	
-	
 }

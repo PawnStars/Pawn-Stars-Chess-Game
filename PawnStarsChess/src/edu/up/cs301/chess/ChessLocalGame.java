@@ -3,7 +3,6 @@ package edu.up.cs301.chess;
 import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.LocalGame;
-import edu.up.cs301.game.ProxyPlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 import android.util.Log;
 
@@ -64,11 +63,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			}
 			return true;
 		}
-		/*else if (action instanceof SelectUpgradeAction) {
-			//A player select an upgrade at any time after a pawn reaches the end of the board
-			gameState.applyMove(action);
-			return true;
-		}*/
 		else if (action instanceof ResignAction) {
 			
 			ResignAction act = (ResignAction)action;
@@ -119,11 +113,6 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			//whoever sends the choose color action determines color
 			ChooseColorAction act = (ChooseColorAction)action;
 			gameState = new ChessGameState(act.isPlayer1IsWhite());
-			/*if(!(act.getCurrentPlayer() instanceof ProxyPlayer))
-			{
-				gameState = new ChessGameState(act.isPlayer1IsWhite());
-				Log.d("local game","num players:"+players.length);
-			}*/
 			
 			//Make sure both players get updated state information
 			this.sendAllUpdatedState();

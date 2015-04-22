@@ -1,16 +1,7 @@
 package edu.up.cs301.chess;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
-import android.content.res.AssetManager;
-import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.GamePlayer;
@@ -31,7 +22,7 @@ public class ChessMainActivity extends GameMainActivity {
 	
 	// the port number that this game will use when playing over the network
 	private static final int PORT_NUMBER = 2244;
-
+	
 	/**
 	 * Create the default configuration for this game:
 	 * - one human player vs. one computer player
@@ -54,14 +45,14 @@ public class ChessMainActivity extends GameMainActivity {
 			}});
 		
 		// a computer player type (player type 1)
-		playerTypes.add(new GamePlayerType("Computer Player") {
+		playerTypes.add(new GamePlayerType("Random Computer Player") {
 			public GamePlayer createPlayer(String name) {
 				//0 means it is not smart
 				return new ChessComputerPlayer1(name,0);
 			}});
 		
 		// a computer player type (player type 2)
-		playerTypes.add(new GamePlayerType("Computer Player (GUI)") {
+		playerTypes.add(new GamePlayerType("Random Computer Player (GUI)") {
 			public GamePlayer createPlayer(String name) {
 				return new ChessComputerPlayer2(name,0);
 			}});
@@ -77,17 +68,28 @@ public class ChessMainActivity extends GameMainActivity {
 				return new ChessComputerPlayer2(name,1);
 			}});
 		
-		
-		playerTypes.add(new GamePlayerType("Computer Player (smartest)") {
+		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
-				return new ChessComputerPlayer1(name,10);
+				return new ChessComputerPlayer1(name,ChessComputerPlayer1.CRITTER);
 			}});
 		
-		playerTypes.add(new GamePlayerType("Computer Player (smartest GUI)") {
+		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest GUI)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
-				return new ChessComputerPlayer2(name,10);
+				return new ChessComputerPlayer2(name,ChessComputerPlayer1.CRITTER);
+			}});
+		
+		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest)") {
+			public GamePlayer createPlayer(String name) {
+				//1 means it is smart
+				return new ChessComputerPlayer1(name,ChessComputerPlayer1.STOCKFISH);
+			}});
+		
+		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest GUI)") {
+			public GamePlayer createPlayer(String name) {
+				//1 means it is smart
+				return new ChessComputerPlayer2(name,ChessComputerPlayer1.STOCKFISH);
 			}});
 
 		// Create a game configuration class for Chess:
@@ -104,8 +106,10 @@ public class ChessMainActivity extends GameMainActivity {
 		defaultConfig.addPlayer("Computer", 2); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 3); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 4); // player 2: a computer player
-		defaultConfig.addPlayer("Computer", 5); // player 2: a computer player
-		defaultConfig.addPlayer("Computer", 6); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 5); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 6); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 7); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 8); // player 2: a computer player
 		
 		// Set the default remote-player setup:
 		// - player name: "Remote Player"

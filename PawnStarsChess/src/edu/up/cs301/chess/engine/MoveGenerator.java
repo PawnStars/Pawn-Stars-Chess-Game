@@ -1,9 +1,6 @@
 package edu.up.cs301.chess.engine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import android.util.Log;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;

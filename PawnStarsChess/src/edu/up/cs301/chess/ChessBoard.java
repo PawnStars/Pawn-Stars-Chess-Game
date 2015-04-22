@@ -1,9 +1,7 @@
 package edu.up.cs301.chess;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-import android.R;
 import android.content.Context;
 
 import android.graphics.Canvas;
