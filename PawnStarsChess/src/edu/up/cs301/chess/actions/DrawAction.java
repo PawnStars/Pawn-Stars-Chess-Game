@@ -79,6 +79,10 @@ public class DrawAction extends GameAction {
 		this.accepted = accepted;
 	}
 	
+	public String toString()
+	{
+		return "Draw";
+	}
 	
 
 

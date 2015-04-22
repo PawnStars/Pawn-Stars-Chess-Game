@@ -1,6 +1,16 @@
 package edu.up.cs301.chess;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+
+import android.content.res.AssetManager;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.GamePlayer;
@@ -77,7 +87,7 @@ public class ChessMainActivity extends GameMainActivity {
 		playerTypes.add(new GamePlayerType("Computer Player (smartest GUI)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
-				return new ChessComputerPlayer1(name,10);
+				return new ChessComputerPlayer2(name,10);
 			}});
 
 		// Create a game configuration class for Chess:

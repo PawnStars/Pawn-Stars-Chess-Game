@@ -120,7 +120,8 @@ public class PawnMove extends ChessMoveAction {
 	
 	public PawnMove clone()
 	{
-		return new PawnMove(super.getPlayer(),this);
+		//super.getPlayer()
+		return new PawnMove(null,this);
 	}
 	
 }

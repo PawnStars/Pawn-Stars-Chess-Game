@@ -1,13 +1,12 @@
 package edu.up.cs301.chess;
 
+import java.util.Locale;
+
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
-import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.chess.actions.DrawAction;
-import edu.up.cs301.chess.actions.PawnMove;
-//import edu.up.cs301.chess.actions.SelectUpgradeAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
-import edu.up.cs301.chess.engine.Search;
+import edu.up.cs301.chess.engine.UCIInterface;
 import edu.up.cs301.game.GameComputerPlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
@@ -41,6 +40,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     //true if this player is white, false if not
     protected boolean isWhite;
     
+    public static String ENGINE_PATH = "/data/data/edu.up.cs301.game/cache/stockfish.engine";
     
 	/**
      * Constructor for objects of class CounterComputerPlayer1
@@ -116,9 +116,86 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		{
 			return null;
 		}
+		
+		
 		ChessGameState newState = new ChessGameState(gameState);
 		GameAction chosenMove = null;
-		if(smart == RANDOM || smart == TAKE_PIECES)
+		if(smart > 1)
+		{
+			UCIInterface client = new UCIInterface(ENGINE_PATH);
+			String FEN = gameState.toFEN();
+			
+			if(FEN == null || FEN.equals(""))
+			{
+				return null;
+			}
+			
+			// initialize and connect to engine
+			if (client.startEngine()) {
+				Log.d("search","Engine has started..");
+			} else {
+			    Log.d("search","Oops! Something went wrong..");
+			    return null;
+			}
+
+			// send commands manually
+			client.sendCommand("uci");
+			
+			String bestMove = client.getBestMove(FEN,5000);
+			
+			Log.d("computer player","best move:"+bestMove);
+			if(bestMove != null && !bestMove.equals("(none)"))
+			{
+				//get coordinates
+				
+				int oldX;
+				int oldY;
+				int newX;
+				int newY;
+				bestMove = bestMove.toLowerCase(Locale.US);
+				if(isWhite())
+				{
+					oldX = bestMove.charAt(bestMove.length()-4)-97;
+					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
+					newX = bestMove.charAt(bestMove.length()-2)-97;
+					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
+				}
+				else
+				{
+					oldX = bestMove.charAt(bestMove.length()-4)-97;
+					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
+					newX = bestMove.charAt(bestMove.length()-2)-97;
+					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
+				}
+				Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
+				
+				int[] newLoc = new int[]{newY,newX};
+				if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
+				{
+					ChessPiece whichPiece = gameState.getPieceMap()[oldY][oldX];
+					ChessPiece takenPiece = gameState.getPieceMap()[newY][newX];
+					chosenMove = new ChessMoveAction(this,whichPiece,newLoc,takenPiece);
+					//TODO make special moves work
+				}
+				
+			}
+
+			// get the evaluation score of current position
+			//System.out.println("Eval score : " + client.getEvalScore(FEN, 2000));
+
+			// stop the engine
+			Log.d("computer player","Stopping engine..");
+			client.stopEngine();
+		}
+		else
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
 		{
 			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite);
@@ -148,7 +225,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 							//Apply any valid non-null move
 							break;
 						}
-						if(smart == TAKE_PIECES)
+						if(smart >= TAKE_PIECES)
 						{
 							//Do any move that would result in taking a piece if it exists
 							if(tempMove.getTakenPiece() != null)
@@ -164,20 +241,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
 
 		}
-		else if(smart > 1)
-		{
-			ChessMoveAction bestMove = Search.findMove(this, newState, smart);
-			bestMove = new ChessMoveAction(this,bestMove);
-			chosenMove = bestMove;
-		}
-		if(chosenMove == null)
-		{
-			/*
-			 * The game ends in a stalemate if one of the
-			 * players cannot make a valid move
-			 */
-			chosenMove = new DrawAction(this,isWhite(),true);
-		}
+		
 		//send the new game state if it worked
 		return chosenMove;
 	}
