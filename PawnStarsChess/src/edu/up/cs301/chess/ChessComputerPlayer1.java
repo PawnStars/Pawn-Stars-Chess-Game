@@ -144,41 +144,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			String bestMove = client.getBestMove(FEN,5000);
 			
 			Log.d("computer player","best move:"+bestMove);
-			if(bestMove != null && !bestMove.equals("(none)"))
-			{
-				//get coordinates
-				
-				int oldX;
-				int oldY;
-				int newX;
-				int newY;
-				bestMove = bestMove.toLowerCase(Locale.US);
-				if(isWhite())
-				{
-					oldX = bestMove.charAt(bestMove.length()-4)-97;
-					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
-					newX = bestMove.charAt(bestMove.length()-2)-97;
-					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
-				}
-				else
-				{
-					oldX = bestMove.charAt(bestMove.length()-4)-97;
-					oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
-					newX = bestMove.charAt(bestMove.length()-2)-97;
-					newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
-				}
-				Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
-				
-				int[] newLoc = new int[]{newY,newX};
-				if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
-				{
-					ChessPiece whichPiece = gameState.getPieceMap()[oldY][oldX];
-					ChessPiece takenPiece = gameState.getPieceMap()[newY][newX];
-					chosenMove = new ChessMoveAction(this,whichPiece,newLoc,takenPiece);
-					//TODO make special moves work
-				}
-				
-			}
+			chosenMove = ChessMoveAction.moveTextToAction(gameState, this, bestMove);
 
 			// get the evaluation score of current position
 			//System.out.println("Eval score : " + client.getEvalScore(FEN, 2000));
