@@ -156,7 +156,7 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		if(gameState != null && game != null)
 		{
 			updateDisplay();
-			ChooseColorAction action = new ChooseColorAction(this,isWhite);
+			ChooseColorAction action = new ChooseColorAction(this,isWhite());
 			game.sendAction(action);
 		}
 	}

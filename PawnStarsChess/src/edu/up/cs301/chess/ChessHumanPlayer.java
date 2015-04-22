@@ -71,7 +71,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	private GameMainActivity activity;
 	
 	//true if this player is white, false if this player is black
-	private boolean isWhite = true;
+	private boolean isWhite = isPlayer1();
 	
 	//true if the user is holding down, false if not
 	private boolean down;
@@ -199,7 +199,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		// update our state; then update the display
 		state = newState;
 		
-		Log.d("human player",state.toString());
+		//Log.d("human player",state.toString());
 		updateDisplay();
 	}
 	
@@ -252,7 +252,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				new android.content.DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which) {
-				setWhite(true);
+				isWhite = true;
 				startGame();
 			}
 		};
@@ -260,7 +260,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				new android.content.DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int which) {
-				setWhite(false);
+				isWhite = false;
 				startGame();
 			}
 		};
@@ -274,7 +274,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public boolean isWhite()
 	{
-		return isWhite;
+		return (isPlayer1() == state.isPlayer1IsWhite());
 	}
 
 	/**
@@ -530,14 +530,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	public boolean isPlayer1() {
 		return playerNum == 0;//return isPlayer1;
-	}
-
-	/**
-	 * Sets this player as white or black
-	 * @param true for white and false for black.
-	 */
-	public void setWhite(boolean isWhite) {
-		this.isWhite = isWhite;
 	}
 
 	/**

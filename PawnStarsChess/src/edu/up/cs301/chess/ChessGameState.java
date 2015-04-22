@@ -1,7 +1,6 @@
 package edu.up.cs301.chess;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
@@ -10,8 +9,6 @@ import java.util.Vector;
 import android.util.Log;
 
 import edu.up.cs301.chess.actions.*;
-import edu.up.cs301.chess.engine.Evaluator;
-import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
 
@@ -89,6 +86,8 @@ public class ChessGameState extends GameState {
 	private int[][] canEnPassant;
 
 	private boolean canDraw;
+	
+	//private boolean choseColor;
 
 	/*
 	 * Keep track of which player is white: True if player 1 is white and player
@@ -129,6 +128,7 @@ public class ChessGameState extends GameState {
 		canCastle = new boolean[MAX_PLAYERS][2];
 		canEnPassant = new int[MAX_PLAYERS][BOARD_WIDTH];
 		canDraw = false;
+		//choseColor = false;
 
 		// Give each player a pawn of the appropriate color:
 		for (int i = 0; i < BOARD_WIDTH; ++i) {
@@ -272,6 +272,8 @@ public class ChessGameState extends GameState {
 
 		player1PawnMaterial = orig.getPlayer1PawnMaterial();
 		player2PawnMaterial = orig.getPlayer2PawnMaterial();
+		
+		//choseColor = orig.isChoseColor();
 	}
 
 	/**
@@ -334,6 +336,9 @@ public class ChessGameState extends GameState {
 
 		if (player1IsWhite != comp.isPlayer1IsWhite())
 			return false;
+		
+		//if (choseColor != comp.isChoseColor())
+		//	return false;
 
 		return true;
 	}
@@ -866,7 +871,7 @@ public class ChessGameState extends GameState {
 
 		// See if the squares in front are taken:
 		int j = 0;
-		int i = 0;
+		int i = 0;//TODO not sure about if
 		if (piece.isWhite()) {// piece is white
 			j = yLocation - 1;
 			i = xLocation;
@@ -1599,14 +1604,14 @@ public class ChessGameState extends GameState {
 				}
 			}
 		}
-		String msg = "";
+		/*String msg = "";
 		for (int j = 0; j < MAX_PLAYERS; j++) {
 			msg += "player " + j;
 			for (int i = 0; i < BOARD_WIDTH; i++) {
 				msg += " " + canEnPassant[j][i];
 			}
 		}
-		Log.d("game state", msg);
+		Log.d("game state", msg);*/
 	}
 
 	/**
@@ -1941,4 +1946,14 @@ public class ChessGameState extends GameState {
 		//Log.d("game state","fen: "+fen);
 		return fen;
 	}
+
+	/*public boolean isChoseColor() {
+		return choseColor;
+	}
+
+	public void setChoseColor(boolean choseColor) {
+		this.choseColor = choseColor;
+	}*/
+	
+	
 }

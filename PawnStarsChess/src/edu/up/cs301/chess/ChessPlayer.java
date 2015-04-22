@@ -20,7 +20,7 @@ public interface ChessPlayer extends GamePlayer
 	
 	public int getPlayerID();
 	
-	public void setWhite(boolean color);
+	//public void setWhite(boolean color);
 	
 	public void askDraw(String msg);
 }

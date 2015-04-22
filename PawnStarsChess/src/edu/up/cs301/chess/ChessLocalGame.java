@@ -3,6 +3,7 @@ package edu.up.cs301.chess;
 import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.LocalGame;
+import edu.up.cs301.game.ProxyPlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 import android.util.Log;
 
@@ -118,23 +119,11 @@ public class ChessLocalGame extends LocalGame implements ChessGame {
 			//whoever sends the choose color action determines color
 			ChooseColorAction act = (ChooseColorAction)action;
 			gameState = new ChessGameState(act.isPlayer1IsWhite());
-			
-			//manually send the new states
-			for(int i=0;i<players.length;i++)
+			/*if(!(act.getCurrentPlayer() instanceof ProxyPlayer))
 			{
-				if(players[i] instanceof ChessPlayer)
-				{
-					ChessPlayer p = (ChessPlayer)players[i];
-					if(p.getPlayerID() == act.getPlayerID())
-					{
-						p.setWhite(act.isWhichColor());
-					}
-					else
-					{
-						p.setWhite(!act.isWhichColor());
-					}
-				}
-			}
+				gameState = new ChessGameState(act.isPlayer1IsWhite());
+				Log.d("local game","num players:"+players.length);
+			}*/
 			
 			//Make sure both players get updated state information
 			this.sendAllUpdatedState();

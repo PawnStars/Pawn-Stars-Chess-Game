@@ -38,7 +38,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     protected ChessGameState gameState;
     
     //true if this player is white, false if not
-    protected boolean isWhite;
+    //protected boolean isWhite;
     
     public static String ENGINE_PATH = "/data/data/edu.up.cs301.game/cache/stockfish.engine";
     
@@ -59,7 +59,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
          * on how fast they initialize the state.
          */
         
-        isWhite = Math.random() > 0.5;
+        //isWhite = Math.random() > 0.5;
     }
     
     /**
@@ -198,7 +198,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
 		{
 			//Get all the possible moves
-			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite);
+			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite());
 			
 			//Check if the move generator found any possible moves
 			if(possibleActions != null && possibleActions.length > 0)
@@ -254,7 +254,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public boolean isWhite() {
 		
-		return isWhite;
+		return (isPlayer1() == gameState.isPlayer1IsWhite());
 	}
 	
 	/**
@@ -262,10 +262,10 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * 
 	 * @param boolean true if white, false if black
 	 */
-	public void setWhite(boolean color)
+	/*public void setWhite(boolean color)
 	{
 		isWhite = color;
-	}
+	}*/
 
 	/**
 	 * Returns true if this player is player 1 in the game state.
@@ -287,7 +287,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	{
 		if(smart < 10)
 		{
-			DrawAction act = new DrawAction(this,isWhite,true);
+			DrawAction act = new DrawAction(this,isWhite(),true);
 			game.sendAction(act);
 		}
 		//Do not accept if the computer is smart
