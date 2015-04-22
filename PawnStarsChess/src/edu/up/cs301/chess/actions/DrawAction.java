@@ -23,7 +23,7 @@ public class DrawAction extends GameAction {
 	/**
 	 * instance variables
 	 */
-	private static final long serialVersionUID = -199275942952L;
+	private static final long serialVersionUID = -1992234942952L;
 	
 	//the player who asks for a draw
 	private ChessPlayer player1;
