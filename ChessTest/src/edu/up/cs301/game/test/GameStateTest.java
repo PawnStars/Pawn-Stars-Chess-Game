@@ -28,7 +28,7 @@ public class GameStateTest extends AndroidTestCase {
 		Assert.assertTrue(castle[0].length == 2);
 
 		
-		Assert.assertTrue(initState.isWhoseTurn() == initState.getPlayer1Color());
+		Assert.assertTrue(initState.isWhoseTurn() == initState.isPlayer1IsWhite());
 		
 		
 		Assert.assertTrue(initState.getPlayer1Points() == 0);
