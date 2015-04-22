@@ -1,5 +1,6 @@
 package edu.up.cs301.chess;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -18,7 +19,10 @@ import edu.up.cs301.chess.ChessPiece;
  * @version March 2015
  *
  */
-public class ChessPiece {
+public class ChessPiece implements Serializable {
+	
+	// to satisfy Serializable interface
+	private static final long serialVersionUID = 773749376698451826L;
 	
 	//The names for what each Piece can be
 	public static final int PAWN = 5;

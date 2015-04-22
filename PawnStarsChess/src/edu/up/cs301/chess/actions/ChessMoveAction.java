@@ -189,6 +189,7 @@ public class ChessMoveAction extends GameAction {
 	
 	public ChessMoveAction clone()
 	{
-		return new ChessMoveAction(super.getPlayer(),this);
+		//
+		return new ChessMoveAction(null,this);
 	}
 }//class CounterMoveAction

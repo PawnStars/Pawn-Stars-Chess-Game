@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Vector;
 
 import android.util.Log;
@@ -1573,11 +1574,11 @@ public class ChessGameState extends GameState {
 				}
 				if (moveList.peekLast() instanceof PawnMove) {
 					PawnMove lastMove = (PawnMove) moveList.getLast();
-					Log.d("game state",
+					/*Log.d("game state",
 							"last move double jump: "
 									+ (lastMove.getType() == PawnMove.FIRST_MOVE)
 									+ " other color: "
-									+ (lastMove.getWhichPiece().isWhite() != player1IsWhite));
+									+ (lastMove.getWhichPiece().isWhite() != player1IsWhite));*/
 
 					// the last move had to be a double jump from the opponent
 					if (lastMove.getType() == PawnMove.FIRST_MOVE
@@ -1801,5 +1802,143 @@ public class ChessGameState extends GameState {
 		} else {
 			return player2Pieces[12];
 		}
+	}
+	
+	public String toFEN()
+	{
+		String fen = "";
+		int i = 0;
+		if(!player1IsWhite)
+		{
+			i = BOARD_HEIGHT-1;
+		}
+		while(i >= 0 && i < BOARD_HEIGHT)
+		{
+			int numEmpty = 0;
+			for (int j = 0; j < BOARD_WIDTH; j++)
+			{
+				if(pieceMap[i][j] == null)
+				{
+					numEmpty++;
+				}
+				else
+				{
+					int type = pieceMap[i][j].getType();
+					if(numEmpty > 0) {
+						fen += numEmpty;
+					}
+					numEmpty = 0;
+					String pieceChar = "";
+					if(type == ChessPiece.PAWN) {
+						pieceChar = "p";
+					}
+					else if(type == ChessPiece.QUEEN) {
+						pieceChar = "q";
+					}
+					else if(type == ChessPiece.KING) {
+						pieceChar = "k";
+					}
+					else if(type == ChessPiece.ROOK) {
+						pieceChar = "r";
+					}
+					else if(type == ChessPiece.BISHOP) {
+						pieceChar = "b";
+					}
+					else if(type == ChessPiece.KNIGHT) {
+						pieceChar = "k";
+					}
+					
+					if(pieceMap[i][j].isWhite())
+					{
+						pieceChar = pieceChar.toUpperCase(Locale.US);
+					}
+					
+					fen+=pieceChar;
+				}
+			}
+			
+			if(numEmpty > 0) {
+				fen += numEmpty;
+			}
+			
+			if(player1IsWhite)
+			{
+				i++;
+			}
+			else
+			{
+				i--;
+			}
+			//not the last row
+			if(i != -1 || i != BOARD_HEIGHT)
+			{
+				fen += "/";
+			}
+		}
+		if(player1IsWhite == whoseTurn)
+		{
+			fen +=" w ";
+		}
+		else
+		{
+			fen +=" b ";
+		}
+		if(!canCastle[0][0] && !canCastle[0][1] && !canCastle[1][0] && !canCastle[1][1])
+		{
+			fen += "-";
+		}
+		if(player1IsWhite)
+		{
+			if(canCastle[0][0]) {
+				fen += "q";//player 2 left
+			}
+			if(canCastle[0][1]) {
+				fen += "k";//player 2 right
+			}
+			if(canCastle[1][0]) {
+				fen += "Q";//player 1 left
+			}
+			if(canCastle[1][1]){
+				fen += "K"; //player 1 right
+			}
+		}
+		else
+		{
+			if(canCastle[0][0]) {
+				fen += "Q";//player 2 left
+			}
+			if(canCastle[0][1]) {
+				fen += "K";//player 2 right
+			}
+			if(canCastle[1][0]) {
+				fen += "q";//player 1 left
+			}
+			if(canCastle[1][1]){
+				fen += "k"; //player 1 right
+			}
+		}
+		boolean enPassant = false;
+		if(moveList.peekLast() instanceof PawnMove)
+		{
+			PawnMove lastMove = (PawnMove)moveList.peekLast();
+			if(lastMove.getType() == PawnMove.FIRST_MOVE)
+			{
+				int[] location = lastMove.getNewPos();
+				fen += " ";
+				fen += (char)(97+location[1]);
+				fen += ChessGameState.BOARD_HEIGHT-location[0];
+				fen += " ";
+				enPassant = true;
+			}
+		}
+		if(!enPassant)
+		{
+			fen += " - ";
+		}
+		fen += lastCapture;
+		fen += " ";
+		fen += moveList.size();
+		//Log.d("game state","fen: "+fen);
+		return fen;
 	}
 }

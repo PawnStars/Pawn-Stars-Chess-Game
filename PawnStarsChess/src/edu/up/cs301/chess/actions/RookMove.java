@@ -44,11 +44,13 @@ public class RookMove extends ChessMoveAction {
 	 * @param player
 	 * @param move
 	 */
-	public RookMove(GamePlayer player, PawnMove move)
+	public RookMove(GamePlayer player, RookMove move)
 	{
 		super(player, move.getWhichPiece(), move.getNewPos(), move.getTakenPiece());
 		this.type = move.getType();
 	}
+	
+	
 	
 	/**
 	 * Returns the type of the move
@@ -75,5 +77,10 @@ public class RookMove extends ChessMoveAction {
 		}
 	}
 	
+	public RookMove clone()
+	{
+		//super.getPlayer()
+		return new RookMove(null,this);
+	}
 	
 }

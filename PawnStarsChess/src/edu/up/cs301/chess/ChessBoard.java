@@ -1,5 +1,6 @@
 package edu.up.cs301.chess;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.R;
@@ -26,6 +27,7 @@ import android.util.AttributeSet;
  */
 public class ChessBoard extends SurfaceView
 {
+	
 	// Paints for each element drawn on the board
 	private Paint tileColor = new Paint();
 	private Paint highlightColor = new Paint();
@@ -62,8 +64,6 @@ public class ChessBoard extends SurfaceView
 	
 	private ArrayList <Integer> whiteTakenIndex = new ArrayList<Integer>();
 	private ArrayList <Integer> blackTakenIndex = new ArrayList<Integer>();
-	
-	int count = 1;
 
 	
 	/**
@@ -294,7 +294,7 @@ public class ChessBoard extends SurfaceView
 								//Goes to a new row of taken pieces
 								if (x > canvas.getWidth() - 100) {
 									y = (int) tileSize[0];
-									y += (int) (tileSize[0] * 6);
+									y += (int) (tileSize[0] * 7);
 									x = (int) ((int) (tileSize[1] * 8) + ((k - 12) * tileSize[1]));
 								}
 							}

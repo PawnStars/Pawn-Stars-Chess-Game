@@ -1,5 +1,10 @@
 package edu.up.cs301.chess;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import edu.up.cs301.chess.actions.*;
@@ -11,6 +16,7 @@ import edu.up.cs301.game.util.MessageBox;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.AssetManager;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -192,11 +198,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		// update our state; then update the display
 		state = newState;
-		if(state!=null && !state.isGameOver())
-		{
-			this.player1Score.setText(state.getPlayer1Points()+ "");
-			this.player2Score.setText(state.getPlayer2Points() + "");
-		}
+		
 		Log.d("human player",state.toString());
 		updateDisplay();
 	}
@@ -279,6 +281,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 * Handles touches for the ChessBoard
 	 */
 	public boolean onTouch(View v, MotionEvent event) {
+		
 		v.onTouchEvent(event);
 		//only handle touches when it is your turn
 		if(event.getAction() == MotionEvent.ACTION_DOWN)
@@ -360,10 +363,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 								//Pawns only reach the edge when they are promoted
 								
 								//Only use the first move assigned
-								if(move == null && takenPiece == null)
+								if(move == null)
 								{
 									move = new PawnMove(this, lastPieceSelected, selectedLoc,
-										null,PawnMove.PROMOTION);
+										takenPiece,PawnMove.PROMOTION);
 									
 									board.setSelectedTiles(null);
 									board.setSelectedLoc(-1, -1);
@@ -482,7 +485,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 									lastPieceSelected, selectedLoc,takenPiece);
 						}
 						
-						//state.applyMove(move);
+						state.applyMove(move);
 						game.sendAction(move);
 						Log.d("human player", "sending this move: "+move);
 						
@@ -571,6 +574,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 		player1View.setText(this.name);
 		player2View.setText(this.allPlayerNames[1]);
+		
+		//copy over the chess engine
+		copyAssets();
+		
 	}
 
 	/**
@@ -652,5 +659,78 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		DrawAction act = new DrawAction(this,isWhite,true);
 		game.sendAction(act);
 	}
+	
+	private void copyAssets()
+	{
+	    AssetManager assetManager = activity.getAssets();
+	    String[] files = null;
+	    try
+	    {
+	        files = assetManager.list("");
+	    }
+	    catch (IOException e)
+	    {
+	        Log.e("tag", "Failed to get asset file list.", e);
+	    }
+	    for(String filename : files)
+	    {
+	    	if(filename.contains("engine"))
+	    	{
+		        InputStream in = null;
+		        OutputStream out = null;
+		        try
+		        {
+					File outFile = new File(activity.getCacheDir(),filename);
+					if(!outFile.exists())
+					{
+						in = assetManager.open(filename);
+						out = new FileOutputStream(outFile);
+						copyFile(in, out);
+						Log.d("tag", "copied asset file: " + outFile.getAbsolutePath());
+						outFile.setExecutable(true);
+					}
+		        }
+		        catch(IOException e)
+		        {
+		            Log.e("tag", "Failed to copy asset file: " + filename, e);
+		        }
+		        finally
+		        {
+		            if(in != null)
+		            {
+		                try
+		                {
+		                    in.close();
+		                }
+		                catch (IOException e)
+		                {
+		                    // NOOP
+		                }
+		            }
+		            if
+		            (out != null)
+		            {
+		                try
+		                {
+		                    out.close();
+		                }
+		                catch (IOException e)
+		                {
+		                    // NOOP
+		                }
+		            }
+		        }
+	    	}
+	    }
+	}
+	private void copyFile(InputStream in, OutputStream out) throws IOException {
+	    byte[] buffer = new byte[1024];
+	    int read;
+	    while((read = in.read(buffer)) != -1){
+	      out.write(buffer, 0, read);
+	    }
+	}
+	
+	
 }// class CounterHumanPlayer
 
