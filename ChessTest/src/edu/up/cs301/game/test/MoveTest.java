@@ -28,8 +28,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getPawnMoves(0, 7, pawn);
-		boolean[][] stateMoves2 = state.getPawnMoves(2, 7, pawn2);
+		boolean[][] stateMoves1 = state.getPawnMoves(0, 7, pawn,false);
+		boolean[][] stateMoves2 = state.getPawnMoves(2, 7, pawn2,false);
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
 				{false,false,false,false,false,false,false,false},
@@ -86,8 +86,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getRookMoves(3, 3, rook);
-		boolean[][] stateMoves2 = state.getRookMoves(1, 6, rook2);
+		boolean[][] stateMoves1 = state.getRookMoves(3, 3, rook,false);
+		boolean[][] stateMoves2 = state.getRookMoves(1, 6, rook2,false);
 		
 		boolean[][] moves1 = {
 				{false,false,false,true ,false,false,false,false},
@@ -144,8 +144,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getKnightMoves(3, 3, knight);
-		boolean[][] stateMoves2 = state.getKnightMoves(0, 7, knight2);
+		boolean[][] stateMoves1 = state.getKnightMoves(3, 3, knight,false);
+		boolean[][] stateMoves2 = state.getKnightMoves(0, 7, knight2,false);
 		
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
@@ -200,8 +200,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getBishopMoves(3, 3, bish);
-		boolean[][] stateMoves2 = state.getBishopMoves(2, 7, bish2);
+		boolean[][] stateMoves1 = state.getBishopMoves(3, 3, bish,false);
+		boolean[][] stateMoves2 = state.getBishopMoves(2, 7, bish2,false);
 		
 		boolean[][] moves1 = {
 				{true ,false,false,false,false,false,true ,false},
@@ -257,8 +257,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getKingMoves(3, 3, king);
-		boolean[][] stateMoves2 = state.getKingMoves(0, 7, king2);
+		boolean[][] stateMoves1 = state.getKingMoves(3, 3, king,false);
+		boolean[][] stateMoves2 = state.getKingMoves(0, 7, king2,false);
 		
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
@@ -316,8 +316,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getQueenMoves(3, 3, queen);
-		boolean[][] stateMoves2 = state.getQueenMoves(6, 1, queen2);
+		boolean[][] stateMoves1 = state.getQueenMoves(3, 3, queen,false);
+		boolean[][] stateMoves2 = state.getQueenMoves(6, 1, queen2,false);
 		
 		boolean[][] moves1 = {
 				{true ,false,false,true ,false,false,true ,false},

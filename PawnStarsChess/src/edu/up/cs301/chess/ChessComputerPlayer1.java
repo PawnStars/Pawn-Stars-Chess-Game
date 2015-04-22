@@ -171,55 +171,29 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		{
 			String FEN = gameState.toFEN();
 			
-			if(FEN == null || FEN.equals(""))
+			if(FEN != null && !FEN.equals(""))
 			{
-				return null;
-			}
-			
-			// initialize and connect to engine
-			if (client.startEngine())
-			{
-				Log.d("search","Engine has started..");
-				// send commands manually
-				client.sendCommand("uci");
-				
-				String bestMove = client.getBestMove(FEN,5000);
-				
-				Log.d("computer player","best move:"+bestMove);
-				if(bestMove != null && !bestMove.equals("(none)"))
+				// initialize and connect to engine
+				if (client.startEngine())
 				{
-					//get coordinates
-					bestMove = bestMove.toLowerCase(Locale.US);
+					Log.d("search","Engine has started..");
 					
-					int oldX = bestMove.charAt(bestMove.length()-4)-97;
-					int oldY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-3)+48;
-					int newX = bestMove.charAt(bestMove.length()-2)-97;
-					int newY = ChessGameState.BOARD_HEIGHT-bestMove.charAt(bestMove.length()-1)+48;
-
-					Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
-					
-					int[] newLoc = new int[]{newY,newX};
-					if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
-					{
-						ChessPiece whichPiece = gameState.getPieceMap()[oldY][oldX];
-						ChessPiece takenPiece = gameState.getPieceMap()[newY][newX];
-						chosenMove = new ChessMoveAction(this,whichPiece,newLoc,takenPiece);
-						//TODO make special moves work
-					}
-					
-				}
-
-				// get the evaluation score of current position
-				//System.out.println("Eval score : " + client.getEvalScore(FEN, 2000));
-
-				// stop the engine
-				Log.d("computer player","Stopping engine..");
-				client.stopEngine();
+					// send commands manually
+					client.sendCommand("uci");
 				
+					String bestMove = client.getBestMove(FEN,5000);
+				
+					Log.d("computer player","best move:"+bestMove);
+					chosenMove = ChessMoveAction.moveTextToAction(gameState, this, bestMove);
+					
+					// stop the engine
+					Log.d("computer player","Stopping engine..");
+					client.stopEngine();
+				}
 			}
 			else
 			{
-			    Log.d("search","Something went wrong..");
+				Log.d("search","Something went wrong..");
 			}
 		}
 		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
@@ -263,7 +237,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					}
 				}
 			}
-			
 			//Make sure the player is included as a reference
 			chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
 

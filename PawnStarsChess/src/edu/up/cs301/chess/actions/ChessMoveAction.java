@@ -1,6 +1,9 @@
 package edu.up.cs301.chess.actions;
 
 import java.util.Arrays;
+import java.util.Locale;
+
+import android.util.Log;
 
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
@@ -190,5 +193,112 @@ public class ChessMoveAction extends GameAction {
 	public ChessMoveAction clone()
 	{
 		return new ChessMoveAction(super.getPlayer(),this);
+	}
+	
+	public static ChessMoveAction moveTextToAction(ChessGameState state,ChessPlayer player, String text)
+	{
+		if(text == null || text.equals("(none)"))
+		{
+			return null;
+		}
+		
+		//ensure lower case so capital letters don't affect character arithmetic
+		text = text.toLowerCase(Locale.US);
+		
+		//TODO use isCheck and checkmate
+		//find out if the move will put the other player in check or checkmate
+		boolean isCheck = false;
+		boolean isCheckmate = false;
+		char lastChar = text.charAt(text.length()-1);
+		if(lastChar == '+')
+		{
+			text = text.substring(0, text.length()-2);
+			isCheck = true;
+		}
+		else if(lastChar == '#')
+		{
+			text = text.substring(0, text.length()-2);
+			isCheckmate = true;
+		}
+		
+		boolean enPassant = false;
+		boolean rightCastle = false;
+		boolean leftCastle = false;
+		int promotion = -1;
+		if(text.contains("e.p."))
+		{
+			enPassant = true;
+		}
+		else if(text.contains("/"))
+		{
+			char type = text.charAt(text.indexOf('/')+1);
+			type = Character.toLowerCase(type);
+			if(type == 'q')
+			{
+				promotion = ChessPiece.QUEEN;
+			}
+			else if(type == 'r')
+			{
+				promotion = ChessPiece.ROOK;
+			}
+			else if(type == 'n')
+			{
+				promotion = ChessPiece.KNIGHT;
+			}
+			else if(type == 'b')
+			{
+				promotion = ChessPiece.BISHOP;
+			}
+		}
+		else if(text.contains("0-0"))
+		{
+			if(text.contains("0-0-0"))
+			{
+				leftCastle = true;
+			}
+			else
+			{
+				rightCastle = true;
+			}
+		}
+		
+		
+		
+		int oldX = text.charAt(text.length()-4)-97;
+		int oldY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-3)+48;
+		int newX = text.charAt(text.length()-2)-97;
+		int newY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48;
+		
+		Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
+		
+		int[] newLoc = new int[]{newY,newX};
+		
+		ChessMoveAction move = null;
+		if(!ChessGameState.outOfBounds(newLoc) && !ChessGameState.outOfBounds(oldX,oldY))
+		{
+			ChessPiece whichPiece = state.getPieceMap()[oldY][oldX];
+			ChessPiece takenPiece = state.getPieceMap()[newY][newX];
+			if(promotion != -1)
+			{
+				//TODO implement taken piece
+				//int[] takenLoc = state.
+				move = new PawnMove(player,whichPiece,newLoc,null,PawnMove.PROMOTION);
+				((PawnMove)move).setNewType(promotion);
+			}
+			else if(enPassant)
+			{
+				
+			}
+			else if(leftCastle || rightCastle)
+			{
+				
+			}
+			else
+			{
+				move = new ChessMoveAction(player,whichPiece,newLoc,takenPiece);
+			}
+			//TODO make special moves work
+		}
+		return move;
 	}
 }//class CounterMoveAction
