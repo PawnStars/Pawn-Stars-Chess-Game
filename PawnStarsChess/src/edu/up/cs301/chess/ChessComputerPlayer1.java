@@ -162,7 +162,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			if(FEN != null && !FEN.equals(""))
 			{
 				// initialize and connect to engine
-				Log.d("computer player","Engine has started..");
 				
 				final Runnable getBestMove = new Runnable() {
 					@Override
@@ -183,7 +182,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 						}
 					}
 				};
-				Log.d("computer player","Stopped engine..");
 				if(engineHandler != null)
 				{
 					engineHandler.post(getBestMove);

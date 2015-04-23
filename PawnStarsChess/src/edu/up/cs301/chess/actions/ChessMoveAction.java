@@ -276,11 +276,19 @@ public class ChessMoveAction extends GameAction {
 				rightCastle = true;
 			}
 		}
-		
-		int oldX = text.charAt(text.length()-4)-97;
-		int oldY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-3)+48;
-		int newX = text.charAt(text.length()-2)-97;
-		int newY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48;
+		int oldX = 0;
+		int oldY = 0;
+		int newX = 0;
+		int newY = 0;
+		if(text.length()-4 >= 0)
+		{
+			oldX = text.charAt(text.length()-4)-97;
+			oldY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-3)+48;
+			newX = text.charAt(text.length()-2)-97;
+			newY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48;
+		}
+		//TODO make sure moves like Bg8 works
+		//or gxh4
 		//TODO make sure special moves work
 		String coords = "x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY;
 		int[] newLoc = new int[]{newY,newX};
@@ -321,14 +329,23 @@ public class ChessMoveAction extends GameAction {
 			if(move == null && (leftCastle || rightCastle))//castling
 			{
 				int moveType;
+				int y = 0;
+				if(state.isWhoseTurn())
+				{
+					y = ChessGameState.BOARD_HEIGHT;
+				}
+				int x = 0;
 				if(leftCastle)
 				{
 					moveType = RookMove.CASTLE_LEFT;
+					
 				}
 				else//right 
 				{
 					moveType = RookMove.CASTLE_RIGHT;
+					x = ChessGameState.BOARD_WIDTH-1;
 				}
+				whichPiece = state.getPieceMap()[y][x];
 				return new RookMove(player, whichPiece, newLoc, null, moveType);
 			}
 			//normal move

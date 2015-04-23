@@ -97,7 +97,7 @@ public class ChessGameState extends GameState {
 	// The stack containing all of the moves applied so far to this game state
 	private ArrayDeque<ChessMoveAction> moveList;
 
-	private Vector<int[][]> pieceMapHistory;
+	private Vector<String> pieceMapHistory;
 
 	/*
 	 * The number of moves since the last capture. Can be used to indicate a
@@ -123,7 +123,7 @@ public class ChessGameState extends GameState {
 		player2Points = 0;
 		lastCapture = 0;
 		moveList = new ArrayDeque<ChessMoveAction>();
-		pieceMapHistory = new Vector<int[][]>();
+		pieceMapHistory = new Vector<String>();
 		canCastle = new boolean[MAX_PLAYERS][2];
 		canEnPassant = new int[2];
 		canDraw = false;
@@ -214,18 +214,12 @@ public class ChessGameState extends GameState {
 			}
 		}
 		// Copy the piece map history
-		pieceMapHistory = new Vector<int[][]>();
+		pieceMapHistory = new Vector<String>();
 		pieceMapHistory.ensureCapacity(orig.getPieceMapHistory().capacity());
 
-		Iterator<int[][]> it1 = orig.getPieceMapHistory().iterator();
+		Iterator<String> it1 = orig.getPieceMapHistory().iterator();
 		while (it1.hasNext()) {
-			int[][] pieces = new int[BOARD_WIDTH][BOARD_HEIGHT];
-			int[][] oldPieces = it1.next();
-			for (int i = 0; i < BOARD_HEIGHT; i++) {
-				pieces[i] = new int[BOARD_WIDTH];
-				System.arraycopy(oldPieces[i], 0, pieces[i], 0, BOARD_WIDTH);
-			}
-			pieceMapHistory.add(pieces);
+			pieceMapHistory.add(it1.next());
 		}
 
 		// Copy the move list
@@ -331,6 +325,9 @@ public class ChessGameState extends GameState {
 			return false;
 
 		if (!Arrays.deepEquals(canCastle, comp.getCanCastle()))
+			return false;
+		
+		if (!Arrays.equals(canEnPassant, comp.getCanEnPassant()))
 			return false;
 
 		if (player1IsWhite != comp.isPlayer1IsWhite())
@@ -781,7 +778,7 @@ public class ChessGameState extends GameState {
 	 * 
 	 * @return
 	 */
-	public Vector<int[][]> getPieceMapHistory() {
+	public Vector<String> getPieceMapHistory() {
 		return pieceMapHistory;
 	}
 
@@ -1603,7 +1600,7 @@ public class ChessGameState extends GameState {
 			// Check if any pawns can en passant
 			updateCanEnPassant();
 
-			// UpdateCanDraw();
+			updateCanDraw();
 
 			// Check if the king is being taken
 			if (takenPiece != null && takenPiece.getType() == ChessPiece.KING) {
@@ -1837,21 +1834,13 @@ public class ChessGameState extends GameState {
 			}
 
 			// convert the piece map into an array of ints for better storage
-			int[][] pieceMapAsInt = new int[BOARD_HEIGHT][BOARD_WIDTH];
-			for (int i = 0; i < BOARD_WIDTH; i++) {
-				for (int j = 0; j < BOARD_HEIGHT; j++) {
-					if (pieceMap[j][i] != null) {
-						pieceMapAsInt[j][i] = pieceMap[j][i].getType();
-					}
-				}
-			}
-			
+			String fen = toFEN();
 
 			// threefold repetition rule
-			Iterator<int[][]> it = pieceMapHistory.iterator();
+			Iterator<String> it = pieceMapHistory.iterator();
 			int matches = 0;
 			while (it.hasNext()) {
-				if (Arrays.deepEquals(it.next(), pieceMapAsInt)) {
+				if (it.next().equals(fen)) {
 					// found a state equivalent to the one right now
 					matches++;
 				}
@@ -1861,7 +1850,7 @@ public class ChessGameState extends GameState {
 				}
 			}
 			
-			pieceMapHistory.add(pieceMapAsInt);
+			pieceMapHistory.add(fen);
 		}
 	}
 
@@ -2049,7 +2038,7 @@ public class ChessGameState extends GameState {
 		fen += lastCapture/2;
 		fen += " ";
 		fen += moveList.size();
-		Log.d("game state","fen: "+fen);
+		
 		return fen;
 	}
 }
