@@ -223,21 +223,7 @@ public class MoveGenerator {
 		{
 			return null;
 		}
-		int x1 = piece.getLocation()[1];
 		int y1 = piece.getLocation()[0];
-		
-		int canEnPassant;
-		int dir;
-		if(piece.isWhite() == state.isPlayer1IsWhite())
-		{
-			canEnPassant = state.getCanEnPassant()[1][x1];
-			dir = -1;
-		}
-		else
-		{
-			canEnPassant = state.getCanEnPassant()[0][x1];
-			dir = 1;
-		}
 		
 		//Add a move for each location it can more to
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
@@ -249,7 +235,6 @@ public class MoveGenerator {
 				{
 					int[] newLoc = new int[]{i,j};
 					
-					
 					ChessPiece taken = state.getPieceMap()[i][j];
 					
 					//special moves
@@ -260,34 +245,22 @@ public class MoveGenerator {
 							//vertical distance is 2
 							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.FIRST_MOVE));
 						}
-						else if(canEnPassant != 0)
+						else if(taken == null && Math.abs(i-state.getCanEnPassant()[1]) == 1 
+								&& j == state.getCanEnPassant()[0])
 						{
-							//can do an en passant
-							int x;
-							int y = i+dir;
-							if(canEnPassant == PawnMove.RIGHT_EN_PASSANT)
-							{
-								//get an adjusted taken piece
-								
-								x = j-1;
-							}
-							else if(canEnPassant == PawnMove.LEFT_EN_PASSANT)
-							{
-								x = j+1;
-							}
-							else
-							{
-								continue;//unhandled behavior
-							}
-							if(!ChessGameState.outOfBounds(x, y))
-							{
-								taken = state.getPieceMap()[i+dir][j+1];
-								moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.EN_PASSANT));
-							}
+							//the piece is moving horizontally, but not on another piece
+							//and it is on the same rank as a double jumped pawn
+							
+							newLoc = state.getCanEnPassant();
+							//en passants happen around the middle of the board, so they do not happen at (0,0)
+							taken = state.getPieceMap()[newLoc[0]][newLoc[1]];
+							moveList.add(new PawnMove(player, piece, newLoc, taken,PawnMove.EN_PASSANT));
 						}
 						else if(i == ChessGameState.BOARD_HEIGHT-1 || i == 0)
 						{
 							PawnMove pawnAct = new PawnMove(player, piece, newLoc, taken,PawnMove.PROMOTION);
+							
+							//automatically choose queen
 							pawnAct.setNewType(ChessPiece.QUEEN);
 							moveList.add(pawnAct);
 						}

@@ -29,8 +29,6 @@ public class PawnMove extends ChessMoveAction {
 	public static final int PROMOTION = 1;
 	public static final int FIRST_MOVE = 2;
 	public static final int NONE = 3;
-	public static final int LEFT_EN_PASSANT = 4;
-	public static final int RIGHT_EN_PASSANT = 5;
 	
 	public final static int NUM_PAWN_ATTACKS_NORMAL = 2;
 	

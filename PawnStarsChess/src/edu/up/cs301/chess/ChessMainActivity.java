@@ -44,49 +44,24 @@ public class ChessMainActivity extends GameMainActivity {
 				return new ChessHumanPlayer(name);
 			}});
 		
-		// a computer player type (player type 1)
-		playerTypes.add(new GamePlayerType("Random Computer Player") {
-			public GamePlayer createPlayer(String name) {
-				//0 means it is not smart
-				return new ChessComputerPlayer1(name,0);
-			}});
-		
 		// a computer player type (player type 2)
-		playerTypes.add(new GamePlayerType("Random Computer Player (GUI)") {
+		playerTypes.add(new GamePlayerType("Random Computer Player") {
 			public GamePlayer createPlayer(String name) {
 				return new ChessComputerPlayer2(name,0);
 			}});
 		
 		playerTypes.add(new GamePlayerType("Computer Player (smarter)") {
 			public GamePlayer createPlayer(String name) {
-				//1 means it is smart
-				return new ChessComputerPlayer1(name,1);
-			}});
-		
-		playerTypes.add(new GamePlayerType("Computer Player (smarter GUI)") {
-			public GamePlayer createPlayer(String name) {
 				return new ChessComputerPlayer2(name,1);
 			}});
 		
-		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest)") {
-			public GamePlayer createPlayer(String name) {
-				//1 means it is smart
-				return new ChessComputerPlayer1(name,ChessComputerPlayer1.CRITTER);
-			}});
-		
-		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest GUI)") {
+		playerTypes.add(new GamePlayerType("Critter Computer Player (smartest)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
 				return new ChessComputerPlayer2(name,ChessComputerPlayer1.CRITTER);
 			}});
 		
 		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest)") {
-			public GamePlayer createPlayer(String name) {
-				//1 means it is smart
-				return new ChessComputerPlayer1(name,ChessComputerPlayer1.STOCKFISH);
-			}});
-		
-		playerTypes.add(new GamePlayerType("Stockfish Computer Player (smartest GUI)") {
 			public GamePlayer createPlayer(String name) {
 				//1 means it is smart
 				return new ChessComputerPlayer2(name,ChessComputerPlayer1.STOCKFISH);
@@ -104,12 +79,8 @@ public class ChessMainActivity extends GameMainActivity {
 		defaultConfig.addPlayer("Human", 0); // player 1: a human player
 		defaultConfig.addPlayer("Computer", 1); // player 2: a computer player
 		defaultConfig.addPlayer("Computer", 2); // player 2: a computer player
-		defaultConfig.addPlayer("Computer", 3); // player 2: a computer player
-		defaultConfig.addPlayer("Computer", 4); // player 2: a computer player
-		defaultConfig.addPlayer("Smart Computer", 5); // player 2: a computer player
-		defaultConfig.addPlayer("Smart Computer", 6); // player 2: a computer player
-		defaultConfig.addPlayer("Smart Computer", 7); // player 2: a computer player
-		defaultConfig.addPlayer("Smart Computer", 8); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 3); // player 2: a computer player
+		defaultConfig.addPlayer("Smart Computer", 4); // player 2: a computer player
 		
 		// Set the default remote-player setup:
 		// - player name: "Remote Player"

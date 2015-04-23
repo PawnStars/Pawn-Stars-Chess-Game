@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
 
+import android.util.Log;
+
 import edu.up.cs301.chess.actions.*;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameState;
@@ -82,7 +84,7 @@ public class ChessGameState extends GameState {
 	// Keep track of which players can castle left or castle right
 	private boolean[][] canCastle;
 
-	private int[][] canEnPassant;
+	private int[] canEnPassant;
 
 	private boolean canDraw;
 
@@ -123,7 +125,7 @@ public class ChessGameState extends GameState {
 		moveList = new ArrayDeque<ChessMoveAction>();
 		pieceMapHistory = new Vector<int[][]>();
 		canCastle = new boolean[MAX_PLAYERS][2];
-		canEnPassant = new int[MAX_PLAYERS][BOARD_WIDTH];
+		canEnPassant = new int[2];
 		canDraw = false;
 
 		// Give each player a pawn of the appropriate color:
@@ -259,8 +261,6 @@ public class ChessGameState extends GameState {
 		player1InCheck = orig.isPlayer1InCheck();
 		player2InCheck = orig.isPlayer2InCheck();
 
-		isGameOver = orig.isGameOver();
-
 		player1Points = orig.getPlayer1Points();
 		player2Points = orig.getPlayer2Points();
 
@@ -366,11 +366,6 @@ public class ChessGameState extends GameState {
 		if (act instanceof ChessMoveAction) {
 			ChessMoveAction move = (ChessMoveAction) act;
 
-			// Check for a draw:
-			/*
-			 * if(lastCapture > MAX_MOVES_SINCE_CAPTURE) { isGameOver = true;
-			 * player1Won = false; player2Won = false; return true; } else {
-			 */
 			return movePiece(move);
 			// }
 		} else {
@@ -796,7 +791,7 @@ public class ChessGameState extends GameState {
 	 * 
 	 * @return
 	 */
-	public int[][] getCanEnPassant() {
+	public int[] getCanEnPassant() {
 		return canEnPassant;
 	}
 
@@ -929,8 +924,10 @@ public class ChessGameState extends GameState {
 			j = yLocation - 1;
 			i = xLocation - 1;
 			if (!outOfBounds(i, j)) {
-				if (this.pieceMap[j][i] != null
-						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				if ((this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite())
+						|| (canEnPassant != null 
+								&& canEnPassant[0] == j && canEnPassant[0] == i)) {
 					moves[j][i] = true;
 				}
 			}
@@ -938,21 +935,15 @@ public class ChessGameState extends GameState {
 			j = yLocation - 1;
 			i = xLocation + 1;
 			if (!outOfBounds(i, j)) {
-				if (this.pieceMap[j][i] != null
-						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				if ((this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite())
+						|| (canEnPassant != null 
+						&& canEnPassant[0] == j && canEnPassant[0] == i)) {
 					moves[j][i] = true;
 				}
 			}
-			if (canEnPassant != null) {
-				if (canEnPassant[1][xLocation] == PawnMove.LEFT_EN_PASSANT) {
-					moves[xLocation - 1][yLocation + 1] = true;
-				}
-				if (canEnPassant[1][xLocation] == PawnMove.RIGHT_EN_PASSANT) {
-					moves[xLocation + 1][yLocation + 1] = true;
-				}
-			}
-
-		} else// player 2 is white
+		}
+		else// player 2 is white
 		{
 			j = yLocation + 1;
 			i = xLocation;
@@ -975,8 +966,10 @@ public class ChessGameState extends GameState {
 			j = yLocation + 1;
 			i = xLocation - 1;
 			if (!outOfBounds(i, j)) {
-				if (this.pieceMap[j][i] != null
-						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+				if ((this.pieceMap[j][i] != null
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite())
+						|| (canEnPassant != null 
+								&& canEnPassant[0] == j && canEnPassant[0] == i)) {
 					moves[j][i] = true;
 				}
 			}
@@ -985,17 +978,10 @@ public class ChessGameState extends GameState {
 			i = xLocation + 1;
 			if (!outOfBounds(i, j)) {
 				if (this.pieceMap[j][i] != null
-						&& this.pieceMap[j][i].isWhite() != piece.isWhite()) {
+						&& this.pieceMap[j][i].isWhite() != piece.isWhite()
+						|| (canEnPassant != null 
+								&& canEnPassant[0] == j && canEnPassant[0] == i)) {
 					moves[j][i] = true;
-				}
-			}
-
-			if (canEnPassant != null) {
-				if (canEnPassant[1][xLocation] == PawnMove.LEFT_EN_PASSANT) {
-					moves[xLocation - 1][yLocation - 1] = true;
-				}
-				if (canEnPassant[1][xLocation] == PawnMove.RIGHT_EN_PASSANT) {
-					moves[xLocation + 1][yLocation - 1] = true;
 				}
 			}
 		}
@@ -1636,68 +1622,36 @@ public class ChessGameState extends GameState {
 	private void updateScores(ChessPiece takenPiece) {
 		if (takenPiece != null) {
 			int tP = takenPiece.getType();
+			int points = 0;
+			
 			// add points based on type
-			if (whoseTurn == true) {
-				if (tP == ChessPiece.KING) {
-					this.player1Points += 10;
-					// player1Score.setText(player1Points + "");
-				}
-				if (tP == ChessPiece.QUEEN) {
-					this.player1Points += 9;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.BISHOP) {
-					this.player1Points += 3;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.ROOK) {
-					this.player1Points += 5;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.KNIGHT) {
-					this.player1Points += 3;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.PAWN) {
-					this.player1Points += 1;
-					// player1Score.setText(player1Points + "");
-
-				}
-			} else {
-				if (tP == ChessPiece.KING) {
-					this.player2Points += 10;
-				}
-				// player1Score.setText(player1Points + "");
-
-				if (tP == ChessPiece.QUEEN) {
-					this.player2Points += 9;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.BISHOP) {
-					this.player2Points += 3;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.ROOK) {
-					this.player2Points += 5;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.KNIGHT) {
-					this.player2Points += 3;
-					// player1Score.setText(player1Points + "");
-
-				}
-				if (tP == ChessPiece.PAWN) {
-					this.player2Points += 1;
-					// player1Score.setText(player1Points + "");
-
-				}
+			
+			if (tP == ChessPiece.KING) {
+				points += 10;
+			}
+			if (tP == ChessPiece.QUEEN) {
+				points += 9;
+			}
+			if (tP == ChessPiece.BISHOP) {
+				points += 3;
+			}
+			if (tP == ChessPiece.ROOK) {
+				points += 5;
+			}
+			if (tP == ChessPiece.KNIGHT) {
+				points += 3;
+			}
+			if (tP == ChessPiece.PAWN) {
+				points += 1;
+			}
+			
+			if(whoseTurn)
+			{
+				player1Points += points;
+			}
+			else
+			{
+				player2Points += points;
 			}
 		}
 	}
@@ -1713,7 +1667,6 @@ public class ChessGameState extends GameState {
 		if (king == null) {
 			return false;
 		}
-		
 		
 		if (!king.isAlive()) {
 			isGameOver = true;
@@ -1761,7 +1714,6 @@ public class ChessGameState extends GameState {
 			isGameOver = true;
 		}
 		
-		
 		// Otherwise, no one is in check
 		player1InCheck = false;
 		player2InCheck = false;
@@ -1769,52 +1721,28 @@ public class ChessGameState extends GameState {
 	}
 
 	public void updateCanEnPassant() {
-		canEnPassant = new int[MAX_PLAYERS][BOARD_WIDTH];
+		canEnPassant = new int[2];
 		for (int i = 0; i < BOARD_WIDTH; i++) {
-			for (int j = 0; j < MAX_PLAYERS; j++) {
-				int fifthRank;
-				if (j == 1)// player 1
-				{
-					fifthRank = 3;
-				} else// player 2
-				{
-					fifthRank = 4;
-				}
-				if (moveList.peekLast() instanceof PawnMove) {
-					PawnMove lastMove = (PawnMove) moveList.getLast();
-					/*Log.d("game state",
-							"last move double jump: "
-									+ (lastMove.getType() == PawnMove.FIRST_MOVE)
-									+ " other color: "
-									+ (lastMove.getWhichPiece().isWhite() != player1IsWhite));*/
+			
+			if (moveList.peekLast() instanceof PawnMove) {
+				PawnMove lastMove = (PawnMove) moveList.getLast();
 
-					// the last move had to be a double jump from the opponent
-					if (lastMove.getType() == PawnMove.FIRST_MOVE
-							&& lastMove.getWhichPiece().isWhite() == player1IsWhite) {
-						int[] pos = lastMove.getNewPos();
-						if (pos[0] == fifthRank) {
-							// The pawns are on the same rank
-							if (pos[1] == i + 1) {
-								// The pawns are adjacent to each other
-								canEnPassant[j][i] = PawnMove.RIGHT_EN_PASSANT;
-							}
-							if (pos[1] == i - 1) {
-								// The pawns are adjacent to each other
-								canEnPassant[j][i] = PawnMove.LEFT_EN_PASSANT;
-							}
-						}
+				// the last move had to be a double jump from the opponent
+				if (lastMove.getType() == PawnMove.FIRST_MOVE) {
+					canEnPassant[1] = lastMove.getNewPos()[1];
+					if(whoseTurn)
+					{
+						canEnPassant[0] = lastMove.getNewPos()[0]-1;
+					}
+					else
+					{
+						canEnPassant[0] = lastMove.getNewPos()[0]+1;
 					}
 				}
+				
 			}
 		}
-		/*String msg = "";
-		for (int j = 0; j < MAX_PLAYERS; j++) {
-			msg += "player " + j;
-			for (int i = 0; i < BOARD_WIDTH; i++) {
-				msg += " " + canEnPassant[j][i];
-			}
-		}
-		Log.d("game state", msg);*/
+		//Log.d("game state","can en passant x:"+canEnPassant[1]+" y:"+canEnPassant[0]);
 	}
 
 	/**
@@ -1826,8 +1754,6 @@ public class ChessGameState extends GameState {
 
 		// Assume no one can castle
 		canCastle = new boolean[2][2];
-
-		// String msg = "";
 
 		for (int y = 0; y < canCastle.length; y++) {
 			// Find the rooks, kings, and empty spaces required for castling
@@ -1863,8 +1789,6 @@ public class ChessGameState extends GameState {
 			}
 
 			xLoop: for (int x = 0; x < canCastle[0].length; x++) {
-				// msg += "\nX:"+x+" Y:"+y;
-
 				if ((rooks[x] == null || !rooks[x].isAlive()
 						|| rooks[x].getHasMoved() || rooks[x].getType() != ChessPiece.ROOK)
 						|| (king == null || king.getHasMoved()) || check) {
@@ -1874,16 +1798,6 @@ public class ChessGameState extends GameState {
 					 * not in the right spot, or it moved, or the piece found is
 					 * not a rook, or the king was not found, or the king moved,
 					 * or the king is in check, then the player may not castle.
-					 */
-					/*
-					 * if(rooks[x] == null) msg += " null rooks["+x+"]";
-					 * if(rooks[x] != null && !rooks[x].isAlive()) msg +=
-					 * " rook dead"; if(rooks[x] != null &&
-					 * rooks[x].getHasMoved()) msg += " rook moved"; if(rooks[x]
-					 * != null && rooks[x].getType() != ChessPiece.ROOK) msg +=
-					 * " rook not a rook"; if(king == null) msg +=
-					 * " king not found"; if(king != null && king.getHasMoved())
-					 * msg += " king moved"; if(check) msg += " in check";
 					 */
 					continue xLoop;
 				}
@@ -1902,26 +1816,17 @@ public class ChessGameState extends GameState {
 				for (int i = minSpace + 1; i < maxSpace; i++) {
 					if ((pieceMap[firstRank][i] != null)
 							|| (attackedSquares[firstRank][i] == true)) {
-						/*
-						 * msg+=" Square X:"+i; if(pieceMap[firstRank][i] !=
-						 * null) msg += " was occupied";
-						 * if(attackedSquares[firstRank][i] == true) msg+=
-						 * " was attacked";
-						 */
 						continue xLoop;
 					}
 				}
-				// msg+=" can castle";
 				// If it reached this point, the player can castle
 				canCastle[y][x] = true;
 			}
 
 		}
-		// Log.d("game state",msg);
-
 	}
 
-	private void UpdateCanDraw() {
+	private void updateCanDraw() {
 		// Once you can claim a draw, it stays that way
 		if (!canDraw) {
 			// fifty move rule
@@ -1939,7 +1844,7 @@ public class ChessGameState extends GameState {
 					}
 				}
 			}
-			pieceMapHistory.add(pieceMapAsInt);
+			
 
 			// threefold repetition rule
 			Iterator<int[][]> it = pieceMapHistory.iterator();
@@ -1954,6 +1859,8 @@ public class ChessGameState extends GameState {
 					return;
 				}
 			}
+			
+			pieceMapHistory.add(pieceMapAsInt);
 		}
 	}
 
@@ -2125,24 +2032,19 @@ public class ChessGameState extends GameState {
 				fen += "k"; //player 1 right
 			}
 		}
-		boolean enPassant = false;
-		if(moveList.peekLast() instanceof PawnMove)
-		{
-			PawnMove lastMove = (PawnMove)moveList.peekLast();
-			if(lastMove.getType() == PawnMove.FIRST_MOVE)
-			{
-				int[] location = lastMove.getNewPos();
-				fen += " ";
-				fen += (char)(97+location[1]);
-				fen += ChessGameState.BOARD_HEIGHT-location[0];
-				fen += " ";
-				enPassant = true;
-			}
-		}
-		if(!enPassant)
+		
+		if(canEnPassant[0] == 0 && canEnPassant[1] == 0)
 		{
 			fen += " - ";
 		}
+		else
+		{
+			fen += " ";
+			fen += (char)(97+canEnPassant[1]);
+			fen += ChessGameState.BOARD_HEIGHT-canEnPassant[0];
+			fen += " ";
+		}
+
 		fen += lastCapture;
 		fen += " ";
 		fen += moveList.size();

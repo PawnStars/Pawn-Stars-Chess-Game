@@ -205,20 +205,14 @@ public class ChessMoveAction extends GameAction {
 		//ensure lower case so capital letters don't affect character arithmetic
 		text = text.toLowerCase(Locale.US);
 		
-		//TODO use isCheck and checkmate
-		//find out if the move will put the other player in check or checkmate
-		boolean isCheck = false;
-		boolean isCheckmate = false;
 		char lastChar = text.charAt(text.length()-1);
 		if(lastChar == '+')
 		{
 			text = text.substring(0, text.length()-2);
-			isCheck = true;
 		}
 		else if(lastChar == '#')
 		{
 			text = text.substring(0, text.length()-2);
-			isCheckmate = true;
 		}
 		
 		boolean enPassant = false;
@@ -262,8 +256,6 @@ public class ChessMoveAction extends GameAction {
 			}
 		}
 		
-		
-		
 		int oldX = text.charAt(text.length()-4)-97;
 		int oldY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-3)+48;
 		int newX = text.charAt(text.length()-2)-97;
@@ -280,18 +272,25 @@ public class ChessMoveAction extends GameAction {
 			ChessPiece takenPiece = state.getPieceMap()[newY][newX];
 			if(promotion != -1)
 			{
-				//TODO implement taken piece
-				//int[] takenLoc = state.
-				move = new PawnMove(player,whichPiece,newLoc,null,PawnMove.PROMOTION);
+				move = new PawnMove(player,whichPiece,newLoc,takenPiece,PawnMove.PROMOTION);
 				((PawnMove)move).setNewType(promotion);
 			}
 			else if(enPassant)
 			{
-				
+				//takenPiece = pieceMap[][]
+				//move = new PawnMove(player,whichPiece,newLoc,);
 			}
 			else if(leftCastle || rightCastle)
 			{
-				
+				if(leftCastle)
+				{
+					
+				}
+				else//right 
+				{
+					
+				}
+				//move = new RookMove(player,whichPiece,);
 			}
 			else
 			{

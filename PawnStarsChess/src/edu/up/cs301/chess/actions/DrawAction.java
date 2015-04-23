@@ -3,7 +3,6 @@
  */
 package edu.up.cs301.chess.actions;
 
-import edu.up.cs301.chess.ChessPlayer;
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 
@@ -15,7 +14,7 @@ import edu.up.cs301.game.actionMsg.GameAction;
  * @author Derek Schumacher
  * @author Scott Rowland
  * @author Allison Liedtke
- * @version March 2015
+ * @version April 2015
  *
  */
 public class DrawAction extends GameAction {
@@ -25,25 +24,17 @@ public class DrawAction extends GameAction {
 	 */
 	private static final long serialVersionUID = -1992234942952L;
 	
-	//the player who asks for a draw
-	private ChessPlayer player1;
-	
 	//the message player2 will receive
 	private String msg;
 	
+	//whether of not the players agree to draw
 	private boolean accepted;
 	
 	/**
 	 * Default constructor. It sets the player instance variable
 	 */
-	public DrawAction(GamePlayer player1, boolean player1IsWhite, boolean accepted) {
-		super(player1);
-		if(player1 instanceof ChessPlayer)
-		{
-			this.player1 = (ChessPlayer)player1;
-			//TODO get the name of who lost somehow
-		}
-		
+	public DrawAction(GamePlayer player, boolean player1IsWhite, boolean accepted) {
+		super(player);
 		this.accepted = accepted;
 	}
 
@@ -64,27 +55,15 @@ public class DrawAction extends GameAction {
 	}
 
 	/**
-	 * Get the player asking for a draw
-	 * @return Player asking for a draw
+	 * Gets whether or not the other player accepted the draw request
+	 * @return true if the draw is accepted, false if the player needs to accept
 	 */
-	public ChessPlayer getPlayer1() {
-		return player1;
-	}
-
 	public boolean isAccepted() {
 		return accepted;
-	}
-
-	public void setAccepted(boolean accepted) {
-		this.accepted = accepted;
 	}
 	
 	public String toString()
 	{
 		return "Draw";
 	}
-	
-
-
-	
 }

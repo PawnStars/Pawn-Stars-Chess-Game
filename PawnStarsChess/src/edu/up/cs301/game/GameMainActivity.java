@@ -296,8 +296,16 @@ View.OnClickListener {
 				requiresGuiCount++;
 				guiPlayer = players[i];
 			}
-			else if (guiPlayer == null && players[i].supportsGui()) {
-				guiPlayer = players[i];
+			else if(players[i].supportsGui())
+			{
+				if(!players[i].requiresGui())
+				{
+					//give these players a reference to the gui once
+					players[i].setAsGui(this);
+				}
+				if(guiPlayer == null) {
+					guiPlayer = players[i];
+				}
 			}
 		}
 

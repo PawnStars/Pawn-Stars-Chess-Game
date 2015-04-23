@@ -5,14 +5,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Locale;
+import java.util.ArrayList;
 
+import android.content.res.AssetManager;
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.DrawAction;
 import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.chess.engine.UCIInterface;
 import edu.up.cs301.game.GameComputerPlayer;
+import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.actionMsg.GameAction;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.Tickable;
@@ -48,22 +50,15 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     //true if this player is white, false if not
     //protected boolean isWhite;
     
-    private String[] engines = {
-    	"/data/data/edu.up.cs301.game/cache/stockfish.engine",
-    	"/data/data/edu.up.cs301.game/cache/critter1.6a.engine"
-    	};
-    
-    //
-    private String engine;
-    
-    //whether or not the executable was copied
-    private boolean copied;
+    private ArrayList<String> engines;
     
     //The interface between the chess engine executable and java
     private UCIInterface client;
     
     //the time to wait before sending a move
     private int waitTime;
+    
+    protected GameMainActivity activity;
     
 	/**
      * Constructor for objects of class CounterComputerPlayer1
@@ -75,9 +70,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         // invoke superclass constructor
         super(name);
         smart = intelligence;
-        copied = false;
-        waitTime = 2000;
-        
+        waitTime = 1000;
+        engines = new ArrayList<String>();
         
         
         /*
@@ -108,26 +102,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		else if (info instanceof ChessGameState) {
 			ChessGameState newState = (ChessGameState)info;
 			
-			//keep trying to copy assets until it succeeds
-			if(!copied)
-			{
-				//copyAssets();
-				if(smart > 1)
-				{
-					String engine = "";
-					if(smart == STOCKFISH)
-			        {
-			        	engine = engines[0];
-			        }
-			        
-			        if(smart == CRITTER)
-			        {
-			        	engine = engines[1];
-			        }
-					client = new UCIInterface(engine);
-				}
-			}
-			
 			//make sure the state was changed
 			if(newState.equals(gameState))
 			{
@@ -141,8 +115,19 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				//not sure if we need to apply move
 				GameAction move = makeMove();
 				Log.d("computer player", "Sending this move: "+move);
-				gameState.applyMove(move);
-				game.sendAction(move);
+				if(gameState.applyMove(move))
+				{
+					game.sendAction(move);
+				}
+				else
+				{
+					Log.d("computer player", "Error when applying this move: "+move);
+					//try again
+					move = makeMove();
+					game.sendAction(move);
+					
+					
+				}
 			}
 		}
 		else
@@ -174,7 +159,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			if(FEN != null && !FEN.equals(""))
 			{
 				// initialize and connect to engine
-				if (client.startEngine())
+				if (client != null && client.startEngine())
 				{
 					Log.d("search","Engine has started..");
 					
@@ -190,10 +175,10 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					Log.d("computer player","Stopping engine..");
 					client.stopEngine();
 				}
-			}
-			else
-			{
-				Log.d("search","Something went wrong..");
+				else
+				{
+					Log.d("computer player","Engine did not work: "+client);
+				}
 			}
 		}
 		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
@@ -243,11 +228,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		}
 		
 		//wait the remaining amount of time
-		if(start-System.currentTimeMillis() < waitTime)
+		if((System.currentTimeMillis()-start) < waitTime)
 		{
 			try
 			{
-				Thread.sleep(waitTime+System.currentTimeMillis()-start);
+				Thread.sleep(waitTime+start-System.currentTimeMillis());
 			}
 			catch (InterruptedException e)
 			{
@@ -293,6 +278,122 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			game.sendAction(act);
 		}
 		//Do not accept if the computer is smart
-		
 	}
+	
+	@Override
+	public boolean supportsGui() {
+		return true;
+	}
+	
+	/**
+	 * callback method--our player has been chosen/rechosen to be the GUI,
+	 * called from the GUI thread.
+	 * 
+	 * @param a
+	 * 		the activity under which we are running
+	 */
+	@Override
+	public void setAsGui(GameMainActivity act) {
+		
+		Log.d("computer player","setting computer as gui");
+		
+		// remember who our activity is
+		this.activity = act;
+		
+		//copy assets
+		if(smart > 1)
+		{
+			copyAssets();
+			String engine = "";
+			for(String str: engines)
+			{
+				if(str.contains("stockfish") && smart == STOCKFISH)
+		        {
+		        	engine = str;
+		        }
+				else if(str.contains("critter") && smart == CRITTER)
+		        {
+		        	engine = str;
+		        }
+			}
+			client = new UCIInterface(engine);
+			Log.d("computer player","initialized interface, engine: "+engine+" num engines: "+engines.size());
+		}
+	}
+	
+	private void copyAssets()
+	{
+	    AssetManager assetManager = activity.getAssets();
+	    String[] files = null;
+	    try
+	    {
+	        files = assetManager.list("");
+	    }
+	    catch (IOException e)
+	    {
+	        Log.e("tag", "Failed to get asset file list.", e);
+	    }
+	    for(String filename : files)
+	    {
+	        InputStream in = null;
+	        OutputStream out = null;
+	        try
+	        {
+				File outFile = new File(activity.getCacheDir(),filename);
+				if(!outFile.exists())
+				{
+					in = assetManager.open(filename);
+					out = new FileOutputStream(outFile);
+					copyFile(in, out);
+					Log.d("tag", "copied asset file: " + outFile.getAbsolutePath());
+					if(filename.contains("engine"))
+					{
+						outFile.setExecutable(true);
+						engines.add(outFile.getAbsolutePath());
+					}
+					
+				}
+	        }
+	        catch(IOException e)
+	        {
+	            Log.e("tag", "Failed to copy asset file: " + filename, e);
+	        }
+	        finally
+	        {
+	            if(in != null)
+	            {
+	                try
+	                {
+	                    in.close();
+	                }
+	                catch (IOException e)
+	                {
+	                    // NOOP
+	                }
+	            }
+	            if
+	            (out != null)
+	            {
+	                try
+	                {
+	                    out.close();
+	                }
+	                catch (IOException e)
+	                {
+	                    // NOOP
+	                }
+	            }
+	        }
+	    	
+	    }
+	}
+	private void copyFile(InputStream in, OutputStream out) throws IOException
+	{
+	    byte[] buffer = new byte[1024];
+	    int read;
+	    while((read = in.read(buffer)) != -1){
+	      out.write(buffer, 0, read);
+	    }
+	}
+		
 }

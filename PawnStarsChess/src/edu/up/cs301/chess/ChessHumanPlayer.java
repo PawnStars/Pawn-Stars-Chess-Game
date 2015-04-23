@@ -1,10 +1,5 @@
 package edu.up.cs301.chess;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 
 import edu.up.cs301.chess.actions.*;
@@ -13,10 +8,10 @@ import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.MessageBox;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.AssetManager;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,9 +23,9 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 /**
- * A GUI of a chess player. The GUI displays the current state of the
+ * A GUI of a human chess player. The GUI displays the current state of the
  * chessboard. It allows the player to select a piece and move it. The
- * player can also quit, flip the board, ask for a draw, and confirm moves.
+ * player can also quit, flip the board, and ask for a draw.
  * 
  * @author Anthony Donaldson
  * @author Derek Schumacher
@@ -114,7 +109,19 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		board.setPieceMap(state.getPieceMap());
 		player1Score.setText("" + state.getPlayer1Points());
 		player2Score.setText("" + state.getPlayer2Points());
-
+		if(state.isWhoseTurn())
+		{
+			player1Score.setTextColor(0xFF00FF00);
+			player1Score.setTextColor(0xFFFF0000);
+		}
+		else
+		{
+			if(state.isWhoseTurn())
+			{
+				player1Score.setTextColor(0xFFFF0000);
+				player1Score.setTextColor(0xFF00FF00);
+			}
+		}
 		
 		// Goes through player 1's pieces to see what ones are dead/alive
 		for (int i = 0; i < state.getPlayer1Pieces().length; i++) {
@@ -210,6 +217,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 * @param activity
 	 * 		the activity under which we are running
 	 */
+	@SuppressLint("ClickableViewAccessibility")
 	public void setAsGui(GameMainActivity activity) {
 		
 		// remember the activity
@@ -485,8 +493,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 									lastPieceSelected, selectedLoc,takenPiece);
 						}
 						
-						state.applyMove(move);
-						game.sendAction(move);
+						if(state.applyMove(move))
+						{
+							game.sendAction(move);
+						}
 						Log.d("human player", "sending this move: "+move);
 						
 						//clear the highlighted tiles after a move
@@ -566,10 +576,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 		player1View.setText(this.name);
 		player2View.setText(this.allPlayerNames[1]);
-		
-		//copy over the chess engine
-		copyAssets();
-		
 	}
 
 	/**
@@ -651,79 +657,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		DrawAction act = new DrawAction(this,isWhite,true);
 		game.sendAction(act);
 	}
-	
-	private void copyAssets()
-	{
-	    AssetManager assetManager = activity.getAssets();
-	    String[] files = null;
-	    //TODO fix
-	    try
-	    {
-	        files = assetManager.list("");
-	    }
-	    catch (IOException e)
-	    {
-	        Log.e("tag", "Failed to get asset file list.", e);
-	    }
-	    for(String filename : files)
-	    {
-	    	if(filename.contains("engine"))
-	    	{
-		        InputStream in = null;
-		        OutputStream out = null;
-		        try
-		        {
-					File outFile = new File(activity.getCacheDir(),filename);
-					if(!outFile.exists())
-					{
-						in = assetManager.open(filename);
-						out = new FileOutputStream(outFile);
-						copyFile(in, out);
-						Log.d("tag", "copied asset file: " + outFile.getAbsolutePath());
-						outFile.setExecutable(true);
-					}
-		        }
-		        catch(IOException e)
-		        {
-		            Log.e("tag", "Failed to copy asset file: " + filename, e);
-		        }
-		        finally
-		        {
-		            if(in != null)
-		            {
-		                try
-		                {
-		                    in.close();
-		                }
-		                catch (IOException e)
-		                {
-		                    // NOOP
-		                }
-		            }
-		            if
-		            (out != null)
-		            {
-		                try
-		                {
-		                    out.close();
-		                }
-		                catch (IOException e)
-		                {
-		                    // NOOP
-		                }
-		            }
-		        }
-	    	}
-	    }
-	}
-	private void copyFile(InputStream in, OutputStream out) throws IOException {
-	    byte[] buffer = new byte[1024];
-	    int read;
-	    while((read = in.read(buffer)) != -1){
-	      out.write(buffer, 0, read);
-	    }
-	}
-	
 	
 }// class CounterHumanPlayer
 
