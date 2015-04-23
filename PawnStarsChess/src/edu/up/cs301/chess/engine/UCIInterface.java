@@ -23,12 +23,12 @@ public class UCIInterface {
 	
 	public UCIInterface(String path)
 	{
-		Log.d("UCI Interface","Path:"+path);
+		//Log.d("UCI Interface","Path:"+path);
 		PATH = path;
 	}
 	
 	/**
-	 * Starts Stockfish engine as a process and initializes it
+	 * Starts the engine as a process and initializes it
 	 * 
 	 * @param None
 	 * @return 
@@ -63,19 +63,21 @@ public class UCIInterface {
 
 	/**
 	 * This is generally called right after 'sendCommand' for getting the raw
-	 * output from Stockfish
+	 * output from the engine
 	 * 
 	 * @param waitTime
 	 *            Time in milliseconds for which the function waits before
 	 *            reading the output. Useful when a long running command is
 	 *            executed
-	 * @return Raw output from Stockfish
+	 * @return Raw output from the engine
 	 */
 	public String getOutput(int waitTime) {
 		StringBuffer buffer = new StringBuffer();
 		try {
 			Thread.sleep(waitTime);
+			sendCommand("stop");//idk
 			sendCommand("isready");
+			
 			while (true) {
 				String text = processReader.readLine();
 				if (text.equals("readyok"))
@@ -105,6 +107,7 @@ public class UCIInterface {
 		String out = getOutput(waitTime + 20);
 		if(out != null)
 		{
+			Log.d("uci interface",out);
 			String[] outs = out.split("bestmove ");
 			if(outs.length > 1)
 			{
@@ -120,7 +123,7 @@ public class UCIInterface {
 	}
 
 	/**
-	 * Stops Stockfish and cleans up before closing it
+	 * Stops the engine and cleans up before closing it
 	 */
 	public void stopEngine() {
 		try {
@@ -169,7 +172,7 @@ public class UCIInterface {
 	 */
 	public float getEvalScore(String fen, int waitTime) {
 		sendCommand("position fen " + fen);
-		sendCommand("go");// movetime " + waitTime);
+		sendCommand("go movetime " + waitTime);
 
 		float evalScore = 0.0f;
 		String[] dump = getOutput(waitTime + 20).split("\n");
@@ -186,4 +189,5 @@ public class UCIInterface {
 		}
 		return evalScore/100;
 	}
+	
 }

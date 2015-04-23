@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import android.content.res.AssetManager;
+import android.os.Handler;
 import android.util.Log;
 import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.DrawAction;
@@ -60,6 +61,12 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     
     protected GameMainActivity activity;
     
+    private Handler engineHandler = new Handler();
+    
+    private ChessPlayer player;
+    
+    private GameAction chosenMove;
+    
 	/**
      * Constructor for objects of class CounterComputerPlayer1
      * 
@@ -70,8 +77,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         // invoke superclass constructor
         super(name);
         smart = intelligence;
-        waitTime = 1000;
+        waitTime = 5000;
         engines = new ArrayList<String>();
+        player = this;
         
         
         /*
@@ -122,9 +130,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				else
 				{
 					Log.d("computer player", "Error when applying this move: "+move);
-					//try again
-					move = makeMove();
-					game.sendAction(move);
 				}
 			}
 		}
@@ -149,7 +154,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		
 		long start = System.currentTimeMillis();
 		ChessGameState newState = new ChessGameState(gameState);
-		GameAction chosenMove = null;
+		chosenMove = null;
 		if(smart > 1)
 		{
 			String FEN = gameState.toFEN();
@@ -157,25 +162,31 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			if(FEN != null && !FEN.equals(""))
 			{
 				// initialize and connect to engine
-				if (client != null && client.startEngine())
-				{
-					Log.d("search","Engine has started..");
-					
-					// send commands manually
-					client.sendCommand("uci");
+				Log.d("computer player","Engine has started..");
 				
-					String bestMove = client.getBestMove(FEN,5000);
-				
-					Log.d("computer player","best move:"+bestMove);
-					chosenMove = ChessMoveAction.moveTextToAction(gameState, this, bestMove);
-					
-					// stop the engine
-					Log.d("computer player","Stopping engine..");
-					client.stopEngine();
-				}
-				else
+				final Runnable getBestMove = new Runnable() {
+					@Override
+					public void run()
+					{
+						//client.sendCommand("uci");//the list of commands
+						//TODO stop the engine from playing as your color
+						if (client != null && client.startEngine())
+						{
+							String FEN = gameState.toFEN();
+							String bestMove = client.getBestMove(FEN,waitTime);
+						
+							Log.d("computer player","engine's best move:"+bestMove);
+							chosenMove = ChessMoveAction.moveTextToAction(gameState, player, bestMove);
+							
+							// stop the engine
+							client.stopEngine();
+						}
+					}
+				};
+				Log.d("computer player","Stopped engine..");
+				if(engineHandler != null)
 				{
-					Log.d("computer player","Engine did not work: "+client);
+					engineHandler.post(getBestMove);
 				}
 			}
 		}
@@ -296,7 +307,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		Log.d("computer player","setting computer as gui");
 		
 		// remember who our activity is
-		this.activity = act;
+		activity = act;
+		
+		engineHandler = new Handler();
 		
 		//copy assets
 		if(smart > 1)
@@ -315,7 +328,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		        }
 			}
 			client = new UCIInterface(engine);
-			Log.d("computer player","initialized interface, engine: "+engine+" num engines: "+engines.size());
 		}
 	}
 	
@@ -341,18 +353,24 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				File outFile = new File(activity.getCacheDir(),filename);
 				
 				//only copy relevant files
-				if(!outFile.exists() && (filename.contains("engine") || filename.contains("cbk")))
+				boolean isEngine = filename.contains("engine");
+				if(isEngine || filename.contains("."))
 				{
-					in = assetManager.open(filename);
-					out = new FileOutputStream(outFile);
-					copyFile(in, out);
-					Log.d("tag", "copied asset file: " + outFile.getAbsolutePath());
-					if(filename.contains("engine"))
+					if(!outFile.exists())
 					{
-						outFile.setExecutable(true);
-						engines.add(outFile.getAbsolutePath());
+						in = assetManager.open(filename);
+						out = new FileOutputStream(outFile);
+						copyFile(in, out);
+						Log.d("computer player", "copied asset file: " + outFile.getAbsolutePath());
 					}
-					
+					outFile.setReadable(true);
+					outFile.setWritable(true);
+					outFile.setExecutable(true);
+					if(isEngine)
+					{
+						engines.add(outFile.getAbsolutePath());
+						Log.d("computer player", "engine: " + outFile.getAbsolutePath());
+					}
 				}
 	        }
 	        catch(IOException e)

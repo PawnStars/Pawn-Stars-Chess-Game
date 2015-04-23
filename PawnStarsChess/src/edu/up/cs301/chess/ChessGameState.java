@@ -1961,7 +1961,7 @@ public class ChessGameState extends GameState {
 						pieceChar = "b";
 					}
 					else if(type == ChessPiece.KNIGHT) {
-						pieceChar = "k";
+						pieceChar = "n";
 					}
 					
 					if(pieceMap[i][j].isWhite())
@@ -2046,10 +2046,10 @@ public class ChessGameState extends GameState {
 			fen += " ";
 		}
 
-		fen += lastCapture;
+		fen += lastCapture/2;
 		fen += " ";
 		fen += moveList.size();
-		//Log.d("game state","fen: "+fen);
+		Log.d("game state","fen: "+fen);
 		return fen;
 	}
 }

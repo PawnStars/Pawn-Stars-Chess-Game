@@ -321,7 +321,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				{
 					tileY = (int) (event.getY()/tileSize[1]);
 				}
-				Log.d("human player","selected x:"+tileX+" y:"+tileY);
+				//Log.d("human player","selected x:"+tileX+" y:"+tileY);
 				int[] selectedLoc = new int[]{tileY,tileX};
 				
 				
@@ -563,7 +563,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			updateDisplay();
 		}
 		// Flip the board if the human player chooses to be black
-		if (!isWhite()) {
+		if (!isPlayer1()) {
 			board.flipBoard();
 		}
 

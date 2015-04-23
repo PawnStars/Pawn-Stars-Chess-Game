@@ -10,7 +10,7 @@ import edu.up.cs301.game.GamePlayer;
  * @author Anthony Donaldson
  * @author Derek Schumacher
  * @author Scott Rowland
- * @version March 2015
+ * @version April 2015
  */
 public interface ChessPlayer extends GamePlayer
 {
@@ -19,8 +19,6 @@ public interface ChessPlayer extends GamePlayer
 	public boolean isPlayer1();
 	
 	public int getPlayerID();
-	
-	//public void setWhite(boolean color);
 	
 	public void askDraw(String msg);
 }

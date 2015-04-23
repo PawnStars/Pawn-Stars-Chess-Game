@@ -64,20 +64,23 @@ public class ChessMoveAction extends GameAction {
 		{
 			this.takenPiece = null;
 		}
-		if(whichPiece != null)
-		{
-			this.whichPiece = new ChessPiece(whichPiece);
-		}
-		else
-		{
-			whichPiece = null;
-		}
 		
 		this.newPos = new int[2];
 		this.oldPos = new int[2];
-			
-		System.arraycopy(newPos, 0, this.newPos, 0, 2);
-		System.arraycopy(oldPos, 0, this.oldPos, 0, 2);
+		if(whichPiece != null)
+		{
+			this.whichPiece = new ChessPiece(whichPiece);
+			System.arraycopy(whichPiece.getLocation(), 0, this.oldPos, 0, 2);
+		}
+		else
+		{
+			this.whichPiece = null;
+		}
+		if(newPos != null)
+		{
+			System.arraycopy(newPos, 0, this.newPos, 0, 2);
+		}
+		
 		
 		makesCheck = false;
 		makesCheckmate = false;
