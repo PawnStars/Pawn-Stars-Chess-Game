@@ -4,7 +4,6 @@ import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
 import edu.up.cs301.game.infoMsg.GameInfo;
-import android.app.Activity;
 import android.os.Handler;
 import android.widget.TextView;
 
@@ -30,21 +29,18 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 	// the score TextViews for each player
 	private TextView player1Score;
 	private TextView player2Score;
+	
+	private TextView player1View;
+	private TextView player2View;
+	private TextView turnText;
 
 	// The chessboard to draw on
 	private ChessBoard board;
-
-	// If this player is running the GUI, the activity (null if the player is
-	// not running a GUI).
-	private Activity activityForGui = null;
 
 	// If this player is running the GUI, the handler for the GUI thread
 	// (otherwise
 	// null)
 	private Handler guiHandler = null;
-	
-	private int currentPlayerColor = 0xFF00FF00;
-	private int otherPlayerColor = 0xFFFF0000;
 	
 	/**
 	 * constructor
@@ -72,18 +68,13 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 					board.setPieceMap(gameState.getPieceMap());
 					player1Score.setText(""+gameState.getPlayer1Points());
 					player2Score.setText(""+gameState.getPlayer2Points());
-					if(gameState.isWhoseTurn())
+					if(gameState.isWhoseTurn() == gameState.isPlayer1IsWhite())
 					{
-						player1Score.setTextColor(currentPlayerColor);
-						player1Score.setTextColor(otherPlayerColor);
+						turnText.setText("Turn: White");
 					}
 					else
 					{
-						if(gameState.isWhoseTurn())
-						{
-							player1Score.setTextColor(otherPlayerColor);
-							player1Score.setTextColor(currentPlayerColor);
-						}
+						turnText.setText("Turn: Black");
 					}
 					
 					// Goes through player 1's pieces to see what ones are dead/alive
@@ -149,19 +140,14 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 	public void setAsGui(GameMainActivity act) {
 		super.setAsGui(act);
 
-		// remember who our activity is
-		this.activityForGui = act;
-
 		// remember the handler for the GUI thread
 		this.guiHandler = new Handler();
 
 		// Load the layout resource for the our GUI's configuration
-		activity.setContentView(R.layout.chess_human_player);
+		act.setContentView(R.layout.chess_human_player);
 
-		this.player1Score = (TextView) act
-				.findViewById(R.id.player1ScoreTextView);
-		this.player2Score = (TextView) act
-				.findViewById(R.id.player2ScoreTextView);
+		this.player1Score = (TextView) act.findViewById(R.id.player1ScoreTextView);
+		this.player2Score = (TextView) act.findViewById(R.id.player2ScoreTextView);
 
 		board = (ChessBoard) act.findViewById(R.id.gameBoardSurfaceView);
 
@@ -172,13 +158,23 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		}
 		
 		// Set the name text views:
-		TextView player1View = (TextView) activity
-				.findViewById(R.id.player1TextView);
-		TextView player2View = (TextView) activity
-				.findViewById(R.id.player2TextView);
-
-		player1View.setText(this.name);
-		player2View.setText(this.allPlayerNames[1]);
+		player1View = (TextView) act.findViewById(R.id.player1TextView);
+		player2View = (TextView) act.findViewById(R.id.player2TextView);
+		
+		turnText = (TextView) activity.findViewById(R.id.turnTextView);
+		
+		//TODO shorten names if necessary
+		if(player1View != null && name != null)
+		{
+			player1View.setText(name);
+		}
+		if(player2View != null && allPlayerNames != null)
+		{
+			if(allPlayerNames.length >1 && allPlayerNames[1] != null)
+			{
+				player2View.setText(allPlayerNames[1]);
+			}
+		}
 	}
 
 	@Override
@@ -186,5 +182,4 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		super.receiveInfo(info);
 		updateDisplay();
 	}
-
 }

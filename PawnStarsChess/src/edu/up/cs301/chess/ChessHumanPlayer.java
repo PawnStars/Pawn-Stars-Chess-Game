@@ -46,9 +46,10 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		ChessPiece.BISHOP
 	};
 	
-	// The TextView the displays the current counter value
+	// The TextView the displays the current score 
 	private TextView player1Score;
 	private TextView player2Score;
+	private TextView turnText;
 	
 	// The buttons at the side of the screen
 	private Button quitButton;
@@ -59,7 +60,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	//The board that draws each piece
 	private ChessBoard board;
 	
-	// the most recent game state, as given to us by the CounterLocalGame
+	// the most recent game state, as given to us by the LocalGame
 	private ChessGameState state;
 	
 	// the android activity that we are running
@@ -109,18 +110,13 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		board.setPieceMap(state.getPieceMap());
 		player1Score.setText("" + state.getPlayer1Points());
 		player2Score.setText("" + state.getPlayer2Points());
-		if(state.isWhoseTurn())
+		if(state.isWhoseTurn() == state.isPlayer1IsWhite())
 		{
-			player1Score.setTextColor(0xFF00FF00);
-			player1Score.setTextColor(0xFFFF0000);
+			turnText.setText("Turn: White");
 		}
 		else
 		{
-			if(state.isWhoseTurn())
-			{
-				player1Score.setTextColor(0xFFFF0000);
-				player1Score.setTextColor(0xFF00FF00);
-			}
+			turnText.setText("Turn: Black");
 		}
 		
 		// Goes through player 1's pieces to see what ones are dead/alive
@@ -240,6 +236,8 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				(TextView) activity.findViewById(R.id.player1ScoreTextView);
 		this.player2Score =
 				(TextView) activity.findViewById(R.id.player2ScoreTextView);
+		
+		turnText = (TextView) activity.findViewById(R.id.turnTextView);
 		
 		// Find the board
 		board = (ChessBoard)activity.findViewById(R.id.gameBoardSurfaceView);
@@ -496,6 +494,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						if(state.applyMove(move))
 						{
 							game.sendAction(move);
+							updateDisplay();
 						}
 						Log.d("human player", "sending this move: "+move);
 						
@@ -574,8 +573,15 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		TextView player2View = (TextView) activity
 				.findViewById(R.id.player2TextView);
 
-		player1View.setText(this.name);
-		player2View.setText(this.allPlayerNames[1]);
+		//TODO shorten names if necessary
+		if(player1View != null)
+		{
+			player1View.setText(this.name);
+		}
+		if(player2View != null)
+		{
+			player2View.setText(this.allPlayerNames[1]);
+		}
 	}
 
 	/**

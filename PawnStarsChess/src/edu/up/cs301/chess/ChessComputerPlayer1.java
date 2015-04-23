@@ -125,8 +125,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					//try again
 					move = makeMove();
 					game.sendAction(move);
-					
-					
 				}
 			}
 		}
@@ -327,6 +325,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	    String[] files = null;
 	    try
 	    {
+	    	//get all of the files in assets
 	        files = assetManager.list("");
 	    }
 	    catch (IOException e)
@@ -340,7 +339,9 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	        try
 	        {
 				File outFile = new File(activity.getCacheDir(),filename);
-				if(!outFile.exists())
+				
+				//only copy relevant files
+				if(!outFile.exists() && (filename.contains("engine") || filename.contains("cbk")))
 				{
 					in = assetManager.open(filename);
 					out = new FileOutputStream(outFile);
@@ -368,7 +369,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	                }
 	                catch (IOException e)
 	                {
-	                    // NOOP
+	                	Log.e("tag", "Failed to close source "+filename, e);
 	                }
 	            }
 	            if
@@ -380,7 +381,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	                }
 	                catch (IOException e)
 	                {
-	                    // NOOP
+	                	Log.e("tag", "Failed to close copy", e);
 	                }
 	            }
 	        }

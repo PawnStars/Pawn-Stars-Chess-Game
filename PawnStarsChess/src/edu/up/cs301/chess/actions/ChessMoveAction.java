@@ -64,10 +64,21 @@ public class ChessMoveAction extends GameAction {
 		{
 			this.takenPiece = null;
 		}
+		if(whichPiece != null)
+		{
+			this.whichPiece = new ChessPiece(whichPiece);
+		}
+		else
+		{
+			whichPiece = null;
+		}
 		
-		this.whichPiece = new ChessPiece(whichPiece);
-		this.newPos = Arrays.copyOf(newPos,2);
-		this.oldPos = Arrays.copyOf(whichPiece.getLocation(),2);
+		this.newPos = new int[2];
+		this.oldPos = new int[2];
+			
+		System.arraycopy(newPos, 0, this.newPos, 0, 2);
+		System.arraycopy(oldPos, 0, this.oldPos, 0, 2);
+		
 		makesCheck = false;
 		makesCheckmate = false;
 	}
@@ -90,9 +101,15 @@ public class ChessMoveAction extends GameAction {
 		}
 		//TODO: this caused a null pointer exception... 
 		//may need to fix after we implement checkmate properly
-		this.whichPiece = new ChessPiece(action.getWhichPiece());
-		this.newPos = Arrays.copyOf(action.getNewPos(),2);
-		this.oldPos = Arrays.copyOf(action.getOldPos(),2);
+		newPos = new int[2];
+		oldPos = new int[2];
+		if(action != null)
+		{
+			this.whichPiece = new ChessPiece(action.getWhichPiece());
+			
+			System.arraycopy(action.getNewPos(), 0, newPos, 0, 2);
+			System.arraycopy(action.getOldPos(), 0, oldPos, 0, 2);
+		}
 		makesCheck = action.isMakesCheck();
 		makesCheckmate = action.isMakesCheckmate();
 	}
@@ -261,9 +278,8 @@ public class ChessMoveAction extends GameAction {
 		int oldY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-3)+48;
 		int newX = text.charAt(text.length()-2)-97;
 		int newY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48;
-		
-		Log.d("computer player","x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY);
-		
+		//TODO make sure special moves work
+		String coords = "x:"+oldX+" y:"+oldY+" newX:"+newX+" newY:"+newY;
 		int[] newLoc = new int[]{newY,newX};
 		
 		ChessMoveAction move = null;
@@ -271,34 +287,54 @@ public class ChessMoveAction extends GameAction {
 		{
 			ChessPiece whichPiece = state.getPieceMap()[oldY][oldX];
 			ChessPiece takenPiece = state.getPieceMap()[newY][newX];
-			if(promotion != -1)
+			if(promotion != -1)//promotion
 			{
 				move = new PawnMove(player,whichPiece,newLoc,takenPiece,PawnMove.PROMOTION);
 				((PawnMove)move).setNewType(promotion);
 			}
-			else if(enPassant)
+			else if(enPassant)//en passant
 			{
-				//takenPiece = pieceMap[][]
-				//move = new PawnMove(player,whichPiece,newLoc,);
+				int dy = 0;
+				if(state.isWhoseTurn())
+				{
+					dy = 1;
+				}
+				else
+				{
+					dy = -1;
+				}
+				int[] loc = state.getCanEnPassant();
+				ChessPiece takenPiece2 = state.getPieceMap()[loc[0]+dy][loc[1]];
+				if(takenPiece != null && takenPiece.getType() == ChessPiece.PAWN)
+				{
+					return new PawnMove(player,whichPiece,newLoc,takenPiece2,PawnMove.EN_PASSANT);
+				}
+				else
+				{
+					Log.d("computer player"," cannot en passant at "+coords);
+					return null;
+				}
 			}
-			else if(leftCastle || rightCastle)
+			if(move == null && (leftCastle || rightCastle))//castling
 			{
+				int moveType;
 				if(leftCastle)
 				{
-					
+					moveType = RookMove.CASTLE_LEFT;
 				}
 				else//right 
 				{
-					
+					moveType = RookMove.CASTLE_RIGHT;
 				}
-				//move = new RookMove(player,whichPiece,);
+				return new RookMove(player, whichPiece, newLoc, null, moveType);
 			}
-			else
-			{
-				move = new ChessMoveAction(player,whichPiece,newLoc,takenPiece);
-			}
-			//TODO make special moves work
+			//normal move
+			return new ChessMoveAction(player,whichPiece,newLoc,takenPiece);
 		}
-		return move;
+		else
+		{
+			Log.d("computer player","invalid x:"+coords);
+			return null;
+		}
 	}
 }//class CounterMoveAction
