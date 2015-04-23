@@ -88,7 +88,8 @@ public class ChessMoveAction extends GameAction {
 		{
 			this.takenPiece = null;
 		}
-		
+		//TODO: this caused a null pointer exception... 
+		//may need to fix after we implement checkmate properly
 		this.whichPiece = new ChessPiece(action.getWhichPiece());
 		this.newPos = Arrays.copyOf(action.getNewPos(),2);
 		this.oldPos = Arrays.copyOf(action.getOldPos(),2);
