@@ -1757,6 +1757,7 @@ public class ChessGameState extends GameState {
 			}
 		}
 
+		//TODO: fix this code
 		if ((player1InCheck || player2InCheck) && this.getPossibleMoves(king).length == 0) {
 			isGameOver = true;
 		}
