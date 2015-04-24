@@ -239,7 +239,7 @@ public class ChessGameState extends GameState {
 		updateCanEnPassant();
 
 		canCastle = copyCastle(orig.getCanCastle());
-		updateCanCastle();
+		//updateCanCastle();
 
 		// canEnPassant = orig.getCanEnPassant();
 		// TODO copy these arrays
@@ -886,6 +886,10 @@ public class ChessGameState extends GameState {
 					}
 				}
 				originalCall = true;
+
+				//TODO: check to see if the pieces move will put the king in check
+				
+				
 			}
 		}
 
@@ -1559,8 +1563,7 @@ public class ChessGameState extends GameState {
 		}
 		if (success) {
 
-			// Check if the players can castle
-			updateCanCastle();
+			
 
 			// Switch turns
 			whoseTurn = !whoseTurn;
@@ -1571,6 +1574,11 @@ public class ChessGameState extends GameState {
 			// Check if any of the players are in check
 			isInCheck();
 
+			// Check if the players can castle (hack to get turn right)
+			whoseTurn = !whoseTurn;
+			updateCanCastle();
+			whoseTurn = !whoseTurn;
+						
 			// Check if any pawns can en passant
 			updateCanEnPassant();
 
@@ -1727,41 +1735,40 @@ public class ChessGameState extends GameState {
 		// find each king. If they have moved, the player can not castle
 		ChessPiece player1King = this.getKing(true);
 
-		// Check player 1:
+		// Check if player 1's king has moved:
 		if (player1King.getHasMoved() == true) {
-			// player 1 can not move
 			canCastle[1][0] = false; // left
 			canCastle[1][1] = false; // right
-		} else { // if the king has not moved
-			if (this.player1InCheck) { // if king is in check, player 1 can not castle
-				canCastle[1][0] = false; // left
-				canCastle[1][1] = false; // right
-			} else {
+		} else if (this.player1InCheck) { // if king is in check, player 1 can
+											// not castle
+			canCastle[1][0] = false; // left
+			canCastle[1][1] = false; // right
+		} else {
 
-				// If there are pieces to the left and right of player 1's king:
-				int xLocation = player1King.getLocation()[1];
-				int yLocation = player1King.getLocation()[0];
+			// If there are pieces to the left and right of player 1's king:
+			int xLocation = player1King.getLocation()[1];
+			int yLocation = player1King.getLocation()[0];
 
-				// Traverse one way:
-				if (!outOfBounds(xLocation + 1, yLocation)) {
-					if (this.pieceMap[yLocation][xLocation + 1] != null
-							|| this.pieceMap[yLocation][xLocation + 2] != null) {
-						canCastle[1][1] = false; // right
-					}
-
-					// Traverse other way:
-					if (this.pieceMap[yLocation][xLocation - 1] != null
-							|| this.pieceMap[yLocation][xLocation - 2] != null
-							|| this.pieceMap[yLocation][xLocation - 3] != null) {
-						canCastle[1][0] = false; // left
-					}
-
-					// TODO:
-					// Check to see if the player is going to attempt to castle
-					// through
-					// check:
+			// Traverse one way:
+			if (!outOfBounds(xLocation + 1, yLocation)) {
+				if (this.pieceMap[yLocation][xLocation + 1] != null
+						|| this.pieceMap[yLocation][xLocation + 2] != null) {
+					canCastle[1][1] = false; // right
 				}
+
+				// Traverse other way:
+				if (this.pieceMap[yLocation][xLocation - 1] != null
+						|| this.pieceMap[yLocation][xLocation - 2] != null
+						|| this.pieceMap[yLocation][xLocation - 3] != null) {
+					canCastle[1][0] = false; // left
+				}
+
+				// TODO:
+				// Check to see if the player is going to attempt to castle
+				// through
+				// check:
 			}
+
 		}
 
 		// Check for player 2:
@@ -1771,31 +1778,29 @@ public class ChessGameState extends GameState {
 			// player 2 can not move:
 			canCastle[0][0] = false;
 			canCastle[0][1] = false;
+		} else if (this.player2InCheck) {
+			canCastle[0][0] = false;
+			canCastle[0][1] = false;
 		} else {
-			if (this.player2InCheck) {
-				canCastle[0][0] = false;
-				canCastle[0][1] = false;
-			} else {
-				// If there are pieces to the left and right of player 2's king:
-				int xLocation = player2King.getLocation()[1];
-				int yLocation = player2King.getLocation()[0];
+			// If there are pieces to the left and right of player 2's king:
+			int xLocation = player2King.getLocation()[1];
+			int yLocation = player2King.getLocation()[0];
 
-				if (!outOfBounds(xLocation, yLocation + 1)) {
-					if (this.pieceMap[yLocation][xLocation + 1] != null
-							|| this.pieceMap[yLocation][xLocation + 2] != null) {
-						canCastle[0][1] = false; // right
-					}
-
-					// Traverse other way:
-					if (this.pieceMap[yLocation][xLocation - 1] != null
-							|| this.pieceMap[yLocation][xLocation - 2] != null
-							|| this.pieceMap[yLocation][xLocation -3] != null) {
-						canCastle[0][0] = false; // left
-					}
+			if (!outOfBounds(xLocation, yLocation + 1)) {
+				if (this.pieceMap[yLocation][xLocation + 1] != null
+						|| this.pieceMap[yLocation][xLocation + 2] != null) {
+					canCastle[0][1] = false; // right
 				}
-				// TODO:
-				// Check to see if the player would castle through check:
+
+				// Traverse other way:
+				if (this.pieceMap[yLocation][xLocation - 1] != null
+						|| this.pieceMap[yLocation][xLocation - 2] != null
+						|| this.pieceMap[yLocation][xLocation - 3] != null) {
+					canCastle[0][0] = false; // left
+				}
 			}
+			// TODO:
+			// Check to see if the player would castle through check:
 
 		}
 
