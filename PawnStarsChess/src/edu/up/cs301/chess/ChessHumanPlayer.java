@@ -78,8 +78,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	//the valid locations for a move using the lastPieceSelected
 	private boolean[][] validLocs;
 	
-	private Vibrator vibrator;
-	
 	//The last move generated
 	private ChessMoveAction move;
 	
@@ -108,22 +106,21 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	 */
 	protected void updateDisplay() {
 		board.setPieceMap(state.getPieceMap());
+		
+		//update player points display
 		player1Score.setText("" + state.getPlayer1Points());
 		player2Score.setText("" + state.getPlayer2Points());
-		if(state.isWhoseTurn() == state.isPlayer1IsWhite())
-		{
+		
+		//update turn indicator
+		if(state.isWhoseTurn() == state.isPlayer1IsWhite()) {
 			turnText.setText("Turn: White");
-		}
-		else
-		{
+		} else {
 			turnText.setText("Turn: Black");
 		}
 		
 		// Goes through player 1's pieces to see what ones are dead/alive
 		for (int i = 0; i < state.getPlayer1Pieces().length; i++) {
-			if (state.getPlayer1Pieces()[i].isAlive()) {
-				
-			} else if (state.getPlayer1Pieces()[i].isAlive() == false) {
+			if (state.getPlayer1Pieces()[i].isAlive() == false) {
 				//Add the taken piece to either the white or black array in Board Class
 				if (state.getPlayer1Pieces()[i].isWhite()){
 					board.setWhiteTakenPiece(state.getPlayer1Pieces()[i], i);
@@ -136,8 +133,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 
 		// Goes through player 2's pieces to see what ones are dead/alive
 		for (int j = 0; j < state.getPlayer2Pieces().length; j++) {
-			if (state.getPlayer2Pieces()[j].isAlive()) {
-			} else if (state.getPlayer2Pieces()[j].isAlive() == false) {
+			if (state.getPlayer2Pieces()[j].isAlive() == false) {
 				//Add the taken piece to either the white or black array in Board Class
 				if (state.getPlayer2Pieces()[j].isWhite()){
 					board.setWhiteTakenPiece(state.getPlayer2Pieces()[j], j);
@@ -244,8 +240,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		
 		board.setOnTouchListener(this);
 		
-		vibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
-		
 		//Ask which color the player wants to be.
 		String colorQuestion =
 				activity.getResources().getString(R.string.dialog_color_question);
@@ -323,8 +317,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				}
 				//Log.d("human player","selected x:"+tileX+" y:"+tileY);
 				int[] selectedLoc = new int[]{tileY,tileX};
-				
-				
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -511,7 +503,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					board.setSelectedTiles(null);
 					board.setSelectedLoc(-1, -1);
 					lastPieceSelected = null;
-					vibrate(100);//to tell the user they did something wrong
 				}
 				
 				//selected a piece to see what tiles it can move to
@@ -624,11 +615,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				lastPieceSelected = null;
 			}
 		}
-	}
-	
-	public void vibrate(int time)
-	{
-		vibrator.vibrate(time);
 	}
 
 	/**

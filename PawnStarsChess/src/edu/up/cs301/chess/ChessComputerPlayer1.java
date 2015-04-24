@@ -168,7 +168,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					public void run()
 					{
 						//client.sendCommand("uci");//the list of commands
-						//TODO stop the engine from playing as your color
 						if (client != null && client.startEngine())
 						{
 							String FEN = gameState.toFEN();
@@ -307,8 +306,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		// remember who our activity is
 		activity = act;
 		
-		engineHandler = new Handler();
-		
 		//copy assets
 		if(smart > 1)
 		{
@@ -327,6 +324,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			}
 			client = new UCIInterface(engine);
 		}
+		
+		engineHandler = new Handler();
 	}
 	
 	private void copyAssets()

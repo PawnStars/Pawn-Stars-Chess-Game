@@ -229,7 +229,6 @@ public class ChessGameState extends GameState {
 			moveList.add(it2.next().clone());
 			// TODO make sure the moves are copied
 		}
-		originalCall2 = orig.originalCall2;
 
 		updateCanCastle();
 		updateCanEnPassant();
@@ -263,10 +262,6 @@ public class ChessGameState extends GameState {
 
 		player1PawnMaterial = orig.getPlayer1PawnMaterial();
 		player2PawnMaterial = orig.getPlayer2PawnMaterial();
-
-		// To prevent recursive function definitions:
-		originalCall = orig.originalCall;
-		// originalCall2 = orig.originalCall2;
 	}
 
 	/**
@@ -797,7 +792,7 @@ public class ChessGameState extends GameState {
 	 * @param piece
 	 * @return
 	 */
-	public boolean[][] getPossibleMoves(ChessPiece piece) {
+	public boolean[][] getPossibleMoves(ChessPiece piece,boolean legal) {
 		boolean[][] moves = null;
 
 		if (piece == null || !piece.isAlive()) {
@@ -822,8 +817,6 @@ public class ChessGameState extends GameState {
 			isInCheck = true;
 		}
 
-		boolean isKingMove = false;
-
 		switch (piece.getType()) {
 		case ChessPiece.PAWN:
 			moves = getPawnMoves(xLocation, yLocation, piece, isInCheck);
@@ -838,38 +831,29 @@ public class ChessGameState extends GameState {
 			moves = getQueenMoves(xLocation, yLocation, piece, isInCheck);
 			break;
 		case ChessPiece.KING:
-			if (originalCall2) {
-				isKingMove = true;
-				originalCall2 = false;
-				moves = getKingMoves(xLocation, yLocation, piece, isInCheck);
-				originalCall2 = true;
-			}
+			moves = getKingMoves(xLocation, yLocation, piece, isInCheck);
 			break;
 		case ChessPiece.ROOK:
 			moves = getRookMoves(xLocation, yLocation, piece, isInCheck);
 			break;
 		}
 
-		if (!isKingMove) {
+		if (piece.getType() != ChessPiece.KING && moves != null) {
 			// See if the player is in check, and update
 			// moves appropriately if they are:
-			if (isInCheck && originalCall) {
-				originalCall = false;
+			if (isInCheck && legal) {
 				// Traverse through the valid moves, and see
 				// if they will stop the king from being in check:
 				for (int row = 0; row < BOARD_WIDTH; ++row) {
 					for (int col = 0; col < BOARD_HEIGHT; ++col) {
-						if (moves != null) {
-							if (moves[row][col] == true) {
-								int[] pieceLocation = { row, col };
-								if (!this.willSaveKing(pieceLocation, piece)) {
-									moves[row][col] = false;
-								}
+						if (moves[row][col] == true) {
+							int[] pieceLocation = { row, col };
+							if (!this.willSaveKing(pieceLocation, piece)) {
+								moves[row][col] = false;
 							}
 						}
 					}
 				}
-				originalCall = true;
 			}
 		}
 
@@ -890,8 +874,6 @@ public class ChessGameState extends GameState {
 	 *         means the piece can move there, false means it can not move
 	 *         there.
 	 */
-	private boolean originalCall = true;
-
 	public boolean[][] getPawnMoves(int xLocation, int yLocation,
 			ChessPiece piece, boolean isInCheck) {
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
@@ -991,7 +973,7 @@ public class ChessGameState extends GameState {
 	 */
 	public boolean willSaveKing(int[] newLocation, ChessPiece piece) {
 		// Get all the pieces currently attacking the king:
-		ChessPiece[] pieces = this.getAttackingPieces();
+		ChessPiece[] pieces = this.getAttackingPieces(getKing(whoseTurn).getLocation());
 
 		// See if the move saves the king from being attacked:
 		ChessGameState stateCopy = new ChessGameState(this);
@@ -1009,7 +991,7 @@ public class ChessGameState extends GameState {
 		}
 		stateCopy.pieceMap[x][y] = piece;
 
-		pieces = stateCopy.getAttackingPieces();
+		pieces = stateCopy.getAttackingPieces(getKing(whoseTurn).getLocation());
 		if (pieces == null) {
 			return true;
 		} else {
@@ -1023,10 +1005,10 @@ public class ChessGameState extends GameState {
 	 * 
 	 */
 
-	private ChessPiece[] getAttackingPieces() {
+	public ChessPiece[] getAttackingPieces(int[] kingLoc) {
 		ArrayList<ChessPiece> attackingPieces = new ArrayList<ChessPiece>();
 		// TODO make sure this is getting the correct king
-		ChessPiece king = this.getKing(this.whoseTurn);
+		//ChessPiece king = this.getKing(this.whoseTurn);
 
 		// Find all pieces of opposite color, and see if their valid
 		// moves would kill the king:
@@ -1040,7 +1022,7 @@ public class ChessGameState extends GameState {
 		// Traverse each piece:
 		for (ChessPiece piece : pieces) {
 			// Get the possible moves for that piece:
-			boolean[][] moves = this.getPossibleMoves(piece);
+			boolean[][] moves = this.getPossibleMoves(piece,true);
 			if (moves != null) {
 				for (int i = 0; i < BOARD_WIDTH; ++i) {
 					for (int j = 0; j < BOARD_HEIGHT; ++j) {
@@ -1048,8 +1030,8 @@ public class ChessGameState extends GameState {
 						// moves can kill the king:
 						if (moves[i][j] == true) {
 							int[] location = { i, j };
-							if (location[0] == king.getLocation()[0]
-									&& location[1] == king.getLocation()[1]) {
+							if (location[0] == kingLoc[0]
+									&& location[1] == kingLoc[1]) {
 								// If it can, add the piece to the list:
 								attackingPieces.add(piece);
 							}
@@ -1092,7 +1074,7 @@ public class ChessGameState extends GameState {
 		// Traverse each piece:
 		for (ChessPiece piece : pieces) {
 			// Get the possible moves for that piece:
-			boolean[][] moves = this.getPossibleMoves(piece);
+			boolean[][] moves = this.getPossibleMoves(piece,true);
 			if (moves != null) {
 				for (int i = 0; i < BOARD_WIDTH; ++i) {
 					for (int j = 0; j < BOARD_HEIGHT; ++j) {
@@ -1500,7 +1482,7 @@ public class ChessGameState extends GameState {
 		int oldYPos = piece.getLocation()[0];
 		int oldXPos = piece.getLocation()[1];
 
-		boolean[][] validMoves = getPossibleMoves(piece);
+		boolean[][] validMoves = getPossibleMoves(piece,true);
 
 		if (act instanceof RookMove) {
 			// Castling
@@ -1696,7 +1678,7 @@ public class ChessGameState extends GameState {
 
 		// See what tiles each piece can attack
 		for (int i = 0; i < NUM_PIECES; i++) {
-			boolean[][] tempAttacked = getPossibleMoves(attackPieces[i]);
+			boolean[][] tempAttacked = getPossibleMoves(attackPieces[i],true);
 			if (tempAttacked != null && tempAttacked[y][x] == true) {
 				// A piece can attack a king if you don't do anything
 				player1InCheck = whoseTurn;
@@ -1708,7 +1690,7 @@ public class ChessGameState extends GameState {
 		}
 
 		//TODO: fix this code
-		if ((player1InCheck || player2InCheck) && this.getPossibleMoves(king).length == 0) {
+		if ((player1InCheck || player2InCheck) && this.getPossibleMoves(king,true).length == 0) {
 			isGameOver = true;
 		}
 		
@@ -1737,7 +1719,6 @@ public class ChessGameState extends GameState {
 						canEnPassant[0] = lastMove.getNewPos()[0]+1;
 					}
 				}
-				
 			}
 		}
 		//Log.d("game state","can en passant x:"+canEnPassant[1]+" y:"+canEnPassant[0]);
@@ -1761,13 +1742,11 @@ public class ChessGameState extends GameState {
 			boolean[][] attackedSquares = new boolean[BOARD_HEIGHT][BOARD_WIDTH];
 			boolean player1 = (y == 1);
 			ChessPiece king = getKing(player1);
-			if (player1)// player 1
-			{
+			if (player1) {// player 1
 				firstRank = BOARD_HEIGHT - 1;// the rook and king's initial row
 				check = player1InCheck;
 				attackPieces = player2Pieces;
-			} else // player 2
-			{
+			} else {// player 2
 				firstRank = 0;// the rook and king's initial row
 				check = player2InCheck;
 				attackPieces = player1Pieces;
@@ -1777,7 +1756,7 @@ public class ChessGameState extends GameState {
 
 			// find the squares that can be attacked in the first rank
 			for (int i = 0; i < NUM_PIECES; i++) {
-				boolean[][] tempAttackedSquares = getPossibleMoves(attackPieces[i]);
+				boolean[][] tempAttackedSquares = getPossibleMoves(attackPieces[i],true);
 
 				if (tempAttackedSquares != null) {
 					for (int j = 0; j < BOARD_WIDTH; j++) {
@@ -1786,17 +1765,23 @@ public class ChessGameState extends GameState {
 				}
 			}
 
-			xLoop: for (int x = 0; x < canCastle[0].length; x++) {
-				if ((rooks[x] == null || !rooks[x].isAlive()
-						|| rooks[x].getHasMoved() || rooks[x].getType() != ChessPiece.ROOK)
-						|| (king == null || king.getHasMoved()) || check) {
-					/*
-					 * According to the rules of chess, there are special
-					 * conditions when castling is not allowed. If the rook is
-					 * not in the right spot, or it moved, or the piece found is
-					 * not a rook, or the king was not found, or the king moved,
-					 * or the king is in check, then the player may not castle.
-					 */
+			xLoop:
+			for (int x = 0; x < canCastle[0].length; x++) {
+				/*
+				 * According to the rules of chess, there are special
+				 * conditions when castling is not allowed.
+				 */
+				if (rooks[x] == null || !rooks[x].isAlive()) {
+					//make sure the piece is alive
+					continue xLoop;
+				} if(rooks[x].getHasMoved() || rooks[x].getType() != ChessPiece.ROOK) {
+					//make sure the rook array has a rook that didn't move
+					continue xLoop;
+				} if(king == null || king.getHasMoved() || king.getType() != ChessPiece.KING) {
+					//make sure the king is a king that hasn't moved
+					continue xLoop;
+				} if(check) {
+					//make sure the king isn't in check
 					continue xLoop;
 				}
 
@@ -1820,7 +1805,6 @@ public class ChessGameState extends GameState {
 				// If it reached this point, the player can castle
 				canCastle[y][x] = true;
 			}
-
 		}
 	}
 

@@ -319,6 +319,8 @@ public class ChessBoard extends SurfaceView
 		blackPieceColor.setColor(0xFF000000);//black
 		highlightColor.setColor(0xAA32CD32);//faded green
 		selectColor.setColor(0xFF00FF00);//blue
+		
+		//make the background transparent
 		setZOrderOnTop(true);
 		SurfaceHolder holder = getHolder();
 		holder.setFormat(PixelFormat.TRANSPARENT);
@@ -337,6 +339,20 @@ public class ChessBoard extends SurfaceView
 		if(pieceMap.length != ChessGameState.BOARD_HEIGHT || pieceMap[0].length != ChessGameState.BOARD_WIDTH)
 		{
 			return;
+		}
+		outerloop:
+		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
+		{
+			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			{
+				//look for the new location of a piece
+				if(this.pieceMap[i][j] == null && pieceMap[i][j] != null)
+				{
+					//select that piece
+					selectedLoc = new int[]{i,j};
+					break outerloop;
+				}
+			}
 		}
 		this.pieceMap = pieceMap;
 		invalidate();
