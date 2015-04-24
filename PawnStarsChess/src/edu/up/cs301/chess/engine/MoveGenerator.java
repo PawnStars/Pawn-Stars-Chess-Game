@@ -217,7 +217,7 @@ public class MoveGenerator {
 		}
 		
 		//Get the locations the piece can move to
-		boolean[][] possibleLocs = state.getPossibleMoves(piece);
+		boolean[][] possibleLocs = state.getSavedPossibleMoves(piece);
 		
 		if(possibleLocs == null)
 		{
@@ -304,10 +304,10 @@ public class MoveGenerator {
 		
 		//Convert to an array
 		ChessMoveAction[] rtnVal = moveList.toArray(new ChessMoveAction[moveList.size()]);
-		if(legal)
+		/*if(legal)
 		{
 			rtnVal =  removeIllegalMoves(state, rtnVal,color);
-		}
+		}*/
 		/*String debugMsg = "";
 		debugMsg+="Possible moves: ";
 		for(ChessMoveAction move:rtnVal)

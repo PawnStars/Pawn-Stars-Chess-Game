@@ -511,7 +511,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					if(pieceSelected.isWhite() == isWhite())
 					{
 						// Highlight valid moves for the player:
-						validLocs = state.getPossibleMoves(pieceSelected);
+						validLocs = state.getSavedPossibleMoves(pieceSelected);
 						board.setSelectedTiles(validLocs);
 						board.setSelectedLoc(tileY,tileX);
 						

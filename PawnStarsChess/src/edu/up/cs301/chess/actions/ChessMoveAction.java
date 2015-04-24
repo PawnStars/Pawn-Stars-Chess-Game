@@ -249,7 +249,7 @@ public class ChessMoveAction extends GameAction {
 			text = text.substring(0, text.length()-2);
 		}
 		
-		//check for special moves
+		//check for special moves and get rid of that info from the string
 		boolean enPassant = false;
 		boolean rightCastle = false;
 		boolean leftCastle = false;
@@ -332,7 +332,7 @@ public class ChessMoveAction extends GameAction {
 		{
 			if(p.getType() == ChessPiece.PAWN)
 			{
-				boolean[][] locs = state.getPossibleMoves(p);
+				boolean[][] locs = state.getSavedPossibleMoves(p);
 				if(locs[newY][newX] == true)
 				{
 					whichPieces.add(p);
