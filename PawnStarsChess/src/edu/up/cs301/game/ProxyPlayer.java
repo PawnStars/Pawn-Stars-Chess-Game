@@ -139,5 +139,11 @@ public class ProxyPlayer implements GamePlayer {
     public boolean supportsGui() {
     	return false;
     }
+
+	@Override
+	public void receiveActivity(GameMainActivity activity) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

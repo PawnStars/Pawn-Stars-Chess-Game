@@ -48,7 +48,7 @@ public class ChessBoard extends SurfaceView
 	// the highlighted tiles on the screen
 	private boolean[][] selectedTiles = new boolean[ChessGameState.BOARD_WIDTH][ChessGameState.BOARD_HEIGHT];
 	
-	private int[] selectedLoc = new int[]{-1,-1};
+	private byte[] selectedLoc = new byte[]{-1,-1};
 
 	// true if the board is flipped upside down
 	// false if not
@@ -340,17 +340,20 @@ public class ChessBoard extends SurfaceView
 		{
 			return;
 		}
-		outerloop:
-		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
+		if(this.pieceMap != null)
 		{
-			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			outerloop:
+			for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 			{
-				//look for the new location of a piece
-				if(this.pieceMap[i][j] == null && pieceMap[i][j] != null)
+				for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 				{
-					//select that piece
-					selectedLoc = new int[]{i,j};
-					break outerloop;
+					//look for the new location of a piece
+					if(this.pieceMap[i][j] == null && pieceMap[i][j] != null)
+					{
+						//select that piece
+						selectedLoc = new byte[]{(byte) i,(byte) j};
+						break outerloop;
+					}
 				}
 			}
 		}
@@ -388,9 +391,9 @@ public class ChessBoard extends SurfaceView
 	 * 		  j the index of the columns across the chess board
 	 */
 	public void setSelectedLoc(int i,int j) {
-		int[] newSelectedLoc = new int[2];
-		newSelectedLoc[0] = j;
-		newSelectedLoc[1] = i;
+		byte[] newSelectedLoc = new byte[2];
+		newSelectedLoc[0] = (byte) j;
+		newSelectedLoc[1] = (byte) i;
 		
 		selectedLoc = newSelectedLoc;
 		invalidate();

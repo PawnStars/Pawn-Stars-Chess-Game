@@ -210,7 +210,7 @@ public class MoveGenerator {
 		}
 		
 		int type = piece.getType();
-		int[] loc = piece.getLocation();
+		byte[] loc = piece.getLocation();
 		if(type == ChessPiece.INVALID || loc == null)
 		{
 			return null;
@@ -227,13 +227,13 @@ public class MoveGenerator {
 		
 		//Add a move for each location it can more to
 		ArrayList<ChessMoveAction> moveList = new ArrayList<ChessMoveAction>();
-		for(int i=0;i<ChessGameState.BOARD_HEIGHT;i++)
+		for(byte i=0;i<ChessGameState.BOARD_HEIGHT;i++)
 		{
-			for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+			for(byte j=0;j<ChessGameState.BOARD_WIDTH;j++)
 			{
 				if(possibleLocs[i][j])
 				{
-					int[] newLoc = new int[]{i,j};
+					byte[] newLoc = new byte[]{i,j};
 					
 					ChessPiece taken = state.getPieceMap()[i][j];
 					
@@ -274,7 +274,7 @@ public class MoveGenerator {
 						if(taken != null && taken.getType() == ChessPiece.KING && taken.isWhite() == piece.isWhite())
 						{
 							//castling
-							int moveType = 0;
+							byte moveType = 0;
 							if(piece.getLocation()[1] == 0)
 							{
 								moveType = RookMove.CASTLE_LEFT;

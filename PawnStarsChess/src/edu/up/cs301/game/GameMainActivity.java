@@ -283,7 +283,7 @@ View.OnClickListener {
 			GamePlayerType gpt = config.getSelType(i); // the player's type
 			GamePlayerType[] availTypes = config.getAvailTypes(); // the available player types
 			players[i] = gpt.createPlayer(name); // create the player
-
+			players[i].receiveActivity(this);
 			// check that the player name is legal
 			if (name.length() <= 0 && gpt != availTypes[availTypes.length-1]) {
 				// disallow an empty player name, unless it's a dummy (proxy) player
@@ -298,11 +298,6 @@ View.OnClickListener {
 			}
 			else if(players[i].supportsGui())
 			{
-				if(!players[i].requiresGui())
-				{
-					//give these players a reference to the gui once
-					players[i].setAsGui(this);
-				}
 				if(guiPlayer == null) {
 					guiPlayer = players[i];
 				}

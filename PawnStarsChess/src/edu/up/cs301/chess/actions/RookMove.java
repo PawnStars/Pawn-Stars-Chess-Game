@@ -24,17 +24,17 @@ public class RookMove extends ChessMoveAction {
 	private static final long serialVersionUID = -1949275900587108452L;
 	
 	//the types of special moves for rooks
-	public static final int CASTLE_RIGHT = 1;
-	public static final int CASTLE_LEFT = 0;
-	public static final int NONE = 2;
+	public static final byte CASTLE_RIGHT = 1;
+	public static final byte CASTLE_LEFT = 0;
+	public static final byte NONE = 2;
 	
 	//the type of this move
-	private int type;
+	private byte type;
 	
 	/**
 	 * Default constructor for RookMove, does what ChessMoveAction does
 	 */
-	public RookMove(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece, int type) {
+	public RookMove(GamePlayer player, ChessPiece whichPiece, byte[] newPos, ChessPiece takenPiece, byte type) {
 		super(player, whichPiece, newPos, takenPiece);
 		this.type = type;
 	}
@@ -56,7 +56,7 @@ public class RookMove extends ChessMoveAction {
 	 * Returns the type of the move
 	 * @return type
 	 */
-	public int getType() {
+	public byte getType() {
 		return type;
 	}
 	

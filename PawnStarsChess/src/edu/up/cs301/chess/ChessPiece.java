@@ -25,15 +25,15 @@ public class ChessPiece implements Serializable {
 	private static final long serialVersionUID = 773749376698451826L;
 	
 	//The names for what each Piece can be
-	public static final int PAWN = 5;
-	public static final int ROOK = 2;
-	public static final int BISHOP = 3;
-	public static final int KNIGHT = 4;
-	public static final int QUEEN = 0;
-	public static final int KING = 1;
+	public static final byte PAWN = 5;
+	public static final byte ROOK = 2;
+	public static final byte BISHOP = 3;
+	public static final byte KNIGHT = 4;
+	public static final byte QUEEN = 0;
+	public static final byte KING = 1;
 	
-	public static final int INVALID = -1;
-	public static final int[] INVALID_LOCATION = new int[]{-1,-1};
+	public static final byte INVALID = -1;
+	public static final byte[] INVALID_LOCATION = new byte[]{-1,-1};
 	
 	public static final int NUM_TYPES = 6;
 	
@@ -45,10 +45,10 @@ public class ChessPiece implements Serializable {
 	private boolean isAlive;
 	
 	//Indicates which type of piece it is.
-	private int type = INVALID; 
+	private byte type = INVALID; 
 	
 	//Indicates where the piece is on the board
-	private int[] location = new int[2];
+	private byte[] location = new byte[2];
 	
 	/**
 	 * Ctor
@@ -56,7 +56,7 @@ public class ChessPiece implements Serializable {
 	 * @param type: Constant used to indicate which piece
 	 * @param isWhite: true if the piece is white
 	 */
-	public ChessPiece (int type, boolean isWhite) {
+	public ChessPiece (byte type, boolean isWhite) {
 		this.type = type;
 		this.hasMoved = false;
 		this.isWhite = isWhite;
@@ -85,7 +85,7 @@ public class ChessPiece implements Serializable {
 	 * 
 	 * @return the type of this piece represented as an int
 	 */
-	public int getType()
+	public byte getType()
 	{
 		return type;
 	}
@@ -125,7 +125,7 @@ public class ChessPiece implements Serializable {
 	 * Sets hasMoved to true and sets a new location
 	 * @param the new location of the piece
 	 */
-	public void move(int[] newLoc)
+	public void move(byte[] newLoc)
 	{
 		hasMoved = true;
 		location = Arrays.copyOf(newLoc,2);
@@ -135,7 +135,7 @@ public class ChessPiece implements Serializable {
 	 * Returns the location
 	 * @return the location of the piece
 	 */
-	public int[] getLocation() {
+	public byte[] getLocation() {
 		return location;
 	}
 
@@ -143,7 +143,7 @@ public class ChessPiece implements Serializable {
 	 * Change the type of this ChessPiece in the case of promotion
 	 * @param type
 	 */
-	public void setType(int type)
+	public void setType(byte type)
 	{
 		this.type = type;
 	}
@@ -152,7 +152,7 @@ public class ChessPiece implements Serializable {
 	 * Changes the location of this piece
 	 * @param location
 	 */
-	public void setLocation(int[] location)
+	public void setLocation(byte[] location)
 	{
 		this.location = Arrays.copyOf(location,2);
 	}

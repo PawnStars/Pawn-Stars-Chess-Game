@@ -31,5 +31,7 @@ public interface GamePlayer {
 	
 	// whether this player supports a GUI
 	public boolean supportsGui();
+	
+	public abstract void receiveActivity(GameMainActivity activity);
 
 }// interface GamePlayer

@@ -32,10 +32,10 @@ public class ChessMoveAction extends GameAction {
 	protected ChessPiece takenPiece;
 	
 	//The new location of the selected piece
-	protected int[] newPos;
+	protected byte[] newPos;
 	
 	//The old location of the selected piece
-	protected int[] oldPos;
+	protected byte[] oldPos;
 	
 	protected boolean makesCheck;
 	
@@ -51,7 +51,7 @@ public class ChessMoveAction extends GameAction {
 	 * @param whichPlayer
 	 *            value to initialize which player is white
 	 */
-	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece)
+	public ChessMoveAction(GamePlayer player, ChessPiece whichPiece, byte[] newPos, ChessPiece takenPiece)
 	{
 		super(player);
 		
@@ -64,8 +64,8 @@ public class ChessMoveAction extends GameAction {
 			this.takenPiece = null;
 		}
 		
-		this.newPos = new int[2];
-		this.oldPos = new int[2];
+		this.newPos = new byte[2];
+		this.oldPos = new byte[2];
 		if(whichPiece != null)
 		{
 			this.whichPiece = new ChessPiece(whichPiece);
@@ -106,8 +106,8 @@ public class ChessMoveAction extends GameAction {
 		}
 		//TODO: this caused a null pointer exception... 
 		//may need to fix after we implement checkmate properly
-		newPos = new int[2];
-		oldPos = new int[2];
+		newPos = new byte[2];
+		oldPos = new byte[2];
 		if(action != null)
 		{
 			if(action.getWhichPiece() != null)
@@ -117,9 +117,9 @@ public class ChessMoveAction extends GameAction {
 			
 			System.arraycopy(action.getNewPos(), 0, newPos, 0, 2);
 			System.arraycopy(action.getOldPos(), 0, oldPos, 0, 2);
+			makesCheck = action.isMakesCheck();
+			makesCheckmate = action.isMakesCheckmate();
 		}
-		makesCheck = action.isMakesCheck();
-		makesCheckmate = action.isMakesCheckmate();
 	}
 
 	/**
@@ -143,11 +143,11 @@ public class ChessMoveAction extends GameAction {
 	 * Gets the new location of the piece
 	 * @return an int array of size 2 with the new position of the ChessPiece
 	 */
-	public int[] getNewPos() {
+	public byte[] getNewPos() {
 		return newPos;
 	}
 	
-	public int[] getOldPos() {
+	public byte[] getOldPos() {
 		return oldPos;
 	}
 
@@ -174,45 +174,47 @@ public class ChessMoveAction extends GameAction {
 	public String toString()
 	{
 		String msg = "";
-		int pieceType = whichPiece.getType();
-		if(pieceType == ChessPiece.QUEEN)
+		if(whichPiece != null)
 		{
-			msg += "Q";
+			byte pieceType = whichPiece.getType();
+			if(pieceType == ChessPiece.QUEEN)
+			{
+				msg += "Q";
+			}
+			if(pieceType == ChessPiece.KING)
+			{
+				msg += "K";
+			}
+			if(pieceType == ChessPiece.ROOK)
+			{
+				msg += "R";
+			}
+			if(pieceType == ChessPiece.BISHOP)
+			{
+				msg += "B";
+			}
+			if(pieceType == ChessPiece.KNIGHT)
+			{
+				msg += "N";
+			}
+			if(takenPiece != null)
+			{
+				msg += "x";
+			}
+			msg += (char)(97+oldPos[1]);
+			msg += ChessGameState.BOARD_HEIGHT-oldPos[0];
+			msg += (char)(97+newPos[1]);
+			msg += ChessGameState.BOARD_HEIGHT-newPos[0];
+			
+			if(makesCheck)
+			{
+				msg += "+";
+			}
+			else if(makesCheckmate)
+			{
+				msg += "#";
+			}
 		}
-		if(pieceType == ChessPiece.KING)
-		{
-			msg += "K";
-		}
-		if(pieceType == ChessPiece.ROOK)
-		{
-			msg += "R";
-		}
-		if(pieceType == ChessPiece.BISHOP)
-		{
-			msg += "B";
-		}
-		if(pieceType == ChessPiece.KNIGHT)
-		{
-			msg += "N";
-		}
-		if(takenPiece != null)
-		{
-			msg += "x";
-		}
-		msg += (char)(97+oldPos[1]);
-		msg += ChessGameState.BOARD_HEIGHT-oldPos[0];
-		msg += (char)(97+newPos[1]);
-		msg += ChessGameState.BOARD_HEIGHT-newPos[0];
-		
-		if(makesCheck)
-		{
-			msg += "+";
-		}
-		else if(makesCheckmate)
-		{
-			msg += "#";
-		}
-		
 		return msg;
 	}
 	
@@ -253,7 +255,7 @@ public class ChessMoveAction extends GameAction {
 		boolean enPassant = false;
 		boolean rightCastle = false;
 		boolean leftCastle = false;
-		int promotion = -1;
+		byte promotion = -1;
 		if(text.contains("e.p."))//en passant
 		{
 			enPassant = true;
@@ -287,14 +289,14 @@ public class ChessMoveAction extends GameAction {
 			}
 		}
 		
-		int oldX = -1;
-		int oldY = -1;
-		int newX = -1;
-		int newY = -1;
+		byte oldX = -1;
+		byte oldY = -1;
+		byte newX = -1;
+		byte newY = -1;
 		if(text.length() >= 2)
 		{
-			newX = text.charAt(text.length()-2)-97;
-			newY = ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48;
+			newX = (byte) (text.charAt(text.length()-2)-97);
+			newY = (byte) (ChessGameState.BOARD_HEIGHT-text.charAt(text.length()-1)+48);
 			text = text.substring(0, text.length()-2);
 			Log.d("move parser","move text without end pos:"+text);
 		}
@@ -312,7 +314,7 @@ public class ChessMoveAction extends GameAction {
 		}
 		
 		//get all the pieces that can move to the right spot
-		int[] newLoc = new int[]{newY,newX};
+		byte[] newLoc = new byte[]{newY,newX};
 		Vector<ChessPiece> whichPieces = new Vector<ChessPiece>();
 		ChessPiece[] temp = state.getAttackingPieces(newLoc);
 		
@@ -382,10 +384,10 @@ public class ChessMoveAction extends GameAction {
 			
 			if(x >= 0 && x < ChessGameState.BOARD_HEIGHT && oldX != -1) {
 				//if c wasn't a file, it will be out of bounds
-				oldX = x;
+				oldX = (byte) x;
 			} else if(y >= 0 && y < ChessGameState.BOARD_HEIGHT && oldY != -1) {
 				//if c wasn't a rank, it will be out of bounds
-				oldY = y;
+				oldY = (byte) y;
 			}
 		}
 		
@@ -406,7 +408,7 @@ public class ChessMoveAction extends GameAction {
 		{
 			for(ChessPiece p:whichPieces)
 			{
-				int[] loc = p.getLocation();
+				byte[] loc = p.getLocation();
 				
 				//the piece must be the right type
 				if(pieceType == p.getType())
@@ -465,7 +467,7 @@ public class ChessMoveAction extends GameAction {
 			}
 			if((leftCastle || rightCastle))//castling
 			{
-				int moveType;
+				byte moveType;
 				int x;
 				int y;
 				

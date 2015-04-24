@@ -286,48 +286,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		//Do not accept if the computer is smart
 	}
 	
-	@Override
-	public boolean supportsGui() {
-		return true;
-	}
-	
-	/**
-	 * callback method--our player has been chosen/rechosen to be the GUI,
-	 * called from the GUI thread.
-	 * 
-	 * @param a
-	 * 		the activity under which we are running
-	 */
-	@Override
-	public void setAsGui(GameMainActivity act) {
-		
-		Log.d("computer player","setting computer as gui");
-		
-		// remember who our activity is
-		activity = act;
-		
-		//copy assets
-		if(smart > 1)
-		{
-			copyAssets();
-			String engine = "";
-			for(String str: engines)
-			{
-				if(str.contains("stockfish") && smart == STOCKFISH)
-		        {
-		        	engine = str;
-		        }
-				else if(str.contains("critter") && smart == CRITTER)
-		        {
-		        	engine = str;
-		        }
-			}
-			client = new UCIInterface(engine);
-		}
-		
-		engineHandler = new Handler();
-	}
-	
 	private void copyAssets()
 	{
 	    AssetManager assetManager = activity.getAssets();
@@ -410,6 +368,35 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	    while((read = in.read(buffer)) != -1){
 	      out.write(buffer, 0, read);
 	    }
+	}
+
+	@Override
+	public void receiveActivity(GameMainActivity activity) {
+		Log.d("computer player","setting computer as gui");
+		
+		// remember who our activity is
+		this.activity = activity;
+		
+		//copy assets
+		if(smart > 1)
+		{
+			copyAssets();
+			String engine = "";
+			for(String str: engines)
+			{
+				if(str.contains("stockfish") && smart == STOCKFISH)
+		        {
+		        	engine = str;
+		        }
+				else if(str.contains("critter") && smart == CRITTER)
+		        {
+		        	engine = str;
+		        }
+			}
+			client = new UCIInterface(engine);
+		}
+		
+		engineHandler = new Handler();
 	}
 		
 }

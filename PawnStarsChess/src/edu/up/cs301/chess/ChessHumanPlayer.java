@@ -39,7 +39,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	
 	private static final String upgradeChoices[] = new String[] {"\u2655 Queen", "\u2658 Knight", "\u2656 Rook", "\u2657 Bishop"};
 	
-	private static final int[] promotionTypes = {
+	private static final byte[] promotionTypes = {
 		ChessPiece.QUEEN,
 		ChessPiece.KNIGHT,
 		ChessPiece.ROOK,
@@ -303,20 +303,20 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 				}
 				
 				float[] tileSize = board.getTileSize();
-				int tileX = (int) (event.getX()/tileSize[0]);
-				int tileY;
+				byte tileX = (byte) (event.getX()/tileSize[0]);
+				byte tileY;
 				
 				//translate the points if the board is flipped
 				if(board.isFlipped())
 				{
-					tileY = ChessGameState.BOARD_WIDTH-1-((int) (event.getY()/tileSize[1]));
+					tileY = (byte) (ChessGameState.BOARD_WIDTH-1-((byte) (event.getY()/tileSize[1])));
 				}
 				else
 				{
-					tileY = (int) (event.getY()/tileSize[1]);
+					tileY = (byte) (event.getY()/tileSize[1]);
 				}
 				//Log.d("human player","selected x:"+tileX+" y:"+tileY);
-				int[] selectedLoc = new int[]{tileY,tileX};
+				byte[] selectedLoc = new byte[]{tileY,tileX};
 				
 				// Make sure it is within bounds
 				if(ChessGameState.outOfBounds(selectedLoc))
@@ -367,7 +367,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 										takenPiece,PawnMove.PROMOTION);
 									
 									board.setSelectedTiles(null);
-									board.setSelectedLoc(-1, -1);
+									board.setSelectedLoc(-1,-1);
 									
 									//let the select upgrade method make a move
 									selectUpgrade();
@@ -387,7 +387,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 							else if(state.getMoveList().getLast() instanceof PawnMove)
 							{
 								PawnMove lastMove = (PawnMove)state.getMoveList().getLast();
-								int[] newLoc = lastMove.getNewPos();
+								byte[] newLoc = lastMove.getNewPos();
 								
 								//The last move was a double pawn jump
 								if(lastMove.getType() == PawnMove.FIRST_MOVE)
@@ -423,7 +423,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 							//Castling
 							if(king != null)
 							{
-								int[] kingLoc = king.getLocation();
+								byte[] kingLoc = king.getLocation();
 								
 								//selected the king
 								if(Arrays.equals(selectedLoc,kingLoc))
@@ -431,7 +431,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 									int lastX = lastPieceSelected.getLocation()[1];
 									int canCastleX = -1;
 									int canCastleY;
-									int type = RookMove.NONE;
+									byte type = RookMove.NONE;
 									
 									//last selected the left rook
 									if(lastX == 0)
@@ -648,6 +648,11 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 	{
 		DrawAction act = new DrawAction(this,isWhite,true);
 		game.sendAction(act);
+	}
+
+	@Override
+	public void receiveActivity(GameMainActivity activity) {
+		//do nothing
 	}
 	
 }// class CounterHumanPlayer

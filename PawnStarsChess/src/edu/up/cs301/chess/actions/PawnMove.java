@@ -25,22 +25,22 @@ public class PawnMove extends ChessMoveAction {
 	private static final long serialVersionUID = -1949275900587108452L;
 	
 	//The types of special moves for pawns
-	public static final int EN_PASSANT = 0;
-	public static final int PROMOTION = 1;
-	public static final int FIRST_MOVE = 2;
-	public static final int NONE = 3;
+	public static final byte EN_PASSANT = 0;
+	public static final byte PROMOTION = 1;
+	public static final byte FIRST_MOVE = 2;
+	public static final byte NONE = 3;
 	
 	public final static int NUM_PAWN_ATTACKS_NORMAL = 2;
 	
 	// The type of this move
-	private int type;
+	private byte type;
 	
-	private int newType;
+	private byte newType;
 	
 	/**
 	 * Default constructor
 	 */
-	public PawnMove(GamePlayer player, ChessPiece whichPiece, int[] newPos, ChessPiece takenPiece, int type) {
+	public PawnMove(GamePlayer player, ChessPiece whichPiece, byte[] newPos, ChessPiece takenPiece, byte type) {
 		super(player, whichPiece, newPos, takenPiece);
 		this.type = type;
 	}
@@ -61,15 +61,15 @@ public class PawnMove extends ChessMoveAction {
 	 * Returns this move's type
 	 * @return
 	 */
-	public int getType() {
+	public byte getType() {
 		return type;
 	}
 
-	public int getNewType() {
+	public byte getNewType() {
 		return newType;
 	}
 
-	public void setNewType(int newType) {
+	public void setNewType(byte newType) {
 		this.newType = newType;
 	}
 	
