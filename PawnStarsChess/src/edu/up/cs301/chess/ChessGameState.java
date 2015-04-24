@@ -1293,7 +1293,7 @@ public class ChessGameState extends GameState {
 						ChessPiece pieceCopy = new ChessPiece(piece);
 						int[] location = { j, i };
 						pieceCopy.setLocation(location);
-						stateCopy.pieceMap[j][i] = piece;
+						stateCopy.pieceMap[j][i] = pieceCopy;
 						stateCopy.originalCall2 = false;
 						ChessPiece[] pieces = stateCopy
 								.getAttackingPieces(pieceCopy);
