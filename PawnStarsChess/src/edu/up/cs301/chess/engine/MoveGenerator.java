@@ -92,9 +92,9 @@ public class MoveGenerator {
 		}
 		
 		//remove the moves that would get the king captured
-		ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
+		//ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
 		
-		return moves;
+		return moveList;
 	}
 	
 	public static ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)

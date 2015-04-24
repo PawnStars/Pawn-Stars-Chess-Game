@@ -72,6 +72,7 @@ public class UCIInterface {
 	 * @return Raw output from the engine
 	 */
 	public String getOutput(int waitTime) {
+		
 		StringBuffer buffer = new StringBuffer();
 		try {
 			Thread.sleep(waitTime);

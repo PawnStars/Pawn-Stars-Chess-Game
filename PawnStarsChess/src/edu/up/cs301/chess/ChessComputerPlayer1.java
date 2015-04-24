@@ -43,7 +43,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * correspond to a shallower search and a lower inclination to
 	 * pick the best move.
 	 */
-    protected int smart;
+    protected int intelligence;
     
     // The current game state according to this player
     protected ChessGameState gameState;
@@ -67,6 +67,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     
     private GameAction chosenMove;
     
+    private long start;
+    
 	/**
      * Constructor for objects of class CounterComputerPlayer1
      * 
@@ -76,7 +78,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     public ChessComputerPlayer1(String name, int intelligence) {
         // invoke superclass constructor
         super(name);
-        smart = intelligence;
+        this.intelligence = intelligence;
         waitTime = 5000;
         engines = new ArrayList<String>();
         player = this;
@@ -121,16 +123,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				gameState = newState;
 				Log.d("computer player",gameState.toString());
 				//not sure if we need to apply move
-				GameAction move = makeMove();
-				Log.d("computer player", "Sending this move: "+move);
-				if(gameState.applyMove(move))
-				{
-					game.sendAction(move);
-				}
-				else
-				{
-					Log.d("computer player", "Error when applying this move: "+move);
-				}
+				makeMove(intelligence);
 			}
 		}
 		else
@@ -143,16 +136,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 * Generates a move according to the AI's intelligence
 	 * level.
 	 */
-	public GameAction makeMove()
+	public void makeMove(int smart)
 	{
 		//Log.d("computer player", "trying to make a move");
 		
 		if(gameState == null || gameState.isWhoseTurn() != isPlayer1())
 		{
-			return null;
+			return;
 		}
 		
-		long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
 		ChessGameState newState = new ChessGameState(gameState);
 		chosenMove = null;
 		if(smart > 1)
@@ -170,8 +163,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 						//client.sendCommand("uci");//the list of commands
 						if (client != null && client.startEngine())
 						{
-							String FEN = gameState.toFEN();
-							String bestMove = client.getBestMove(FEN,waitTime);
+							String fen = gameState.toFEN();
+							String bestMove = client.getBestMove(fen,waitTime);
 						
 							Log.d("computer player","engine's best move:"+bestMove);
 							chosenMove = ChessMoveAction.moveTextToAction(gameState, player, bestMove);
@@ -183,11 +176,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				};
 				if(engineHandler != null)
 				{
-					engineHandler.post(getBestMove);
+					engineHandler.postDelayed(getBestMove,100);
 				}
 			}
 		}
-		if(smart == RANDOM || smart == TAKE_PIECES || chosenMove == null)
+		if(smart <= TAKE_PIECES || chosenMove == null)
 		{
 			//Get all the possible moves
 			ChessMoveAction[] possibleActions = MoveGenerator.getPossibleMoves(newState, this, isWhite());
@@ -233,20 +226,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 
 		}
 		
-		//wait the remaining amount of time
-		if((System.currentTimeMillis()-start) < waitTime)
-		{
-			try
-			{
-				Thread.sleep(waitTime+start-System.currentTimeMillis());
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
 		//send the new game state if it worked
-		return chosenMove;
+		sendMove();
 	}
 
 	/**
@@ -278,7 +259,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	 */
 	public void askDraw(String msg)
 	{
-		if(smart < 10)
+		if(intelligence < 10)
 		{
 			DrawAction act = new DrawAction(this,isWhite(),true);
 			game.sendAction(act);
@@ -318,8 +299,8 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 						copyFile(in, out);
 						Log.d("computer player", "copied asset file: " + outFile.getAbsolutePath());
 					}
-					outFile.setReadable(true);
-					outFile.setWritable(true);
+					//outFile.setReadable(true);
+					//outFile.setWritable(true);
 					outFile.setExecutable(true);
 					if(isEngine)
 					{
@@ -378,17 +359,17 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		this.activity = activity;
 		
 		//copy assets
-		if(smart > 1)
+		if(intelligence > 1)
 		{
 			copyAssets();
 			String engine = "";
 			for(String str: engines)
 			{
-				if(str.contains("stockfish") && smart == STOCKFISH)
+				if(str.contains("stockfish") && intelligence == STOCKFISH)
 		        {
 		        	engine = str;
 		        }
-				else if(str.contains("critter") && smart == CRITTER)
+				else if(str.contains("critter") && intelligence == CRITTER)
 		        {
 		        	engine = str;
 		        }
@@ -397,6 +378,48 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		}
 		
 		engineHandler = new Handler();
+	}
+	
+	public void sendMove()
+	{
+		final Runnable sendMove = new Runnable() {
+			@Override
+			public void run()
+			{
+				//wait the remaining amount of time
+				if((System.currentTimeMillis()-start) < waitTime)
+				{
+					try
+					{
+						Thread.sleep(waitTime+start-System.currentTimeMillis());
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
+				
+				Log.d("computer player", "Sending this move: "+chosenMove);
+				
+				//check if the state can handle the move
+				if(gameState.applyMove(chosenMove))
+				{
+					game.sendAction(chosenMove);
+				}
+				else if(intelligence <= TAKE_PIECES)
+				{
+					//do nothing if the move engine failed to make a good move
+				}
+				else
+				{
+					//try again with the move engine if a smart player's move failed
+					Log.d("computer player", "Error when applying this move: "+chosenMove);
+					makeMove(TAKE_PIECES);
+				}
+			}
+		};
+		engineHandler.postDelayed(sendMove,100);
+		
 	}
 		
 }

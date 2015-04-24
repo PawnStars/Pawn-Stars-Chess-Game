@@ -68,12 +68,18 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 					board.setPieceMap(gameState.getPieceMap());
 					player1Score.setText(""+gameState.getPlayer1Points());
 					player2Score.setText(""+gameState.getPlayer2Points());
-					if(gameState.isWhoseTurn() == gameState.isPlayer1IsWhite())
-					{
-						turnText.setText("Turn: White");
+					
+					if(player1View != null && name != null) {
+						player1View.setText(name);
+					} if(player2View != null && allPlayerNames != null) {
+						if(allPlayerNames.length >1 && allPlayerNames[1] != null) {
+							player2View.setText(allPlayerNames[1]);
+						}
 					}
-					else
-					{
+					
+					if(gameState.isWhoseTurn() == gameState.isPlayer1IsWhite()) {
+						turnText.setText("Turn: White");
+					} else {
 						turnText.setText("Turn: Black");
 					}
 					
@@ -164,17 +170,6 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 		turnText = (TextView) activity.findViewById(R.id.turnTextView);
 		
 		//TODO shorten names if necessary
-		if(player1View != null && name != null)
-		{
-			player1View.setText(name);
-		}
-		if(player2View != null && allPlayerNames != null)
-		{
-			if(allPlayerNames.length >1 && allPlayerNames[1] != null)
-			{
-				player2View.setText(allPlayerNames[1]);
-			}
-		}
 	}
 
 	@Override

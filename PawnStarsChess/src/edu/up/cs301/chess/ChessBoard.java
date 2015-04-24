@@ -351,7 +351,8 @@ public class ChessBoard extends SurfaceView
 					if(this.pieceMap[i][j] == null && pieceMap[i][j] != null)
 					{
 						//select that piece
-						selectedLoc = new byte[]{(byte) i,(byte) j};
+						selectedLoc[0] = (byte) j;
+						selectedLoc[1] = (byte) i;
 						break outerloop;
 					}
 				}

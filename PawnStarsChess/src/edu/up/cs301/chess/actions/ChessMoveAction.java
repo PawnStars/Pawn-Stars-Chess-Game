@@ -302,7 +302,7 @@ public class ChessMoveAction extends GameAction {
 		}
 		else
 		{
-			Log.d("move parser","not enough info for end pos: "+text);
+			Log.wtf("move parser","not enough info for end pos: "+text);
 		}
 		
 		ChessPiece newTakenPiece = null;
@@ -316,28 +316,24 @@ public class ChessMoveAction extends GameAction {
 		//get all the pieces that can move to the right spot
 		byte[] newLoc = new byte[]{newY,newX};
 		Vector<ChessPiece> whichPieces = new Vector<ChessPiece>();
-		ChessPiece[] temp = state.getAttackingPieces(newLoc);
-		
-		for(ChessPiece p:temp)
+
+		if(!ChessGameState.outOfBounds(newX, newY))
 		{
-			whichPieces.add(p);
-		}
-		
-		//add pawn moves manually
-		ChessPiece[] movingPieces = null;
-		if(state.isWhoseTurn()) {
-			movingPieces = state.getPlayer1Pieces();
-		} else {
-			movingPieces = state.getPlayer2Pieces();
-		}
-		for(ChessPiece p:movingPieces)
-		{
-			if(p.getType() == ChessPiece.PAWN)
+			//add each piece manually
+			ChessPiece[] movingPieces = null;
+			boolean[][][] locs = null;
+			if(state.isWhoseTurn()) {
+				movingPieces = state.getPlayer1Pieces();
+				locs = state.getPlayer1Moves();
+			} else {
+				movingPieces = state.getPlayer2Pieces();
+				locs = state.getPlayer2Moves();
+			}
+			for(int i=0;i<ChessGameState.NUM_PIECES;i++)
 			{
-				boolean[][] locs = state.getSavedPossibleMoves(p);
-				if(locs[newY][newX] == true)
+				if(locs[i][newY][newX])
 				{
-					whichPieces.add(p);
+					whichPieces.add(movingPieces[i]);
 				}
 			}
 		}
@@ -350,14 +346,19 @@ public class ChessMoveAction extends GameAction {
 			char pieceChar = text.charAt(0);
 			if(pieceChar == 'Q') {
 				pieceType = ChessPiece.QUEEN;
+				Log.d("move parser","moving a queen");
 			} else if(pieceChar == 'R') {
 				pieceType = ChessPiece.ROOK;
+				Log.d("move parser","moving a rook");
 			} else if(pieceChar == 'N') {
 				pieceType = ChessPiece.KNIGHT;
+				Log.d("move parser","moving a knight");
 			} else if(pieceChar == 'B') {
 				pieceType = ChessPiece.BISHOP;
+				Log.d("move parser","moving a bishop");
 			} else if(pieceChar == 'K') {
 				pieceType = ChessPiece.KING;
+				Log.d("move parser","moving a king");
 			} else {
 				Log.wtf("move parser","invalid chess piece type char "+text.charAt(0));
 				return null;
@@ -369,6 +370,7 @@ public class ChessMoveAction extends GameAction {
 		{
 			//no piece character implies pawn
 			pieceType = ChessPiece.PAWN;
+			Log.d("move parser","might be moving a pawn?");
 		}
 		
 		//now the text should only contain the rank or file of which piece to move
@@ -382,10 +384,10 @@ public class ChessMoveAction extends GameAction {
 			int x = c-97;
 			int y = ChessGameState.BOARD_HEIGHT-c+48;
 			
-			if(x >= 0 && x < ChessGameState.BOARD_HEIGHT && oldX != -1) {
+			if(x >= 0 && x < ChessGameState.BOARD_HEIGHT && oldX == -1) {
 				//if c wasn't a file, it will be out of bounds
 				oldX = (byte) x;
-			} else if(y >= 0 && y < ChessGameState.BOARD_HEIGHT && oldY != -1) {
+			} else if(y >= 0 && y < ChessGameState.BOARD_HEIGHT && oldY == -1) {
 				//if c wasn't a rank, it will be out of bounds
 				oldY = (byte) y;
 			}
@@ -395,23 +397,27 @@ public class ChessMoveAction extends GameAction {
 		
 		//figure out which piece in the vector should move
 		ChessPiece newWhichPiece = null;
-		if(whichPieces.isEmpty())
+		if(!ChessGameState.outOfBounds(oldX, oldY) && state.getPieceMap()[oldY][oldX] != null)
 		{
-			Log.wtf("move parser","did not get any pieces that can attack here");
+			newWhichPiece = state.getPieceMap()[oldY][oldX];
+		}
+		else if(whichPieces.isEmpty())
+		{
+			Log.wtf("move parser","did not get any pieces that can attack at "+coords);
 			return null;
 		}
-		if(whichPieces.size() == 1)
+		else if(whichPieces.size() == 1)
 		{
 			newWhichPiece = whichPieces.firstElement();
 		}
-		if(whichPieces.size() > 1)//there are multiple pieces this could be
+		else if(whichPieces.size() > 1)//there are multiple pieces this could be
 		{
 			for(ChessPiece p:whichPieces)
 			{
 				byte[] loc = p.getLocation();
 				
-				//the piece must be the right type
-				if(pieceType == p.getType())
+				//the piece must be the right type if it was specified
+				if(pieceType == p.getType() || pieceType == ChessPiece.PAWN)
 				{
 					newWhichPiece = p;
 					
@@ -430,7 +436,6 @@ public class ChessMoveAction extends GameAction {
 						}
 					} else { //doesn't need to match anything, but have to choose from more than 1 piece
 						Log.wtf("move parser","could not narrow down any pieces at "+coords);
-						break;
 					}
 				}
 			}
@@ -447,13 +452,13 @@ public class ChessMoveAction extends GameAction {
 			}
 			if(enPassant)//en passant
 			{
-				/*int dy = 0;
+				int dy = 0;
 				if(state.isWhoseTurn()) {
 					dy = 1;
 				} else {
 					dy = -1;
 				}
-				int[] loc = state.getCanEnPassant();
+				byte[] loc = state.getCanEnPassant();
 				newTakenPiece = state.getPieceMap()[loc[0]+dy][loc[1]];//TODO see if this is necessary*/
 				if(newTakenPiece != null && newTakenPiece.getType() == ChessPiece.PAWN)
 				{
