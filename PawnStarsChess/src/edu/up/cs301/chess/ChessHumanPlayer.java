@@ -568,7 +568,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			updateDisplay();
 		}
 		// Flip the board if the human player chooses to be black
-		if (!isPlayer1()) {
+		if (!this.isWhite) {
 			board.flipBoard();
 		}
 
