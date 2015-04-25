@@ -77,7 +77,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         // invoke superclass constructor
         super(name);
         smart = intelligence;
-        waitTime = 500;
+        waitTime = 50;
         engines = new ArrayList<String>();
         player = this;
         

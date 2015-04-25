@@ -217,7 +217,7 @@ public class MoveGenerator {
 		}
 		
 		//Get the locations the piece can move to
-		boolean[][] possibleLocs = state.getPossibleMoves(piece);
+		boolean[][] possibleLocs = state.getPossibleMoves(piece, false);
 		
 		if(possibleLocs == null)
 		{
