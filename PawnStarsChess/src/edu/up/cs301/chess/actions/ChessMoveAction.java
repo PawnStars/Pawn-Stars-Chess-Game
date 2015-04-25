@@ -105,7 +105,7 @@ public class ChessMoveAction extends GameAction {
 			makesCheck = action.isMakesCheck();
 			makesCheckmate = action.isMakesCheckmate();
 		}
-		
+
 	}
 
 	/**
@@ -161,36 +161,37 @@ public class ChessMoveAction extends GameAction {
 	@Override
 	public String toString() {
 		String msg = "";
-		int pieceType = whichPiece.getType();
-		if (pieceType == ChessPiece.QUEEN) {
-			msg += "Q";
-		}
-		if (pieceType == ChessPiece.KING) {
-			msg += "K";
-		}
-		if (pieceType == ChessPiece.ROOK) {
-			msg += "R";
-		}
-		if (pieceType == ChessPiece.BISHOP) {
-			msg += "B";
-		}
-		if (pieceType == ChessPiece.KNIGHT) {
-			msg += "N";
-		}
-		if (takenPiece != null) {
-			msg += "x";
-		}
-		msg += (char) (97 + oldPos[1]);
-		msg += ChessGameState.BOARD_HEIGHT - oldPos[0];
-		msg += (char) (97 + newPos[1]);
-		msg += ChessGameState.BOARD_HEIGHT - newPos[0];
+		if (whichPiece != null) {
+			int pieceType = whichPiece.getType();
+			if (pieceType == ChessPiece.QUEEN) {
+				msg += "Q";
+			}
+			if (pieceType == ChessPiece.KING) {
+				msg += "K";
+			}
+			if (pieceType == ChessPiece.ROOK) {
+				msg += "R";
+			}
+			if (pieceType == ChessPiece.BISHOP) {
+				msg += "B";
+			}
+			if (pieceType == ChessPiece.KNIGHT) {
+				msg += "N";
+			}
+			if (takenPiece != null) {
+				msg += "x";
+			}
+			msg += (char) (97 + oldPos[1]);
+			msg += ChessGameState.BOARD_HEIGHT - oldPos[0];
+			msg += (char) (97 + newPos[1]);
+			msg += ChessGameState.BOARD_HEIGHT - newPos[0];
 
-		if (makesCheck) {
-			msg += "+";
-		} else if (makesCheckmate) {
-			msg += "#";
+			if (makesCheck) {
+				msg += "+";
+			} else if (makesCheckmate) {
+				msg += "#";
+			}
 		}
-
 		return msg;
 	}
 

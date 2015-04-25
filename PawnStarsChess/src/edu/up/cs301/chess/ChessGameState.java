@@ -353,6 +353,7 @@ public class ChessGameState extends GameState {
 	}
 
 	private boolean fromApplyMove = false;
+
 	/**
 	 * Applies a move to the game state
 	 * 
@@ -380,20 +381,20 @@ public class ChessGameState extends GameState {
 		if (act instanceof ChessMoveAction) {
 			ChessMoveAction move = (ChessMoveAction) act;
 			boolean retVal = movePiece(move);
-			//See if anyone won:
-			
+			// See if anyone won:
+
 			// TODO: fix this code: implement game winning conditions
 			ChessPiece player1King = this.getKing(true);
 			ChessPiece player2King = this.getKing(false);
-			
-			if (this.isPlayer1InCheck() && whoseTurn && !fromApplyMove){
+
+			if (this.isPlayer1InCheck() && whoseTurn && !fromApplyMove) {
 				fromApplyMove = true;
-				boolean [][] arr = this.getPossibleMoves(player1King, false);
+				boolean[][] arr = this.getPossibleMoves(player1King, false);
 				isGameOver = true;
 				this.player1Won = false;
 				this.player2Won = true;
 				for (int i = 0; i < BOARD_WIDTH; ++i) {
-					for (boolean element: arr[i]) {
+					for (boolean element : arr[i]) {
 						if (element) {
 							isGameOver = false;
 							this.player1Won = true;
@@ -401,15 +402,15 @@ public class ChessGameState extends GameState {
 						}
 					}
 				}
-				
+
 			} else if (this.isPlayer2InCheck() && !whoseTurn && !fromApplyMove) {
 				fromApplyMove = true;
-				boolean [][] arr = this.getPossibleMoves(player2King, false);
+				boolean[][] arr = this.getPossibleMoves(player2King, false);
 				isGameOver = true;
 				this.player2Won = false;
 				this.player1Won = true;
 				for (int i = 0; i < BOARD_WIDTH; ++i) {
-					for (boolean element: arr[i]) {
+					for (boolean element : arr[i]) {
 						if (element) {
 							isGameOver = false;
 							this.player2Won = true;
@@ -418,7 +419,12 @@ public class ChessGameState extends GameState {
 					}
 				}
 			}
-				return retVal;
+			
+			if (isGameOver) {
+				Log.i("GAME STATE: ","______GAME IS OVER ______");
+			}
+			
+			return retVal;
 		} else {
 			return false;
 		}
