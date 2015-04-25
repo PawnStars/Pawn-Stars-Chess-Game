@@ -1,89 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/edu.up.cs301.game"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/top_gui_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res/edu.up.cs301.game">
-
-    <android.support.v7.widget.GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-    </android.support.v7.widget.GridLayout>
+    android:layout_height="match_parent"
+    tools:ignore="UnusedNamespace" >
 
     <ImageView
         android:id="@+id/woodBackgroundImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
         android:contentDescription="@string/backgroundDescription"
         android:scaleType="fitXY"
         android:src="@drawable/cherrywooddesk" />
 
-    <TextView
-        android:id="@+id/scoreTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerInParent="false"
-        android:layout_weight="1"
-        android:text="@string/score"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white" />
-
     <edu.up.cs301.chess.ChessBoard
         android:id="@+id/gameBoardSurfaceView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="0dp"
-        android:layout_toRightOf="@+id/LinearLayout2"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/LinearLayout2"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/topLinearLayout"
+        android:layout_marginBottom="@dimen/tab_height"
         android:background="@color/background_color"
         android:paddingBottom="0dp"
         android:paddingLeft="200dp"
-        android:paddingTop="25dp" />
-
-    
-
-        
-
-    
+        android:paddingTop="500dp" />
 
     <LinearLayout
         android:id="@+id/LinearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="73dp"
         android:orientation="horizontal"
         android:weightSum="11.5" >
-        
-			<TextView
-            android:id="@+id/player1TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/player1"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
-			
-        <TextView
-            android:id="@+id/turnTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="@string/randomNumber"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/white" />
-
-        <Button
-            android:id="@+id/drawButton"
-            style="@style/importantButton"
-            android:layout_width="172dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.5"
-            android:background="@drawable/buttonshape"
-            android:text="@string/draw" />
 
         <Button
             android:id="@+id/flipBoardButton"
@@ -102,6 +55,18 @@
             android:layout_weight="1.5"
             android:background="@drawable/buttonshape"
             android:text="@string/resign" />
+
+        <Button
+            android:id="@+id/drawButton"
+            style="@style/importantButton"
+            android:layout_width="172dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="68dp"
+            android:layout_weight="1.5"
+            android:background="@drawable/buttonshape"
+            android:text="@string/draw" 
+            android:visibility="gone" 
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -109,14 +74,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/scoreTextView" >
+        android:layout_alignParentTop="true"
+        android:weightSum="5" >
 
         <TextView
-            android:id="@+id/player1ScoreTextView"
+            android:id="@+id/scoreTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:layout_weight="1"
-            android:text="@string/randomNumber"
+            android:text="@string/score"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white" />
 
@@ -124,13 +91,43 @@
             android:id="@+id/player2TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_marginRight="10dp"
             android:text="@string/player2"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white" />
 
         <TextView
+            android:id="@+id/player1ScoreTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:text="@string/randomNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/player1TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="@string/player1"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <TextView
             android:id="@+id/player2ScoreTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="@string/randomNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/turnTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
