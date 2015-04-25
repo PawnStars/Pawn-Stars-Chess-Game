@@ -21,9 +21,10 @@ public class UCIInterface {
 
 	private String PATH;
 	
+	private boolean restart;
+	
 	public UCIInterface(String path)
 	{
-		//Log.d("UCI Interface","Path:"+path);
 		PATH = path;
 	}
 	
@@ -42,6 +43,7 @@ public class UCIInterface {
 			processWriter = new OutputStreamWriter(
 					engineProcess.getOutputStream());
 		} catch (Exception e) {
+			restart = true;
 			return false;
 		}
 		return true;
@@ -58,6 +60,7 @@ public class UCIInterface {
 			processWriter.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
+			restart = true;
 		}
 	}
 
@@ -87,6 +90,7 @@ public class UCIInterface {
 					buffer.append(text + "\n");
 			}
 		} catch (Exception e) {
+			restart = true;
 			e.printStackTrace();
 		}
 		return buffer.toString();
@@ -132,7 +136,9 @@ public class UCIInterface {
 			processReader.close();
 			processWriter.close();
 		} catch (IOException e) {
+			restart = true;
 		}
+		engineProcess.destroy();
 	}
 
 	/**
@@ -190,5 +196,11 @@ public class UCIInterface {
 		}
 		return evalScore/100;
 	}
+
+	public boolean isRestart() {
+		return restart;
+	}
+	
+	
 	
 }

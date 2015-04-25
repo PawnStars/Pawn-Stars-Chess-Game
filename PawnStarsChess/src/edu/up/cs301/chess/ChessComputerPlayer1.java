@@ -79,7 +79,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         // invoke superclass constructor
         super(name);
         this.intelligence = intelligence;
-        waitTime = 5000;
+        waitTime = intelligence*750;
         engines = new ArrayList<String>();
         player = this;
         
@@ -155,7 +155,11 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 			if(FEN != null && !FEN.equals(""))
 			{
 				// initialize and connect to engine
-				
+				if(client != null && client.isRestart())
+				{
+					//restart the interface and engine if it failed
+					receiveActivity(activity);
+				}
 				final Runnable getBestMove = new Runnable() {
 					@Override
 					public void run()

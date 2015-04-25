@@ -161,7 +161,9 @@ public class MoveGenerator {
 					{
 						if(move != null && move.getTakenPiece() != null)
 						{
-							ChessPiece piece = move.getTakenPiece();
+							byte loc[] = move.getNewPos();
+							ChessPiece piece = state.getPieceMap()[loc[0]][loc[1]];
+							//ChessPiece piece = move.getTakenPiece();
 							
 							//If there is a move that results in the king being taken
 							if(piece.getType() == ChessPiece.KING)

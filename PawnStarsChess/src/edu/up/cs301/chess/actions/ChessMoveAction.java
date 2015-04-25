@@ -370,7 +370,7 @@ public class ChessMoveAction extends GameAction {
 		{
 			//no piece character implies pawn
 			pieceType = ChessPiece.PAWN;
-			Log.d("move parser","might be moving a pawn?");
+			Log.d("move parser","moving a pawn");
 		}
 		
 		//now the text should only contain the rank or file of which piece to move

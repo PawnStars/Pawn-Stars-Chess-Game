@@ -798,7 +798,7 @@ public class ChessGameState extends GameState {
 			moves = getQueenMoves(xLocation, yLocation, piece);
 			break;
 		case ChessPiece.KING:
-			moves = getKingMoves(xLocation, yLocation, piece);
+			moves = getKingMoves(xLocation, yLocation, piece, legal);
 			break;
 		case ChessPiece.ROOK:
 			moves = getRookMoves(xLocation, yLocation, piece);
@@ -808,7 +808,7 @@ public class ChessGameState extends GameState {
 		if (moves != null) {
 			// See if the player is in check, and update
 			// moves appropriately if they are:
-			if (legal) {
+			if (legal && piece.getType() != ChessPiece.KING || player1InCheck || player2InCheck) {
 				// Traverse through the valid moves, and see
 				// if they will stop the king from being in check:
 				for (int row = 0; row < BOARD_WIDTH; ++row) {
@@ -821,13 +821,16 @@ public class ChessGameState extends GameState {
 						}
 					}
 				}
+				
+				
 
 				//TODO: check to see if the pieces move will put the king in check
 			}
 		}
-		
 		return moves;
 	}
+		
+		
 	
 	/**
 	 * Gets the tiles the piece can move to
@@ -951,7 +954,7 @@ public class ChessGameState extends GameState {
 		byte oldY = piece.getLocation()[0];
 		ChessPiece whichPiece = stateCopy.findPiece(piece);
 		
-		stateCopy.setWhoseTurn(!whoseTurn);
+		
 		stateCopy.pieceMap[oldY][oldX] = null;
 		// Hack a move for the state:
 		if (stateCopy.pieceMap[y][x] != null) {
@@ -962,25 +965,28 @@ public class ChessGameState extends GameState {
 		}
 		stateCopy.pieceMap[y][x] = whichPiece;
 		whichPiece.move(new byte[]{y,x});
+		stateCopy.setWhoseTurn(!whoseTurn);
 		
 		//if the game is over next turn, the legality of the next move does not matter
 		stateCopy.updateMoves(false);
 		
-		stateCopy.updateCheck();
-		if(stateCopy.isPlayer1InCheck() && (piece.isWhite() == player1IsWhite))
-		{
+		/*stateCopy.updateCheck();
+		
+		if(stateCopy.isPlayer1InCheck() && (piece.isWhite() == player1IsWhite)) {
 			return false;
-		}
-		if(stateCopy.isPlayer2InCheck() && (piece.isWhite() != player1IsWhite))
-		{
+		} if(stateCopy.isPlayer2InCheck() && (piece.isWhite() != player1IsWhite)) {
 			return false;
-		}
-		if(stateCopy.isGameOver())
-		{
+		} if(stateCopy.isGameOver()) {
 			return false;
 		}
 		
-		return true;
+		return true;*/
+		if (stateCopy.isAttacked(piece.getLocation())) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 
@@ -1039,9 +1045,9 @@ public class ChessGameState extends GameState {
 		// moves would kill the king:
 		ChessPiece[] pieces = new ChessPiece[NUM_PIECES];
 		if (whoseTurn) {
-			pieces = this.getPlayer2Pieces();
-		} else {
 			pieces = this.getPlayer1Pieces();
+		} else {
+			pieces = this.getPlayer2Pieces();
 		}
 		// Traverse each piece:
 		for (ChessPiece piece : pieces) {
@@ -1233,7 +1239,7 @@ public class ChessGameState extends GameState {
 	 */
 
 	public boolean[][] getKingMoves(byte xLocation, byte yLocation,
-			ChessPiece piece) {
+			ChessPiece piece, boolean legal) {
 
 		boolean[][] moves = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
 
@@ -1244,6 +1250,31 @@ public class ChessGameState extends GameState {
 					if (pieceMap[j][i] == null
 							|| pieceMap[j][i].isWhite() != piece.isWhite()) {
 						moves[j][i] = true;
+
+						if(legal)
+						{
+							// See if the move will put you into check:
+							ChessGameState stateCopy = new ChessGameState(this);
+							ChessPiece pieceCopy = stateCopy.findPiece(piece);
+							
+							stateCopy.pieceMap[xLocation][yLocation] = null;
+							// Hack a move for the state:
+							if (stateCopy.pieceMap[j][i] != null) {
+								// This means we are taking a piece:
+								ChessPiece takenPiece = stateCopy.pieceMap[j][i];
+								// Remove it from the board:
+								takenPiece.kill();
+							}
+							
+							byte[] location = { j, i };
+							pieceCopy.setLocation(location);
+							stateCopy.pieceMap[j][i] = pieceCopy;
+							stateCopy.setWhoseTurn(!whoseTurn);
+							if (stateCopy.isAttacked(location)) {
+								moves[j][i] = false;
+	
+							}
+						}
 					}
 				}
 			}
