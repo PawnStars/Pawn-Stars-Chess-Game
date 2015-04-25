@@ -429,11 +429,11 @@ public class ChessGameState extends GameState {
 					}
 				}
 			}
-			
+
 			if (isGameOver) {
-				Log.i("GAME STATE: ","______GAME IS OVER ______");
+				Log.i("GAME STATE: ", "______GAME IS OVER ______");
 			}
-			
+
 			return retVal;
 		} else {
 			return false;
@@ -1825,16 +1825,18 @@ public class ChessGameState extends GameState {
 
 		if (!king.isAlive()) {
 			isGameOver = true;
-			if (moveList.getLast() instanceof ChessMoveAction) {
-				moveList.getLast().setMakesCheckmate(true);
-			}
+			if (moveList.size() != 0) {
+				if (moveList.getLast() instanceof ChessMoveAction) {
+					moveList.getLast().setMakesCheckmate(true);
+				}
 
-			// The king belongs to player 1
-			if (king.isWhite() == player1IsWhite) {
-				player2Won = true;
-			} else// The king belongs to player 2
-			{
-				player1Won = true;
+				// The king belongs to player 1
+				if (king.isWhite() == player1IsWhite) {
+					player2Won = true;
+				} else// The king belongs to player 2
+				{
+					player1Won = true;
+				}
 			}
 			return true;
 		}
