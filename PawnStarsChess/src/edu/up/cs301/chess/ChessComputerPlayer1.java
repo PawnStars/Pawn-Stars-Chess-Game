@@ -80,6 +80,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
         super(name);
         this.intelligence = intelligence;
         waitTime = intelligence*750;
+
         engines = new ArrayList<String>();
         player = this;
         

@@ -174,6 +174,7 @@ public class ChessMoveAction extends GameAction {
 	public String toString()
 	{
 		String msg = "";
+		
 		if(whichPiece != null)
 		{
 			byte pieceType = whichPiece.getType();

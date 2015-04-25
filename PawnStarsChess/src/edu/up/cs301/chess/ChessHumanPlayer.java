@@ -3,6 +3,7 @@ package edu.up.cs301.chess;
 import java.util.Arrays;
 
 import edu.up.cs301.chess.actions.*;
+import edu.up.cs301.chess.engine.MoveGenerator;
 import edu.up.cs301.game.GameHumanPlayer;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
@@ -510,6 +511,9 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 					{
 						// Highlight valid moves for the player:
 						validLocs = state.getSavedPossibleMoves(pieceSelected);
+
+						//Highlight to see where the king can move:
+						
 						board.setSelectedTiles(validLocs);
 						board.setSelectedLoc(tileY,tileX);
 						
