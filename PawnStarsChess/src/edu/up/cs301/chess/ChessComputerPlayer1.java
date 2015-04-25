@@ -262,12 +262,16 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 	/**
 	 * How to respond when a player asks for a draw
 	 */
-	public void askDraw(String msg)
+	public void askDraw(GameAction act)
 	{
 		if(intelligence < 10)
 		{
-			DrawAction act = new DrawAction(this,isWhite(),true);
-			game.sendAction(act);
+			if(act instanceof DrawAction) {
+				act = new DrawAction(this, true);
+			}
+			//DrawAction act = new DrawAction(this,true);
+
+			//game.sendAction(act);
 		}
 		//Do not accept if the computer is smart
 	}
@@ -426,5 +430,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 		engineHandler.postDelayed(sendMove,100);
 		
 	}
+
 		
 }

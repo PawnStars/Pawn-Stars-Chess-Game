@@ -1,9 +1,9 @@
 package edu.up.cs301.chess.actions;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import android.util.Log;
-
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.chess.ChessPlayer;
@@ -20,7 +20,7 @@ import edu.up.cs301.game.actionMsg.GameAction;
  * @author Allison Liedtke
  * @version April 2015
  */
-public class ChessMoveAction extends GameAction {
+public class ChessMoveAction extends GameAction implements Serializable{
 	
 	// to satisfy the serializable interface
 	private static final long serialVersionUID = 2806249547013L;
@@ -224,7 +224,7 @@ public class ChessMoveAction extends GameAction {
 	 */
 	public ChessMoveAction clone()
 	{
-		return new ChessMoveAction(super.getPlayer(),this);
+		return new ChessMoveAction(null,this);
 	}
 	
 	/**

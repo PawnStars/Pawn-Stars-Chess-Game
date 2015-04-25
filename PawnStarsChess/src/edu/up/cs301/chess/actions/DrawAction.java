@@ -3,6 +3,8 @@
  */
 package edu.up.cs301.chess.actions;
 
+import java.io.Serializable;
+
 import edu.up.cs301.game.GamePlayer;
 import edu.up.cs301.game.actionMsg.GameAction;
 
@@ -17,7 +19,7 @@ import edu.up.cs301.game.actionMsg.GameAction;
  * @version April 2015
  *
  */
-public class DrawAction extends GameAction {
+public class DrawAction extends GameAction implements Serializable {
 
 	/**
 	 * instance variables
@@ -33,7 +35,7 @@ public class DrawAction extends GameAction {
 	/**
 	 * Default constructor. It sets the player instance variable
 	 */
-	public DrawAction(GamePlayer player, boolean player1IsWhite, boolean accepted) {
+	public DrawAction(GamePlayer player, boolean accepted) {
 		super(player);
 		this.accepted = accepted;
 	}
@@ -65,5 +67,10 @@ public class DrawAction extends GameAction {
 	public String toString()
 	{
 		return "Draw";
+	}
+	
+	public DrawAction clone() {
+		DrawAction newAction = new DrawAction(null,  this.accepted);
+		return newAction;
 	}
 }

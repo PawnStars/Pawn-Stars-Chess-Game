@@ -3,6 +3,8 @@
  */
 package edu.up.cs301.chess.actions;
 
+import java.io.Serializable;
+
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.game.GamePlayer;
 
@@ -16,12 +18,12 @@ import edu.up.cs301.game.GamePlayer;
  * @version March 2015
  *
  */
-public class RookMove extends ChessMoveAction {
+public class RookMove extends ChessMoveAction implements Serializable{
 
 	/**
 	 * instance variables
 	 */
-	private static final long serialVersionUID = -1949275900587108452L;
+	private static final long serialVersionUID = -1949265900587108452L;
 	
 	//the types of special moves for rooks
 	public static final byte CASTLE_RIGHT = 1;

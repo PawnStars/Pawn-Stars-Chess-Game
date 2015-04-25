@@ -1,6 +1,7 @@
 package edu.up.cs301.chess;
 
 import edu.up.cs301.game.GamePlayer;
+import edu.up.cs301.game.actionMsg.GameAction;
 
 
 /**
@@ -20,5 +21,5 @@ public interface ChessPlayer extends GamePlayer
 	
 	public int getPlayerID();
 	
-	public void askDraw(String msg);
+	public void askDraw(GameAction act);
 }

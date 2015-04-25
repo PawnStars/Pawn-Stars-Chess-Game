@@ -3,6 +3,8 @@
  */
 package edu.up.cs301.chess.actions;
 
+import java.io.Serializable;
+
 import edu.up.cs301.chess.ChessGameState;
 import edu.up.cs301.chess.ChessPiece;
 import edu.up.cs301.game.GamePlayer;
@@ -17,12 +19,12 @@ import edu.up.cs301.game.GamePlayer;
  * @version March 2015
  *
  */
-public class PawnMove extends ChessMoveAction {
+public class PawnMove extends ChessMoveAction implements Serializable {
 
 	/**
 	 * instance variables
 	 */
-	private static final long serialVersionUID = -1949275900587108452L;
+	private static final long serialVersionUID = -1949275901587108452L;
 	
 	//The types of special moves for pawns
 	public static final byte EN_PASSANT = 0;
@@ -118,7 +120,7 @@ public class PawnMove extends ChessMoveAction {
 	
 	public PawnMove clone()
 	{
-		//super.getPlayer()
+		//super.getPlayer();
 		return new PawnMove(null,this);
 	}
 	
