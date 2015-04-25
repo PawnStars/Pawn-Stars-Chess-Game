@@ -28,8 +28,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getPawnMoves(0, 7, pawn,false);
-		boolean[][] stateMoves2 = state.getPawnMoves(2, 7, pawn2,false);
+		boolean[][] stateMoves1 = state.getPawnMoves((byte)0, (byte)7, pawn);
+		boolean[][] stateMoves2 = state.getPawnMoves((byte)2, (byte)7, pawn2);
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
 				{false,false,false,false,false,false,false,false},
@@ -86,8 +86,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getRookMoves(3, 3, rook,false);
-		boolean[][] stateMoves2 = state.getRookMoves(1, 6, rook2,false);
+		boolean[][] stateMoves1 = state.getRookMoves((byte)3, (byte)3, rook);
+		boolean[][] stateMoves2 = state.getRookMoves((byte)1, (byte)6, rook2);
 		
 		boolean[][] moves1 = {
 				{false,false,false,true ,false,false,false,false},
@@ -144,8 +144,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getKnightMoves(3, 3, knight,false);
-		boolean[][] stateMoves2 = state.getKnightMoves(0, 7, knight2,false);
+		boolean[][] stateMoves1 = state.getKnightMoves((byte)3, (byte)3, knight);
+		boolean[][] stateMoves2 = state.getKnightMoves((byte)0, (byte)7, knight2);
 		
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
@@ -200,8 +200,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getBishopMoves(3, 3, bish,false);
-		boolean[][] stateMoves2 = state.getBishopMoves(2, 7, bish2,false);
+		boolean[][] stateMoves1 = state.getBishopMoves((byte)3,(byte) 3, bish);
+		boolean[][] stateMoves2 = state.getBishopMoves((byte)2, (byte)7, bish2);
 		
 		boolean[][] moves1 = {
 				{true ,false,false,false,false,false,true ,false},
@@ -257,8 +257,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getKingMoves(3, 3, king,false);
-		boolean[][] stateMoves2 = state.getKingMoves(0, 7, king2,false);
+		boolean[][] stateMoves1 = state.getKingMoves((byte)3,(byte) 3, king,false);
+		boolean[][] stateMoves2 = state.getKingMoves((byte)0, (byte)7, king2,false);
 		
 		boolean[][] moves1 = {
 				{false,false,false,false,false,false,false,false},
@@ -316,8 +316,8 @@ public class MoveTest extends AndroidTestCase {
 		};
 		ChessGameState state = new ChessGameState(true);
 		state.setPieceMap(map);
-		boolean[][] stateMoves1 = state.getQueenMoves(3, 3, queen,false);
-		boolean[][] stateMoves2 = state.getQueenMoves(6, 1, queen2,false);
+		boolean[][] stateMoves1 = state.getQueenMoves((byte)3, (byte)3, queen);
+		boolean[][] stateMoves2 = state.getQueenMoves((byte)6, (byte)1, queen2);
 		
 		boolean[][] moves1 = {
 				{true ,false,false,true ,false,false,true ,false},
@@ -366,7 +366,7 @@ public class MoveTest extends AndroidTestCase {
 	 * @throws Throwable
 	 */
 	public void testAI() throws Throwable {
-		//TODO fix crashes
+		
 		//Make a dummy game
 		ChessLocalGame game = new ChessLocalGame();
 		ChessGameState state = new ChessGameState(true);
@@ -387,8 +387,46 @@ public class MoveTest extends AndroidTestCase {
 		//Make the players make moves until someone wins
 		while(!state.isGameOver())
 		{
-			state.applyMove(smartPlayer.makeMove());
-			state.applyMove(dumbPlayer.makeMove());
+			smartPlayer.makeMove(1);
+			smartPlayer.sendMove();
+			dumbPlayer.makeMove(0);
+			dumbPlayer.sendMove();
+		}
+		
+		//Make sure the smart player wins
+		assertTrue("",state.isPlayer1Won());
+	}
+	
+	/**
+	 * Test that the smart AI can beat the dumb AI
+	 * @throws Throwable
+	 */
+	public void testStockfishAI() throws Throwable {
+		
+		//Make a dummy game
+		ChessLocalGame game = new ChessLocalGame();
+		ChessGameState state = new ChessGameState(true);
+		
+		//Initialize players
+		ChessComputerPlayer1 smartPlayer = new ChessComputerPlayer1("Hawking",
+				ChessComputerPlayer1.STOCKFISH);
+		ChessComputerPlayer1 dumbPlayer = new ChessComputerPlayer1("Peter",
+				ChessComputerPlayer1.RANDOM);
+		
+		game.start(new ChessPlayer[]{smartPlayer,dumbPlayer});
+		
+		smartPlayer.sendInfo(new BindGameInfo(game, 0));
+		dumbPlayer.sendInfo(new BindGameInfo(game, 1));
+		
+		smartPlayer.sendInfo(state);
+		dumbPlayer.sendInfo(state);
+		//Make the players make moves until someone wins
+		while(!state.isGameOver())
+		{
+			smartPlayer.makeMove(10);
+			smartPlayer.sendMove();
+			dumbPlayer.makeMove(0);
+			dumbPlayer.sendMove();
 		}
 		
 		//Make sure the smart player wins
