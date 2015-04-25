@@ -14,7 +14,7 @@ import android.util.AttributeSet;
 
 /**
  * A subclass of the SurfaceView class that draws a square chessboard on the
- * screen with an 8x8 array of pieces.
+ * screen with an 8x8 array of pieces .
  * 
  * @author Anthony Donaldson
  * @author Derek Schumacher
