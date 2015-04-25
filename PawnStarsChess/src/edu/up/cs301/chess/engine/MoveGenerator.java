@@ -91,35 +91,7 @@ public class MoveGenerator {
 			}
 		}
 		
-		//remove the moves that would get the king captured
-		//ChessMoveAction[] moves = removeIllegalMoves(state, moveList, color);
-		
 		return moveList;
-	}
-	
-	public static ChessMoveAction[] getEvasions(ChessGameState state, ChessPlayer player)
-	{
-		return null;
-	}
-	
-	public static ChessMoveAction[] getCapturesAndChecks(ChessGameState state, ChessPlayer player)
-	{
-		return null;
-	}
-	
-	public static ChessMoveAction[] getCaptures(ChessGameState state, ChessPlayer player)
-	{
-		return null;
-	}
-	
-	public static boolean isInCheck(ChessGameState state, ChessPlayer player)
-	{
-		return false;
-	}
-	
-	public static boolean givesCheck(ChessGameState state, ChessPlayer player, ChessMoveAction move)
-	{
-		return false;
 	}
 	
 	/**
@@ -305,19 +277,7 @@ public class MoveGenerator {
 		}
 		
 		//Convert to an array
-		ChessMoveAction[] rtnVal = moveList.toArray(new ChessMoveAction[moveList.size()]);
-		/*if(legal)
-		{
-			rtnVal =  removeIllegalMoves(state, rtnVal,color);
-		}*/
-		/*String debugMsg = "";
-		debugMsg+="Possible moves: ";
-		for(ChessMoveAction move:rtnVal)
-		{
-			debugMsg +=move.toString()+" ";
-		}
-		Log.d("Move Generator", debugMsg);*/
-		return rtnVal;
+		return moveList.toArray(new ChessMoveAction[moveList.size()]);
 	}
 
 	/**

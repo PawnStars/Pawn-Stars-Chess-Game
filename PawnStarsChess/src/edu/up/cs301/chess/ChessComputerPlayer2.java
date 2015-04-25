@@ -1,5 +1,6 @@
 package edu.up.cs301.chess;
 
+import edu.up.cs301.chess.actions.ChessMoveAction;
 import edu.up.cs301.chess.actions.ChooseColorAction;
 import edu.up.cs301.game.GameMainActivity;
 import edu.up.cs301.game.R;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 */
 public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 
+	private static final int MAX_NAME_LENGTH = 12;
 	/*
 	 * instance variables
 	 */
@@ -69,12 +71,33 @@ public class ChessComputerPlayer2 extends ChessComputerPlayer1 {
 					player1Score.setText(""+gameState.getPlayer1Points());
 					player2Score.setText(""+gameState.getPlayer2Points());
 					
-					if(player1View != null && name != null) {
-						player1View.setText(name);
-					} if(player2View != null && allPlayerNames != null) {
-						if(allPlayerNames.length >1 && allPlayerNames[1] != null) {
-							player2View.setText(allPlayerNames[1]);
+					//select the tile the computer moved to
+					if(chosenMove instanceof ChessMoveAction)
+					{
+						byte[] loc = ((ChessMoveAction)chosenMove).getNewPos();
+						board.setSelectedLoc(loc[0],loc[1]);
+					}
+					
+					if(player1View != null && name != null)
+					{
+						String msg = name;
+						if(msg.length() > MAX_NAME_LENGTH)
+						{
+							msg = msg.substring(0, MAX_NAME_LENGTH);
 						}
+						player1View.setText(msg);
+					}
+					if(player2View != null && allPlayerNames != null)
+					{
+						if(allPlayerNames.length >1 && allPlayerNames[1] != null) {
+							String msg = allPlayerNames[1];
+							if(msg.length() > MAX_NAME_LENGTH)
+							{
+								msg = msg.substring(0, MAX_NAME_LENGTH);
+							}
+							player2View.setText(msg);
+						}
+						
 					}
 					
 					if(gameState.isWhoseTurn() == gameState.isPlayer1IsWhite()) {

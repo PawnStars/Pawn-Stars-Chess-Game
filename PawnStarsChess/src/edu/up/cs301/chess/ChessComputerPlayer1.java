@@ -65,7 +65,7 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
     
     private ChessPlayer player;
     
-    private GameAction chosenMove;
+    public GameAction chosenMove;
     
     private long start;
     
@@ -204,20 +204,23 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 				
 				for(int i=0;i<possibleActions.length;i++)
 				{
-					System.out.print(possibleActions[i].toString()+", ");
-					ChessMoveAction tempMove = new ChessMoveAction(this,possibleActions[i]);
-					if(tempMove != null)
+					if(possibleActions[i] != null)
 					{
-						chosenMove = tempMove;
+						chosenMove = possibleActions[i];
 						if(smart == RANDOM)
 						{
 							//Apply any valid non-null move
 							break;
 						}
-						if(smart >= TAKE_PIECES)
+						else
 						{
 							//Do any move that would result in taking a piece if it exists
-							if(tempMove.getTakenPiece() != null)
+							if(possibleActions[i].getTakenPiece() != null)
+							{
+								break;
+							}
+							byte[] loc = possibleActions[i].getNewPos();
+							if(gameState.getPieceMap()[loc[0]][loc[1]] != null)
 							{
 								break;
 							}
@@ -225,9 +228,6 @@ public class ChessComputerPlayer1 extends GameComputerPlayer implements ChessPla
 					}
 				}
 			}
-			//Make sure the player is included as a reference
-			chosenMove = new ChessMoveAction(this,(ChessMoveAction)chosenMove);
-
 		}
 		
 		//send the new game state if it worked

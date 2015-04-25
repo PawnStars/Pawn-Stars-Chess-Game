@@ -10,9 +10,7 @@ import edu.up.cs301.game.infoMsg.GameInfo;
 import edu.up.cs301.game.util.MessageBox;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -36,6 +34,8 @@ import android.view.View.OnClickListener;
 public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, OnClickListener, OnTouchListener {
 
 	/* instance variables */
+	
+	private static final int MAX_NAME_LENGTH = 12;
 	
 	private static final String upgradeChoices[] = new String[] {"\u2655 Queen", "\u2658 Knight", "\u2656 Rook", "\u2657 Bishop"};
 	
@@ -294,8 +294,6 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 			
 			if(v == board)
 			{
-				//TODO sound feedback/vibration
-				
 				//check if it is your turn
 				if(state == null || state.isWhoseTurn() != isPlayer1())
 				{
@@ -492,7 +490,7 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 						
 						//clear the highlighted tiles after a move
 						board.setSelectedTiles(null);
-						board.setSelectedLoc(-1, -1);
+						board.setSelectedLoc(move.getNewPos()[0], move.getNewPos()[1]);
 						lastPieceSelected = null;
 						pieceSelected = null;
 					}
@@ -564,14 +562,23 @@ public class ChessHumanPlayer extends GameHumanPlayer implements ChessPlayer, On
 		TextView player2View = (TextView) activity
 				.findViewById(R.id.player2TextView);
 
-		//TODO shorten names if necessary
 		if(player1View != null)
 		{
-			player1View.setText(this.name);
+			String msg = name;
+			if(msg.length() > MAX_NAME_LENGTH)
+			{
+				msg = msg.substring(0, MAX_NAME_LENGTH);
+			}
+			player1View.setText(msg);
 		}
 		if(player2View != null)
 		{
-			player2View.setText(this.allPlayerNames[1]);
+			String msg = this.allPlayerNames[1];
+			if(msg.length() > MAX_NAME_LENGTH)
+			{
+				msg = msg.substring(0, MAX_NAME_LENGTH);
+			}
+			player2View.setText(msg);
 		}
 	}
 

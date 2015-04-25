@@ -169,15 +169,15 @@ public class ChessBoard extends SurfaceView
 			}
 			
 			// Draw the chess notation text vertically
-			canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
+			//canvas.drawText(""+(ChessGameState.BOARD_HEIGHT-i), 0, (int)((i+0.66)*tileSize[0]), textColor);
 		}
 		
 		// Draw the chess notation text horizontally
-		for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
+		/*for(int j=0;j<ChessGameState.BOARD_WIDTH;j++)
 		{
 			// uses arithmetic to turn 0,1,...,8 to A,B,...,H
 			canvas.drawText(String.valueOf((char)(65+j)), (int)((j+0.33)*tileSize[1]), marginSize, textColor);
-		}
+		}*/
 		if(pieceMap != null)
 		{
 			// Draw each piece in its respective color

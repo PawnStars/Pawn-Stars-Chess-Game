@@ -805,26 +805,28 @@ public class ChessGameState extends GameState {
 			break;
 		}
 
-		if (moves != null) {
+		if (piece.getType() != ChessPiece.KING) {
 			// See if the player is in check, and update
 			// moves appropriately if they are:
-			if (legal && piece.getType() != ChessPiece.KING || player1InCheck || player2InCheck) {
+			if (legal) {
 				// Traverse through the valid moves, and see
 				// if they will stop the king from being in check:
 				for (int row = 0; row < BOARD_WIDTH; ++row) {
 					for (int col = 0; col < BOARD_HEIGHT; ++col) {
-						if (moves[row][col] == true) {
-							byte[] pieceLocation = { (byte) row, (byte) col };
-							if (!willSaveKing(pieceLocation, piece)) {
-								moves[row][col] = false;
+						if (moves != null) {
+							if (moves[row][col] == true) {
+								byte[] pieceLocation = { (byte) row, (byte) col };
+								if (!this.willSaveKing(pieceLocation, piece)) {
+									moves[row][col] = false;
+								}
 							}
 						}
 					}
 				}
-				
-				
 
 				//TODO: check to see if the pieces move will put the king in check
+				
+				
 			}
 		}
 		return moves;
@@ -939,52 +941,39 @@ public class ChessGameState extends GameState {
 		return moves;
 	}
 
-		
-	
-
 	/**
 	 * Checks to see if the move will save the king
 	 */
 	public boolean willSaveKing(byte[] newLocation, ChessPiece piece) {
 		// See if the move saves the king from being attacked:
 		ChessGameState stateCopy = new ChessGameState(this);
+		
 		byte x = newLocation[1];
 		byte y = newLocation[0];
 		byte oldX = piece.getLocation()[1];
 		byte oldY = piece.getLocation()[0];
 		ChessPiece whichPiece = stateCopy.findPiece(piece);
 		
+		//moves the piece
+		stateCopy.getPieceMap()[oldY][oldX] = null;
+		stateCopy.pieceMap[y][x] = whichPiece;
+		whichPiece.move(newLocation);
 		
-		stateCopy.pieceMap[oldY][oldX] = null;
-		// Hack a move for the state:
+		//takes a piece
 		if (stateCopy.pieceMap[y][x] != null) {
 			// This means we are taking a piece:
-			ChessPiece takenPiece = stateCopy.getPieceMap()[y][x];
+			ChessPiece takenPiece = stateCopy.pieceMap[y][x];
 			// Remove it from the board:
 			takenPiece.kill();
 		}
-		stateCopy.pieceMap[y][x] = whichPiece;
-		whichPiece.move(new byte[]{y,x});
+		
 		stateCopy.setWhoseTurn(!whoseTurn);
 		
-		//if the game is over next turn, the legality of the next move does not matter
-		stateCopy.updateMoves(false);
+		byte[] kingLoc = getKing(whoseTurn).getLocation();
 		
-		/*stateCopy.updateCheck();
-		
-		if(stateCopy.isPlayer1InCheck() && (piece.isWhite() == player1IsWhite)) {
+		if (stateCopy.isAttacked(kingLoc)) {
 			return false;
-		} if(stateCopy.isPlayer2InCheck() && (piece.isWhite() != player1IsWhite)) {
-			return false;
-		} if(stateCopy.isGameOver()) {
-			return false;
-		}
-		
-		return true;*/
-		if (stateCopy.isAttacked(piece.getLocation())) {
-			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
@@ -992,7 +981,6 @@ public class ChessGameState extends GameState {
 
 	public ChessPiece[] getAttackingPieces(byte[] loc) {
 		ChessPiece[] attackingPieces = new ChessPiece[NUM_PIECES];
-		// TODO make sure this is getting the correct king
 
 		// Find all pieces of opposite color, and see if their valid
 		// moves would kill the king:
@@ -1620,11 +1608,17 @@ public class ChessGameState extends GameState {
 	 * @return
 	 */
 	public void updateCheck() {
+		//not in check by default
+		player1InCheck = false;
+		player2InCheck = false;
+		
 		// The king that currently can move
 		ChessPiece king = getKing(whoseTurn);
 		if (king == null) {
 			return;
 		}
+		
+		
 
 		if (!king.isAlive()) {
 			isGameOver = true;
@@ -1639,6 +1633,7 @@ public class ChessGameState extends GameState {
 			{
 				player1Won = true;
 			}
+			return;
 		}
 		byte[] kingLoc = king.getLocation();
 		if (outOfBounds(kingLoc)) {
@@ -1671,7 +1666,6 @@ public class ChessGameState extends GameState {
 		
 		if (player1InCheck) {
 			isGameOver = true;
-			outerloop:
 			for(int i=0;i<NUM_PIECES;i++)
 			{
 				for(int j=0;j<BOARD_HEIGHT;j++)
@@ -1682,15 +1676,18 @@ public class ChessGameState extends GameState {
 						{
 							//if a valid move can be made, the game isn't over
 							isGameOver = false;
-							break outerloop;
+							return;
 						}
 					}
 				}
 			}
+			if(isGameOver)
+			{
+				player2Won = true;
+			}
 		}
 		if (player2InCheck) {
 			isGameOver = true;
-			outerloop:
 			for(int i=0;i<NUM_PIECES;i++)
 			{
 				for(int j=0;j<BOARD_HEIGHT;j++)
@@ -1700,16 +1697,19 @@ public class ChessGameState extends GameState {
 						if(player2Moves[i][j][k])
 						{
 							isGameOver = false;
-							break outerloop;
+							return;
 						}
 					}
 				}
 			}
+			if(isGameOver)
+			{
+				player1Won = true;
+			}
 		}
 
 		// Otherwise, no one is in check
-		player1InCheck = false;
-		player2InCheck = false;
+		
 	}
 
 	/**
@@ -1835,16 +1835,19 @@ public class ChessGameState extends GameState {
 				
 				byte[] kingLoc = king.getLocation();
 				
-				//add in castling move
-				for(int i=0;i<NUM_PIECES;i++)
+				if(!outOfBounds(kingLoc))
 				{
-					if(player1Pieces[i] == rooks[x])
+					//add in castling move
+					for(int i=0;i<NUM_PIECES;i++)
 					{
-						player1Moves[i][kingLoc[0]][kingLoc[1]] = true;
-					}
-					if(player2Pieces[i] == rooks[x])
-					{
-						player2Moves[i][kingLoc[0]][kingLoc[1]] = true;
+						if(player1Pieces[i] == rooks[x])
+						{
+							player1Moves[i][kingLoc[0]][kingLoc[1]] = true;
+						}
+						if(player2Pieces[i] == rooks[x])
+						{
+							player2Moves[i][kingLoc[0]][kingLoc[1]] = true;
+						}
 					}
 				}
 			}
@@ -2016,27 +2019,21 @@ public class ChessGameState extends GameState {
 		if (player1IsWhite) {
 			if (canCastle[0][0]) {
 				fen += "q";// player 2 left
-			}
-			if (canCastle[0][1]) {
+			} if (canCastle[0][1]) {
 				fen += "k";// player 2 right
-			}
-			if (canCastle[1][0]) {
+			} if (canCastle[1][0]) {
 				fen += "Q";// player 1 left
-			}
-			if (canCastle[1][1]) {
+			} if (canCastle[1][1]) {
 				fen += "K"; // player 1 right
 			}
 		} else {
 			if (canCastle[0][0]) {
 				fen += "Q";// player 2 left
-			}
-			if (canCastle[0][1]) {
+			} if (canCastle[0][1]) {
 				fen += "K";// player 2 right
-			}
-			if (canCastle[1][0]) {
+			} if (canCastle[1][0]) {
 				fen += "q";// player 1 left
-			}
-			if (canCastle[1][1]) {
+			} if (canCastle[1][1]) {
 				fen += "k"; // player 1 right
 			}
 		}
