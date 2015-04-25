@@ -351,52 +351,6 @@ public class MoveTest extends AndroidTestCase {
 		}
 	}
 	
-	public void testCastling()
-	{
-		//TODO implement method
-	}
-	
-	public void testEnPassant()
-	{
-		//TODO implement method
-	}
-	
-	/**
-	 * Test that the smart AI can beat the dumb AI
-	 * @throws Throwable
-	 */
-	public void testAI() throws Throwable {
-		
-		//Make a dummy game
-		ChessLocalGame game = new ChessLocalGame();
-		ChessGameState state = new ChessGameState(true);
-		
-		//Initialize players
-		ChessComputerPlayer1 smartPlayer = new ChessComputerPlayer1("Hawking",
-				ChessComputerPlayer1.TAKE_PIECES);
-		ChessComputerPlayer1 dumbPlayer = new ChessComputerPlayer1("Peter",
-				ChessComputerPlayer1.RANDOM);
-		
-		game.start(new ChessPlayer[]{smartPlayer,dumbPlayer});
-		
-		smartPlayer.sendInfo(new BindGameInfo(game, 0));
-		dumbPlayer.sendInfo(new BindGameInfo(game, 1));
-		
-		smartPlayer.sendInfo(state);
-		dumbPlayer.sendInfo(state);
-		//Make the players make moves until someone wins
-		while(!state.isGameOver())
-		{
-			smartPlayer.makeMove(1);
-			smartPlayer.sendMove();
-			dumbPlayer.makeMove(0);
-			dumbPlayer.sendMove();
-		}
-		
-		//Make sure the smart player wins
-		assertTrue("",state.isPlayer1Won());
-	}
-	
 	/**
 	 * Test that the smart AI can beat the dumb AI
 	 * @throws Throwable

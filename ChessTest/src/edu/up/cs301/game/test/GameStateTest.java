@@ -14,18 +14,6 @@ public class GameStateTest extends AndroidTestCase {
 		ChessGameState initState = new ChessGameState(true);
 		Assert.assertTrue(initState.getPlayer1Pieces().length == ChessGameState.NUM_PIECES);
 		Assert.assertTrue(initState.getPlayer2Pieces().length == ChessGameState.NUM_PIECES);
-		
-		boolean[][] castle = initState.getCanCastle();
-		for(int i=0;i<2;i++)
-		{
-			for(int j=0;j<2;j++)
-			{
-				Assert.assertTrue(castle[i][j] == true);
-			}
-		}
-		
-		Assert.assertTrue(castle.length == 2);
-		Assert.assertTrue(castle[0].length == 2);
 
 		
 		Assert.assertTrue(initState.isWhoseTurn() == initState.isPlayer1IsWhite());
@@ -51,7 +39,7 @@ public class GameStateTest extends AndroidTestCase {
 		ChessGameState initState = new ChessGameState(true);
 		ChessPiece[][] layout = initState.getPieceMap();
 		int[] pieces = { ChessPiece.ROOK, ChessPiece.KNIGHT, ChessPiece.BISHOP,
-				ChessPiece.KING, ChessPiece.QUEEN, ChessPiece.BISHOP,
+				ChessPiece.QUEEN, ChessPiece.KING, ChessPiece.BISHOP,
 				ChessPiece.KNIGHT, ChessPiece.ROOK };
 		for(int i=0;i<ChessGameState.BOARD_WIDTH;i++)
 		{

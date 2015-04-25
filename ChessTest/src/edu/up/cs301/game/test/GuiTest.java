@@ -73,25 +73,6 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		TouchUtils.clickView(this, drawButton);
 	}
 	
-	public void testDrawButton() {
-		// Get the size of the button
-		float btnWidth = drawButton.getWidth();
-		float btnHeight = drawButton.getHeight();
-		
-		// Find the button's coords
-		int buttonLocation[] = { 0, 0 };
-		drawButton.getLocationOnScreen(buttonLocation);
-		
-		// Check if it is all in the screen
-		assertTrue("Checking button 1 x-bounds: ",
-				layoutLocation[0] + width > buttonLocation[0] + btnWidth);
-		assertTrue("Checking button 1 y-bounds: ",
-				layoutLocation[1] + height > buttonLocation[1] + btnHeight);
-		
-		TouchUtils.clickView(this, drawButton);
-		//TODO check if the draw button does what it is supposed to do
-	}
-	
 	/**
 	 * Tests that the quit button is visible on the screen
 	 * for any given screen size
@@ -135,10 +116,10 @@ public class GuiTest extends ActivityInstrumentationTestCase2<ChessMainActivity>
 		
 		boolean wasFlipped = board.isFlipped();
 		TouchUtils.clickView(this, flipButton);
+		TouchUtils.clickView(this, flipButton);
 		boolean isFlipped = board.isFlipped();
 		
-		assertTrue("The board did not flip", wasFlipped!=isFlipped);
-		//TODO check if flipping the board works
+		assertTrue("The board was flipped", wasFlipped==isFlipped);
 	}
 	
 	public void testPromotion()
