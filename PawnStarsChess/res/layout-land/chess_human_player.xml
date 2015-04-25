@@ -89,7 +89,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
             android:background="@drawable/buttonshape"
-            android:text="@string/draw" />
+            android:text="@string/draw"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/flipBoardButton"
